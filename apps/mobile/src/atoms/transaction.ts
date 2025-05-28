@@ -8,15 +8,17 @@ interface CurrentTxType {
   amount: string;
   type: TxType;
   memo: string | null;
-  recipient: Contact | Record<string, any>;
+  recipient: Contact | null;
 }
 
-const currentTxAtom = atom<CurrentTxType>({
+const initialTx: CurrentTxType = {
   amount: '0',
   type: 'PAY',
   memo: null,
-  recipient: {},
-});
+  recipient: null,
+};
 
-export { currentTxAtom };
+const currentTxAtom = atom<CurrentTxType>(initialTx);
+
+export { currentTxAtom, initialTx };
 export type { TxType };

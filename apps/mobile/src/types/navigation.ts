@@ -5,5 +5,6 @@ export type RootStackParamList = {
   AuthGate: undefined;
   Send: undefined;
   TxHistory: undefined;
+  TxConfirmation: undefined;
   Contacts: undefined;
 };

@@ -10,7 +10,7 @@ import Toast from 'react-native-toast-message';
 
 import { txSessionAuthorizedAtom } from '~/atoms/session';
 import { currentTxAtom, TxType } from '~/atoms/transaction';
-import { walletBalanceAtom } from '~/atoms/wallet';
+import { useWallet } from '~/hooks/useWallet';
 import CoreLayout from '~/layouts/CoreLayout';
 import PinEntryScreen from '~/screens/PinEntry';
 import { RootStackParamList } from '~/types/navigation';
@@ -22,7 +22,7 @@ export default function SendScreen() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [txAuthorized, setTxAuthorized] = useAtom(txSessionAuthorizedAtom);
   const [tx, setTx] = useAtom(currentTxAtom);
-  const [walletBalance] = useAtom(walletBalanceAtom);
+  const { walletBalance } = useWallet();
 
   const shakeAnim = useRef(new Animated.Value(0)).current;
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -111,9 +111,9 @@ export default function SendScreen() {
     Toast.hide();
 
     if (isDisabled) return;
-    const { balance = 0 } = walletBalance;
 
-    if (type === 'PAY' && parseFloat(tx.amount) > balance) {
+    if (type === 'PAY' && parseFloat(tx.amount) > Number(walletBalance?.balance)) {
+      buzzAndShake(shakeAnim);
       Toast.show({
         type: 'error',
         text1: `Invalid Transaction Request`,

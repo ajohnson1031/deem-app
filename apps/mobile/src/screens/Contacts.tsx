@@ -5,7 +5,7 @@ import { useAtom } from 'jotai';
 import { useState } from 'react';
 import { FlatList, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-import { currentTxAtom } from '~/atoms/transaction';
+import { currentTxAtom, initialTx } from '~/atoms/transaction';
 import { Container } from '~/components';
 import ContactListItem from '~/components/ContactListItem';
 import { MOCK_ALL_CONTACTS, MOCK_SUGGESTED } from '~/mocks/contacts';
@@ -19,7 +19,7 @@ const ContactScreen = ({
   navigation: NativeStackNavigationProp<RootStackParamList>;
 }) => {
   const [tx, setTx] = useAtom(currentTxAtom);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(tx.recipient ? tx.recipient.name : '');
   const buttonWidth = tx.type === 'PAY' ? 'w-10' : 'w-20';
 
   const filteredContacts: Contact[] = MOCK_ALL_CONTACTS.filter(
@@ -28,20 +28,31 @@ const ContactScreen = ({
       c.username.toLowerCase().includes(search.toLowerCase())
   );
 
+  const handleSearch = (val: string) => {
+    if (!val) {
+      setTx((prev) => ({ ...prev, recipient: null }));
+    }
+    setSearch(val);
+  };
+
   const handleSelect = (contact: Contact) => {
-    setTx({ ...tx, recipient: contact });
-    setSearch(contact.name);
+    if (tx.recipient !== contact) {
+      setTx((prev) => ({ ...prev, recipient: contact }));
+      setSearch(contact.name);
+    } else {
+      setTx((prev) => ({ ...prev, recipient: null }));
+      setSearch('');
+    }
   };
 
   const handleMemo = (val: string) => {
-    setTx({ ...tx, memo: val.length ? val : null });
+    setTx((prev) => ({ ...prev, memo: val.length ? val : null }));
   };
 
   const handleNav = (screenName: any) => {
     if (screenName === 'Send') {
-      setTx({ ...tx, memo: null, recipient: {} });
+      setTx(initialTx);
     }
-
     navigation.navigate(screenName);
   };
 
@@ -63,7 +74,10 @@ const ContactScreen = ({
               'bg-green-500': tx.type === 'PAY',
               'bg-red-500': tx.type === 'REQUEST',
               buttonWidth,
-            })}>
+              'opacity-40': !tx.recipient?.name || !tx.memo,
+            })}
+            disabled={!tx.recipient?.name || !tx.memo}
+            onPress={() => handleNav('TxConfirmation')}>
             <Text className="font-semibold text-white">{capitalize(tx.type)}</Text>
           </TouchableOpacity>
         </View>
@@ -72,7 +86,7 @@ const ContactScreen = ({
           <Text className="font-semibold">To</Text>
           <TextInput
             value={search}
-            onChangeText={setSearch}
+            onChangeText={handleSearch}
             placeholder="Name or @username"
             placeholderTextColor="#777"
             className="mb-4 w-[92.5%] px-3 font-semibold"
@@ -86,7 +100,7 @@ const ContactScreen = ({
             onChangeText={handleMemo}
             placeholder="Memo (required)"
             placeholderTextColor="#777"
-            className="mb-4 w-[92.5%] px-3"
+            className="mb-4 w-[92.5%] px-3 font-semibold"
           />
         </View>
 
