@@ -1,3 +1,4 @@
+export { submitXrplTransaction } from '~/utils/xrpl';
 export { clearAuthData } from './auth';
 export { colors, getColorIndex } from './colors';
 export { buzzAndShake, causeBuzz, shakeAnimation } from './feedback';

@@ -18,7 +18,7 @@ const WalletScreen = ({ onLogout }: { onLogout: () => void }) => {
   }
 
   return (
-    <CoreLayout>
+    <CoreLayout showHeader showFooter>
       <View className="flex-1 items-center justify-center">
         <Text className="mb-4 text-lg font-bold">Your XRP Wallet</Text>
 

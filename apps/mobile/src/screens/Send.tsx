@@ -153,7 +153,7 @@ export default function SendScreen() {
   }
 
   return (
-    <CoreLayout>
+    <CoreLayout showHeader showFooter showHeaderOptions>
       <View className="flex-1 px-4 pb-20">
         <Animated.View
           style={{ transform: [{ translateX: shakeAnim }] }}
@@ -168,6 +168,8 @@ export default function SendScreen() {
             </Text>
             <Text className="text-xl font-semibold">XRP</Text>
           </View>
+
+          {/* TODO: Add USD Value, Ratio, Polling */}
 
           <View className="flex-row flex-wrap justify-center gap-x-4 gap-y-6">
             {['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0'].map((num) => (

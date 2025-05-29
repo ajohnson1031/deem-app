@@ -9,4 +9,6 @@ const getStoredPin = async (): Promise<string | null> => {
   return await SecureStore.getItemAsync('userPin');
 };
 
-export { getStoredPin, savePin };
+const PIN_CELL_COUNT = 4;
+
+export { getStoredPin, PIN_CELL_COUNT, savePin };

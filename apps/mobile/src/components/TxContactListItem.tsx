@@ -24,7 +24,7 @@ const TxContactListItem = ({
           />
         ) : (
           <View className="h-20 w-20 items-center justify-center rounded-lg bg-gray-700">
-            <Text className="text-2xl font-normal text-white">{`${first[0]}${last[0]}`}</Text>
+            <Text className="text-3xl font-normal text-white">{`${first[0]}${last[0]}`}</Text>
           </View>
         )}
         <View className="flex justify-center">

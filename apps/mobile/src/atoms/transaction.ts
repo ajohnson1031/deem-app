@@ -20,5 +20,5 @@ const initialTx: CurrentTxType = {
 
 const currentTxAtom = atom<CurrentTxType>(initialTx);
 
-export { currentTxAtom, initialTx };
+export { currentTxAtom };
 export type { TxType };

@@ -12,7 +12,9 @@ import {
   PinEntryScreen,
   PinSetupScreen,
   SendScreen,
+  SettingsScreen,
   TxConfirmationScreen,
+  TxFinalConfirmationScreen,
   TxHistoryScreen,
   WalletScreen,
 } from '~/screens';
@@ -144,6 +146,8 @@ export default function AppNavigator() {
             </Stack.Screen>
             <Stack.Screen name="Contacts" component={ContactScreen} />
             <Stack.Screen name="TxConfirmation" component={TxConfirmationScreen} />
+            <Stack.Screen name="TxFinalConfirmation" component={TxFinalConfirmationScreen} />
+            <Stack.Screen name="Settings" component={SettingsScreen} />
           </>
         )}
       </Stack.Navigator>

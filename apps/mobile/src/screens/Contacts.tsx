@@ -5,7 +5,7 @@ import { useAtom } from 'jotai';
 import { useState } from 'react';
 import { FlatList, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-import { currentTxAtom, initialTx } from '~/atoms/transaction';
+import { currentTxAtom } from '~/atoms/transaction';
 import { Container } from '~/components';
 import ContactListItem from '~/components/ContactListItem';
 import { MOCK_ALL_CONTACTS, MOCK_SUGGESTED } from '~/mocks/contacts';
@@ -51,7 +51,7 @@ const ContactScreen = ({
 
   const handleNav = (screenName: any) => {
     if (screenName === 'Send') {
-      setTx(initialTx);
+      setTx((prev) => ({ ...prev, memo: null, recipient: null }));
     }
     navigation.navigate(screenName);
   };
@@ -67,6 +67,7 @@ const ContactScreen = ({
           <View className="flex-1 flex-row items-baseline justify-center gap-0.5">
             <Text className="text-xl font-bold">{formatWithCommas(tx.amount)}</Text>
             <Text className="text-sm font-semibold">XRP</Text>
+            {/* TODO: Add USD value */}
           </View>
 
           <TouchableOpacity

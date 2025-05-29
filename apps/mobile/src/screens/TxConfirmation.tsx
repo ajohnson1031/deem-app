@@ -12,7 +12,7 @@ import { capitalize } from '~/utils';
 import { formatWithCommas } from '~/utils/format';
 
 const TxConfirmationScreen = () => {
-  const [tx] = useAtom(currentTxAtom);
+  const [tx, setTx] = useAtom(currentTxAtom);
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const { type, amount, memo, recipient } = tx;
@@ -20,6 +20,7 @@ const TxConfirmationScreen = () => {
   const title = type === 'PAY' ? 'Confirm Payment?' : 'Confirm Request?';
 
   const handleBackPress = () => {
+    setTx((prev) => ({ ...prev, memo: null, recipient: null }));
     navigation.navigate('Contacts');
   };
 
@@ -29,10 +30,10 @@ const TxConfirmationScreen = () => {
 
       <TxContactListItem recipient={recipient!} label={txLabel} />
 
-      {/* Amount Display */}
+      {/* Amount Display TODO: Add USD value */}
       <View className="mx-6 rounded-lg p-3">
         <Text className="mb-2 font-medium text-stone-900">Tx. Amount:</Text>
-        <View className="flex flex-row items-baseline rounded-lg bg-black/10 p-3">
+        <View className="flex flex-row items-baseline rounded-lg bg-black/10 p-3 pt-5">
           <Text className="text-5xl text-stone-900">{formatWithCommas(amount)}</Text>
           <Text className="text-xl font-semibold text-stone-900">XRP</Text>
         </View>
@@ -46,16 +47,16 @@ const TxConfirmationScreen = () => {
         </View>
       </View>
 
-      {/* Action Buttons */}
+      {/* Action Buttons TODO: Make functional */}
       <View className="flex flex-row justify-center gap-x-5">
         <TouchableOpacity
-          onPress={() => navigation.navigate('Contacts')}
+          onPress={handleBackPress}
           className="flex w-2/5 flex-row items-center justify-center gap-2 rounded-full border-2 border-stone-900 py-4">
-          <FontAwesome6 name="arrow-left-long" size={20} color="#1c1917" />
+          <FontAwesome6 name="arrow-left-long" size={20} color="#292924" />
           <Text className="text-xl font-bold text-stone-900">Back</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={handleBackPress}
+          onPress={() => navigation.navigate('TxFinalConfirmation')}
           className={cn('flex w-2/5 flex-row items-center justify-center gap-2 rounded-full py-4', {
             'bg-green-500': type === 'PAY',
             'bg-red-500': type === 'REQUEST',
