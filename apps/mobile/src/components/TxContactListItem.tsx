@@ -1,35 +1,33 @@
 import { Image, Text, View } from 'react-native';
+import { v4 as uuidv4 } from 'uuid';
 
 import { Contact } from '~/types/contacts';
+import { getColorIndex } from '~/utils';
 
-const TxContactListItem = ({
-  recipient,
-  label,
-}: {
-  recipient: Contact | Record<string, any>;
-  label: string;
-}) => {
+const TxContactListItem = ({ recipient }: { recipient: Contact | Record<string, any> }) => {
+  const backgroundColor = getColorIndex(recipient?.id ?? uuidv4());
   const { avatarUrl, name, username } = recipient || { avatarUrl: '', name: '', username: '' };
   const splitName = name?.split(' ');
   const [first, last] = [splitName[0], splitName[splitName.length - 1]];
   return (
-    <View className="mx-6 flex-col rounded-lg p-3">
-      <Text className="mb-2 font-medium text-stone-900">{label}</Text>
-      <View className="flex flex-row gap-4 rounded-lg bg-black/10">
+    <View className="flex rounded-xl bg-slate-800 p-4">
+      <View className="flex flex-row gap-4">
         {avatarUrl ? (
           <Image
             source={{ uri: avatarUrl }}
-            className="h-20 w-20 rounded-lg bg-gray-700"
+            className="h-20 w-20 rounded-full"
             onError={(e: any) => console.log('Error Loading Image', e.nativeEvent)}
           />
         ) : (
-          <View className="h-20 w-20 items-center justify-center rounded-lg bg-gray-700">
+          <View
+            className="h-20 w-20 items-center justify-center rounded-full"
+            style={{ backgroundColor }}>
             <Text className="text-3xl font-normal text-white">{`${first[0]}${last[0]}`}</Text>
           </View>
         )}
         <View className="flex justify-center">
-          <Text className="text-xl font-bold text-stone-900">{name}</Text>
-          <Text className="text-lg font-medium text-stone-900/70">{username}</Text>
+          <Text className="text-xl font-bold text-white">{name}</Text>
+          <Text className="text-lg font-medium text-white/70">{username}</Text>
         </View>
       </View>
     </View>

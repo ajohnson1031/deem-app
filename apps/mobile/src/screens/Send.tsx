@@ -111,7 +111,7 @@ export default function SendScreen() {
     Toast.hide();
 
     if (isDisabled) return;
-
+    console.log(type, parseFloat(tx.amount), walletBalance?.balance);
     if (type === 'PAY' && parseFloat(tx.amount) > Number(walletBalance?.balance)) {
       buzzAndShake(shakeAnim);
       Toast.show({
@@ -119,6 +119,7 @@ export default function SendScreen() {
         text1: `Invalid Transaction Request`,
         text2: `Tx amount exceeds wallet balance`,
         position: 'top',
+        topOffset: 60,
       });
       return;
     }
@@ -153,14 +154,14 @@ export default function SendScreen() {
   }
 
   return (
-    <CoreLayout showHeader showFooter showHeaderOptions>
+    <CoreLayout showFooter showHeaderOptions showBack={false}>
       <View className="flex-1 px-4 pb-20">
         <Animated.View
           style={{ transform: [{ translateX: shakeAnim }] }}
           className="flex-1 items-center justify-center">
           <View className="flex h-32 flex-row items-baseline">
             <Text
-              className={cn('mb-6 text-center text-8xl font-medium', {
+              className={cn('font-inter-medium mb-6 text-center text-8xl', {
                 '!text-6xl': tx.amount!.length > 5 && tx.amount!.length <= 9,
                 '!text-4xl': tx.amount!.length > 8,
               })}>
@@ -187,13 +188,17 @@ export default function SendScreen() {
 
           <View className="mt-8 flex w-full flex-row justify-center gap-x-4">
             <TouchableOpacity
-              className={cn('w-[42.5%] rounded bg-red-500  py-3', { 'opacity-40': isDisabled })}
+              className={cn('w-[42.5%] rounded-full bg-red-500  py-4', {
+                'opacity-40': isDisabled,
+              })}
               disabled={isDisabled}
               onPress={() => handleRequestPress('REQUEST')}>
               <Text className="text-center text-lg font-semibold text-white">Request</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              className={cn('w-[42.5%] rounded bg-green-500  py-3', { 'opacity-40': isDisabled })}
+              className={cn('w-[42.5%] rounded-full bg-green-500  py-4', {
+                'opacity-40': isDisabled,
+              })}
               disabled={isDisabled}
               onPress={() => handleRequestPress('PAY')}>
               <Text className="text-center text-lg font-semibold text-white">Pay</Text>

@@ -5,22 +5,28 @@ import { Container, FooterNav, HeaderNav } from '~/components';
 
 interface Props {
   showBack?: boolean;
-  showHeader?: boolean;
   showHeaderOptions?: boolean;
   showFooter?: boolean;
   children: ReactNode;
+  containerClassName?: string;
+  onBackPress?: () => void;
 }
 
 const CoreLayout = ({
   children,
   showBack,
   showHeaderOptions,
-  showHeader = false,
-  showFooter = false,
+  showFooter = true,
+  onBackPress,
+  containerClassName,
 }: Props) => {
   return (
-    <Container>
-      {showHeader && <HeaderNav showBack={showBack} showHeaderOptions={showHeaderOptions} />}
+    <Container className={containerClassName}>
+      <HeaderNav
+        showBack={showBack}
+        showHeaderOptions={showHeaderOptions}
+        onBackPress={onBackPress}
+      />
       <View className="flex-1">{children}</View>
       {showFooter && <FooterNav />}
     </Container>

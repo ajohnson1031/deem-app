@@ -58,7 +58,7 @@ const ContactScreen = ({
 
   return (
     <Container>
-      <View className="flex-1 px-4 py-6">
+      <View className="m-6 flex-1">
         <View className="mb-4 flex flex-row justify-between">
           <TouchableOpacity onPress={() => handleNav('Send')} className={buttonWidth}>
             <FontAwesome6 name="arrow-left-long" size={20} />
@@ -91,6 +91,12 @@ const ContactScreen = ({
             placeholder="Name or @username"
             placeholderTextColor="#777"
             className="mb-4 w-[92.5%] px-3 font-semibold"
+            style={{
+              fontSize: 14,
+              lineHeight: 17,
+              paddingTop: 0, // adjust as needed
+              paddingBottom: 0, // adjust as needed
+            }}
           />
         </View>
 
@@ -102,6 +108,12 @@ const ContactScreen = ({
             placeholder="Memo (required)"
             placeholderTextColor="#777"
             className="mb-4 w-[92.5%] px-3 font-semibold"
+            style={{
+              fontSize: 14,
+              lineHeight: 17,
+              paddingTop: 0, // adjust as needed
+              paddingBottom: 0, // adjust as needed
+            }}
           />
         </View>
 

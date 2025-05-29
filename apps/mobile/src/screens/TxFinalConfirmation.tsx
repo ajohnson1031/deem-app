@@ -6,6 +6,7 @@ import { ActivityIndicator, Animated, Text, View } from 'react-native';
 import { txSessionAuthorizedAtom } from '~/atoms/session';
 import { currentTxAtom } from '~/atoms/transaction';
 import PinInputField from '~/components/PinInputField';
+import CoreLayout from '~/layouts/CoreLayout';
 import { useSessionResetCountdown } from '~/utils/feedback';
 import { submitXrplTransaction } from '~/utils/xrpl';
 
@@ -39,22 +40,24 @@ const TxFinalConfirmationScreen = () => {
   };
 
   return (
-    <View className="flex-1 items-center justify-center px-6">
-      <Text className="mb-6 text-2xl font-semibold text-gray-800">Confirm Transaction</Text>
+    <CoreLayout showBack showFooter={false} showHeaderOptions={false}>
+      <View className="flex-1 items-center justify-center px-6">
+        <Text className="mb-6 text-2xl font-semibold text-gray-800">Confirm Transaction</Text>
 
-      {txSuccess === null ? (
-        <PinInputField onPinComplete={handlePinComplete} shakeRef={shakeRef} />
-      ) : (
-        <View className="items-center">
-          {isSubmitting && <ActivityIndicator size="large" color="#4ade80" />}
-          <Text className="mt-4 text-base font-medium text-gray-700">
-            {txSuccess === true && 'Transaction submitted successfully!'}
-            {txSuccess === false && 'Transaction failed. Please try again.'}
-          </Text>
-          <CountdownDisplay />
-        </View>
-      )}
-    </View>
+        {txSuccess === null ? (
+          <PinInputField onPinComplete={handlePinComplete} shakeRef={shakeRef} />
+        ) : (
+          <View className="items-center">
+            {isSubmitting && <ActivityIndicator size="large" color="#4ade80" />}
+            <Text className="mt-4 text-base font-medium text-gray-700">
+              {txSuccess === true && 'Transaction submitted successfully!'}
+              {txSuccess === false && 'Transaction failed. Please try again.'}
+            </Text>
+            <CountdownDisplay />
+          </View>
+        )}
+      </View>
+    </CoreLayout>
   );
 };
 

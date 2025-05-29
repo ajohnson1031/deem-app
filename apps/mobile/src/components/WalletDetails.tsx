@@ -20,7 +20,8 @@ const WalletDetails = ({
     Toast.show({
       type: 'success',
       text1: `${label} copied`,
-      position: 'bottom',
+      position: 'top',
+      topOffset: 60,
     });
   };
 
