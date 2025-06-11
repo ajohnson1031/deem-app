@@ -1,5 +1,5 @@
 import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { CardStyleInterpolators, createStackNavigator } from '@react-navigation/stack';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { useSetAtom } from 'jotai';
 import { useEffect, useState } from 'react';
@@ -9,6 +9,7 @@ import { txSessionAuthorizedAtom } from '~/atoms/session';
 import { useWallet } from '~/hooks/useWallet';
 import {
   ContactScreen,
+  PendingTransactionsScreen,
   PinEntryScreen,
   PinSetupScreen,
   SendScreen,
@@ -21,7 +22,7 @@ import {
 import { RootStackParamList } from '~/types/navigation';
 import { getStoredPin, savePin } from '~/utils';
 
-const Stack = createNativeStackNavigator<RootStackParamList>();
+const Stack = createStackNavigator<RootStackParamList>();
 
 const AuthGate = ({ onAuthSuccess }: { onAuthSuccess: () => void }) => {
   const [checking, setChecking] = useState(true);
@@ -73,7 +74,7 @@ const AuthGate = ({ onAuthSuccess }: { onAuthSuccess: () => void }) => {
       <View className="flex-1 items-center justify-center">
         <ActivityIndicator size="large" />
         <Text className="mt-4 text-gray-600">Authenticating...</Text>
-        {errorMessage && <Text className="mt-2 text-red-500">{errorMessage}</Text>}
+        {errorMessage && <Text className="mt-2 text-sky-700">{errorMessage}</Text>}
       </View>
     );
   }
@@ -130,7 +131,26 @@ export default function AppNavigator() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false, animation: 'none' }}>
+      <Stack.Navigator
+        screenOptions={{
+          headerShown: false,
+          gestureEnabled: true,
+          transitionSpec: {
+            open: {
+              animation: 'timing',
+              config: {
+                duration: 200, // Fast, consistent timing!
+              },
+            },
+            close: {
+              animation: 'timing',
+              config: {
+                duration: 200,
+              },
+            },
+          },
+          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS, // Matches "slide_from_right" feel
+        }}>
         {!authenticated ? (
           <Stack.Screen name="AuthGate">
             {() => <AuthGate onAuthSuccess={() => setAuthenticated(true)} />}
@@ -148,6 +168,7 @@ export default function AppNavigator() {
             <Stack.Screen name="TxConfirmation" component={TxConfirmationScreen} />
             <Stack.Screen name="TxFinalConfirmation" component={TxFinalConfirmationScreen} />
             <Stack.Screen name="Settings" component={SettingsScreen} />
+            <Stack.Screen name="PendingTransactions" component={PendingTransactionsScreen} />
           </>
         )}
       </Stack.Navigator>

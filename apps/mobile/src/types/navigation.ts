@@ -1,3 +1,5 @@
+import { CurrentTxType } from '~/atoms/transaction';
+
 export type RootStackParamList = {
   Home: undefined;
   Pin: undefined;
@@ -5,8 +7,9 @@ export type RootStackParamList = {
   AuthGate: undefined;
   Send: undefined;
   TxHistory: undefined;
-  TxConfirmation: undefined;
-  TxFinalConfirmation: undefined;
+  TxConfirmation: { tx: CurrentTxType };
+  TxFinalConfirmation: { tx: CurrentTxType };
+  PendingTransactions: undefined;
   Contacts: undefined;
   Settings: undefined;
 };

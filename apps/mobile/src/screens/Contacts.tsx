@@ -1,14 +1,14 @@
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import cn from 'classnames';
-import { useAtom } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import { useState } from 'react';
 import { FlatList, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
+import { contactsAtom, suggestedContactsAtom } from '~/atoms/contacts';
 import { currentTxAtom } from '~/atoms/transaction';
 import { Container } from '~/components';
 import ContactListItem from '~/components/ContactListItem';
-import { MOCK_ALL_CONTACTS, MOCK_SUGGESTED } from '~/mocks/contacts';
 import { Contact } from '~/types/contacts';
 import { RootStackParamList } from '~/types/navigation';
 import { capitalize, formatWithCommas } from '~/utils';
@@ -19,10 +19,14 @@ const ContactScreen = ({
   navigation: NativeStackNavigationProp<RootStackParamList>;
 }) => {
   const [tx, setTx] = useAtom(currentTxAtom);
-  const [search, setSearch] = useState(tx.recipient ? tx.recipient.name : '');
+  const contacts = useAtomValue(contactsAtom);
+  const suggestedContacts = useAtomValue(suggestedContactsAtom);
+  const [search, setSearch] = useState(
+    tx.recipient ? contacts.filter((contact) => contact.id === tx.recipient)[0].name : ''
+  );
   const buttonWidth = tx.type === 'PAY' ? 'w-10' : 'w-20';
 
-  const filteredContacts: Contact[] = MOCK_ALL_CONTACTS.filter(
+  const filteredContacts: Contact[] = contacts.filter(
     (c) =>
       c.name.toLowerCase().includes(search.toLowerCase()) ||
       c.username.toLowerCase().includes(search.toLowerCase())
@@ -36,8 +40,8 @@ const ContactScreen = ({
   };
 
   const handleSelect = (contact: Contact) => {
-    if (tx.recipient !== contact) {
-      setTx((prev) => ({ ...prev, recipient: contact }));
+    if (tx.recipient !== contact.id) {
+      setTx((prev) => ({ ...prev, recipient: contact.id }));
       setSearch(contact.name);
     } else {
       setTx((prev) => ({ ...prev, recipient: null }));
@@ -53,7 +57,7 @@ const ContactScreen = ({
     if (screenName === 'Send') {
       setTx((prev) => ({ ...prev, memo: null, recipient: null }));
     }
-    navigation.navigate(screenName);
+    navigation.navigate(screenName, { tx });
   };
 
   return (
@@ -72,12 +76,12 @@ const ContactScreen = ({
 
           <TouchableOpacity
             className={cn('rounded-full px-4 py-2', {
-              'bg-green-500': tx.type === 'PAY',
-              'bg-red-500': tx.type === 'REQUEST',
+              'bg-green-600': tx.type === 'PAY',
+              'bg-sky-600': tx.type === 'REQUEST',
               buttonWidth,
-              'opacity-40': !tx.recipient?.name || !tx.memo,
+              'opacity-40': !tx.recipient || !tx.memo,
             })}
-            disabled={!tx.recipient?.name || !tx.memo}
+            disabled={!tx.recipient || !tx.memo}
             onPress={() => handleNav('TxConfirmation')}>
             <Text className="font-semibold text-white">{capitalize(tx.type)}</Text>
           </TouchableOpacity>
@@ -123,7 +127,7 @@ const ContactScreen = ({
             horizontal
             showsHorizontalScrollIndicator={false}
             className="mb-4 border-b border-gray-300 pb-4">
-            {MOCK_SUGGESTED.map((contact) => (
+            {suggestedContacts.map((contact) => (
               <ContactListItem
                 key={contact.id}
                 contact={contact}

@@ -47,7 +47,7 @@ export default function PinSetupScreen({ onComplete, errorMessage }: PinSetupScr
         </TouchableOpacity>
 
         {(errorMessage || localError) && (
-          <Text className="mt-4 font-medium text-red-500">{errorMessage || localError}</Text>
+          <Text className="mt-4 font-medium text-sky-700">{errorMessage || localError}</Text>
         )}
       </View>
     </Container>

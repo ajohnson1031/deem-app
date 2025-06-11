@@ -15,21 +15,22 @@ const ContactListItem = ({
   isSuggested: boolean;
   onPress: () => void;
 }) => {
-  const { id, name, username, avatarUrl } = contact;
+  const { name, username, avatarUrl } = contact;
   const [tx] = useAtom(currentTxAtom);
 
   const splitName = name.split(' ');
-  const [first, last] = [splitName[0], splitName[splitName.length - 1]];
+  const [first, last] = [splitName[0], splitName[1] || ''];
   const backgroundColor = getColorIndex(contact.id);
-  const isSelected = tx.recipient === contact;
+  const isSelected = tx.recipient === contact.id;
 
   return (
     <TouchableOpacity
-      key={id}
       onPress={onPress}
+      accessible
+      accessibilityLabel={`Contact: ${name}`}
       className={cn('rounded-full', {
-        'mr-4 h-fit items-center': isSuggested,
-        'mb-3 flex-row items-center gap-4': !isSuggested,
+        'mr-4 w-20 items-center': isSuggested,
+        'flex-row items-center gap-4 py-2': !isSuggested,
         'bg-slate-200': isSelected && !isSuggested,
       })}>
       {avatarUrl ? (
@@ -42,11 +43,17 @@ const ContactListItem = ({
         <View
           className="h-14 w-14 items-center justify-center rounded-full"
           style={{ backgroundColor }}>
-          <Text className="text-2xl font-medium text-white">{`${first[0]}${last[0]}`}</Text>
+          <Text className="text-2xl font-medium text-white">
+            {first[0]}
+            {last[0] || ''}
+          </Text>
         </View>
       )}
+
       {isSuggested ? (
-        <Text className="text-xs font-medium text-gray-800">{`${name.length > 8 ? name.substring(0, 7) + '...' : name}`}</Text>
+        <Text className="mt-2 text-center text-xs font-medium text-gray-800" numberOfLines={1}>
+          {name}
+        </Text>
       ) : (
         <View>
           <Text className="font-semibold text-gray-800">{name}</Text>

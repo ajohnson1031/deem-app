@@ -1,5 +1,6 @@
 export { default as ContactScreen } from './Contacts';
 export { default as Home } from './Home';
+export { default as PendingTransactionsScreen } from './PendingTransactions';
 export { default as PinEntryScreen } from './PinEntry';
 export { default as PinSetupScreen } from './PinSetup';
 export { default as SendScreen } from './Send';

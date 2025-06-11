@@ -41,6 +41,7 @@ export function useWallet() {
     const client = new Client(RIPPLENET_URL);
 
     try {
+      setLoading(true);
       await client.connect();
       const balance = await client.getXrpBalance(wallet.classicAddress);
       setWalletBalance({ success: true, balance: balance.toString() });
@@ -48,13 +49,14 @@ export function useWallet() {
       setWalletBalance({ success: false, error: e.message });
     } finally {
       await client.disconnect();
+      setLoading(false);
     }
   }, [wallet]);
 
   useEffect(() => {
     (async () => {
       await loadWallet();
-      setLoading(false);
+      setTimeout(() => setLoading(false), 250);
     })();
   }, []);
 

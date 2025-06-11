@@ -40,7 +40,7 @@ export default function PinEntryScreen({ onSuccess }: PinEntryScreenProps) {
           shakeRef={shakeRef}
         />
 
-        {errorMessage && <Text className="mt-4 font-medium text-red-500">{errorMessage}</Text>}
+        {errorMessage && <Text className="mt-4 font-medium text-sky-700">{errorMessage}</Text>}
       </View>
     </Container>
   );

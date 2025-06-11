@@ -111,7 +111,7 @@ export default function SendScreen() {
     Toast.hide();
 
     if (isDisabled) return;
-    console.log(type, parseFloat(tx.amount), walletBalance?.balance);
+
     if (type === 'PAY' && parseFloat(tx.amount) > Number(walletBalance?.balance)) {
       buzzAndShake(shakeAnim);
       Toast.show({
@@ -133,7 +133,7 @@ export default function SendScreen() {
       <View className="flex-1 items-center justify-center">
         <ActivityIndicator size="large" />
         <Text className="mt-4 text-gray-600">Verifying identity...</Text>
-        {errorMessage && <Text className="mt-2 text-red-500">{errorMessage}</Text>}
+        {errorMessage && <Text className="mt-2 text-red-600">{errorMessage}</Text>}
       </View>
     );
   }
@@ -161,7 +161,7 @@ export default function SendScreen() {
           className="flex-1 items-center justify-center">
           <View className="flex h-32 flex-row items-baseline">
             <Text
-              className={cn('font-inter-medium mb-6 text-center text-8xl', {
+              className={cn('mb-6 text-center font-inter-medium text-8xl', {
                 '!text-6xl': tx.amount!.length > 5 && tx.amount!.length <= 9,
                 '!text-4xl': tx.amount!.length > 8,
               })}>
@@ -188,7 +188,7 @@ export default function SendScreen() {
 
           <View className="mt-8 flex w-full flex-row justify-center gap-x-4">
             <TouchableOpacity
-              className={cn('w-[42.5%] rounded-full bg-red-500  py-4', {
+              className={cn('w-[42.5%] rounded-xl bg-sky-600  py-4', {
                 'opacity-40': isDisabled,
               })}
               disabled={isDisabled}
@@ -196,7 +196,7 @@ export default function SendScreen() {
               <Text className="text-center text-lg font-semibold text-white">Request</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              className={cn('w-[42.5%] rounded-full bg-green-500  py-4', {
+              className={cn('w-[42.5%] rounded-xl bg-green-600  py-4', {
                 'opacity-40': isDisabled,
               })}
               disabled={isDisabled}

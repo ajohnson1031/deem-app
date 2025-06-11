@@ -1,12 +1,15 @@
 import { Image, Text, View } from 'react-native';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Contact } from '~/types/contacts';
-import { getColorIndex } from '~/utils';
+import { getColorIndex, useGetContact } from '~/utils';
 
-const TxContactListItem = ({ recipient }: { recipient: Contact | Record<string, any> }) => {
-  const backgroundColor = getColorIndex(recipient?.id ?? uuidv4());
-  const { avatarUrl, name, username } = recipient || { avatarUrl: '', name: '', username: '' };
+const TxContactListItem = ({ id }: { id: string }) => {
+  const backgroundColor = getColorIndex(id ?? uuidv4());
+  const { avatarUrl, name, username } = useGetContact(id) || {
+    avatarUrl: '',
+    name: '',
+    username: '',
+  };
   const splitName = name?.split(' ');
   const [first, last] = [splitName[0], splitName[splitName.length - 1]];
   return (
