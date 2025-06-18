@@ -33,7 +33,7 @@ const ContactScreen = ({
 
   const handleSearch = (val: string) => {
     if (!val) {
-      setTx((prev) => ({ ...prev, recipientId: null }));
+      setTx((prev) => ({ ...prev, recipientId: undefined }));
     }
     setSearch(val);
   };
@@ -43,18 +43,18 @@ const ContactScreen = ({
       setTx((prev) => ({ ...prev, recipientId: contact.id }));
       setSearch(contact.name);
     } else {
-      setTx((prev) => ({ ...prev, recipientId: null }));
+      setTx((prev) => ({ ...prev, recipientId: undefined }));
       setSearch('');
     }
   };
 
   const handleMemo = (val: string) => {
-    setTx((prev) => ({ ...prev, memo: val.length ? val : null }));
+    setTx((prev) => ({ ...prev, memo: val.length ? val : undefined }));
   };
 
   const handleNav = (screenName: any) => {
     if (screenName === 'Send') {
-      setTx((prev) => ({ ...prev, memo: null, recipientId: null }));
+      setTx((prev) => ({ ...prev, memo: undefined, recipientId: undefined }));
     }
     navigation.navigate(screenName, { tx });
   };
@@ -62,19 +62,19 @@ const ContactScreen = ({
   return (
     <Container>
       <View className="m-6 flex-1">
-        <View className="mb-4 flex flex-row justify-between">
+        <View className="mb-4 flex flex-row items-center justify-between">
           <TouchableOpacity onPress={() => handleNav('Send')} className={buttonWidth}>
             <FontAwesome6 name="arrow-left-long" size={20} />
           </TouchableOpacity>
 
           <View className="flex-1 flex-row items-baseline justify-center gap-0.5">
-            <Text className="text-xl font-bold">{formatWithCommas(tx.amount)}</Text>
-            <Text className="text-sm font-semibold">XRP</Text>
-            {/* TODO: Add USD value */}
+            <Text className="text-2xl font-semibold">{formatWithCommas(tx.amount)}</Text>
+            <Text className="text-md font-semibold">XRP</Text>
+            {/* // TODO: Add USD value */}
           </View>
 
           <TouchableOpacity
-            className={cn('rounded-full px-4 py-2', {
+            className={cn('rounded-full px-5 py-2', {
               'bg-green-600': tx.type === 'PAYMENT',
               'bg-sky-600': tx.type === 'REQUEST',
               buttonWidth,
@@ -82,21 +82,21 @@ const ContactScreen = ({
             })}
             disabled={!tx.recipientId || !tx.memo}
             onPress={() => handleNav('TxConfirmation')}>
-            <Text className="font-semibold text-white">{buttonText}</Text>
+            <Text className=" text-xl font-medium text-white">{buttonText}</Text>
           </TouchableOpacity>
         </View>
 
         <View className="flex flex-row items-baseline gap-x-2 border-t border-gray-300 pt-4">
-          <Text className="font-semibold">To</Text>
+          <Text className="text-xl font-semibold">To</Text>
           <TextInput
             value={search}
             onChangeText={handleSearch}
             placeholder="Name or @username"
             placeholderTextColor="#777"
-            className="mb-4 w-[92.5%] px-3 font-semibold"
+            className="mb-4 w-[92.5%] px-3 font-medium"
             style={{
-              fontSize: 14,
-              lineHeight: 17,
+              fontSize: 18,
+              lineHeight: 22,
               paddingTop: 0, // adjust as needed
               paddingBottom: 0, // adjust as needed
             }}
@@ -104,23 +104,23 @@ const ContactScreen = ({
         </View>
 
         <View className="mb-4 flex flex-row items-baseline gap-x-2 border-y border-gray-300 pt-4">
-          <Text className="font-semibold">For</Text>
+          <Text className="text-xl font-semibold">For</Text>
           <TextInput
             value={tx.memo || ''}
             onChangeText={handleMemo}
             placeholder="Memo (required)"
             placeholderTextColor="#777"
-            className="mb-4 w-[92.5%] px-3 font-semibold"
+            className="mb-4 w-[92.5%] px-3 font-medium"
             style={{
-              fontSize: 14,
-              lineHeight: 17,
+              fontSize: 18,
+              lineHeight: 22,
               paddingTop: 0, // adjust as needed
               paddingBottom: 0, // adjust as needed
             }}
           />
         </View>
 
-        <Text className="text-medium mb-2 font-semibold text-gray-600">Suggested</Text>
+        <Text className="mb-4 text-xl font-semibold text-gray-600">Suggested</Text>
         <View>
           <ScrollView
             horizontal
@@ -137,16 +137,18 @@ const ContactScreen = ({
           </ScrollView>
         </View>
 
-        <Text className="text-medium mb-2 font-semibold text-gray-600">All Contacts</Text>
+        <Text className="mb-2 text-xl font-semibold text-gray-600">All Contacts</Text>
         <FlatList
           data={filteredContacts}
           keyExtractor={(item) => item.id}
           renderItem={({ item }: { item: Contact }) => (
-            <ContactListItem
-              contact={item}
-              isSuggested={false}
-              onPress={() => handleSelect(item)}
-            />
+            <View className="my-3">
+              <ContactListItem
+                contact={item}
+                isSuggested={false}
+                onPress={() => handleSelect(item)}
+              />
+            </View>
           )}
         />
       </View>

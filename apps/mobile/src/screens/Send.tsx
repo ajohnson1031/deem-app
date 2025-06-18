@@ -177,11 +177,11 @@ export default function SendScreen() {
                 key={num}
                 onPress={() => handleNumberPress(num)}
                 className="w-[30%] rounded px-6 py-4">
-                <Text className="text-center text-xl font-bold">{num}</Text>
+                <Text className="text-center text-2xl font-semibold">{num}</Text>
               </TouchableOpacity>
             ))}
             <TouchableOpacity onPress={handleBackspace} className="w-[30%] rounded px-6 py-4">
-              <Ionicons name="backspace-outline" size={24} style={{ textAlign: 'center' }} />
+              <Ionicons name="backspace-outline" size={28} style={{ textAlign: 'center' }} />
             </TouchableOpacity>
           </View>
 
@@ -192,7 +192,7 @@ export default function SendScreen() {
               })}
               disabled={isDisabled}
               onPress={() => handleRequestPress('REQUEST')}>
-              <Text className="text-center text-lg font-semibold text-white">Request</Text>
+              <Text className="text-center text-xl font-medium text-white">Request</Text>
             </TouchableOpacity>
             <TouchableOpacity
               className={cn('w-[42.5%] rounded-xl bg-green-600  py-4', {
@@ -200,7 +200,7 @@ export default function SendScreen() {
               })}
               disabled={isDisabled}
               onPress={() => handleRequestPress('PAYMENT')}>
-              <Text className="text-center text-lg font-semibold text-white">Pay</Text>
+              <Text className="text-center text-xl font-medium text-white">Pay</Text>
             </TouchableOpacity>
           </View>
         </Animated.View>

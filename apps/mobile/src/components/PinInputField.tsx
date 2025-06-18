@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Animated, TextInput } from 'react-native';
 
+import { Theme } from '~/types';
 import { buzzAndShake } from '~/utils/feedback';
 import { getStoredPin, PIN_CELL_COUNT } from '~/utils/securePin';
 
@@ -9,13 +10,23 @@ interface PinInputFieldProps {
   onPinChange?: (pin: string) => void;
   onPinComplete: () => Promise<void>;
   shakeRef: Animated.Value;
+  theme?: Theme;
 }
 
-const PinInputField = ({ onPinChange, onPinComplete, shakeRef }: PinInputFieldProps) => {
+const PinInputField = ({
+  onPinChange,
+  onPinComplete,
+  shakeRef,
+  theme = 'DARK',
+}: PinInputFieldProps) => {
   const [pinLength, setPinLength] = useState<number>(PIN_CELL_COUNT);
   const [pin, setPin] = useState<string[]>(Array(pinLength).fill(''));
   const [storedPin, setStoredPin] = useState<string | null>(null);
   const inputsRef = useRef<(TextInput | null)[]>([]);
+  const borderColors = {
+    focused: theme === 'DARK' ? 'border-gray-800' : 'border-white',
+    blurred: theme === 'DARK' ? 'border-gray-400' : 'border-white/70',
+  };
 
   useEffect(() => {
     getStoredPin().then((pin) => {
@@ -84,8 +95,8 @@ const PinInputField = ({ onPinChange, onPinComplete, shakeRef }: PinInputFieldPr
             keyboardType="number-pad"
             maxLength={1}
             className={`h-12 w-12 rounded-lg border-b text-center text-2xl ${
-              pin[index] ? 'border-gray-800' : 'border-gray-400'
-            }`}
+              pin[index] ? borderColors.focused : borderColors.blurred
+            } ${theme === 'DARK' ? 'text-gray-800' : 'text-white'}`}
             textAlign="center"
             style={{ fontSize: 24, lineHeight: 32 }}
           />

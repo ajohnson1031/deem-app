@@ -16,8 +16,8 @@ import {
   SendScreen,
   SettingsScreen,
   TxConfirmationScreen,
-  TxFinalConfirmationScreen,
   TxHistoryScreen,
+  TxSubmissionScreen,
   WalletScreen,
 } from '~/screens';
 import { RootStackParamList } from '~/types';
@@ -168,7 +168,7 @@ export default function AppNavigator() {
               </Stack.Screen>
               <Stack.Screen name="Contacts" component={ContactScreen} />
               <Stack.Screen name="TxConfirmation" component={TxConfirmationScreen} />
-              <Stack.Screen name="TxFinalConfirmation" component={TxFinalConfirmationScreen} />
+              <Stack.Screen name="TxSubmission" component={TxSubmissionScreen} />
               <Stack.Screen name="Settings" component={SettingsScreen} />
               <Stack.Screen name="PendingTransactions" component={PendingTransactionsScreen} />
             </>

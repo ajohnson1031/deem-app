@@ -41,7 +41,7 @@ const WalletScreen = ({ onLogout }: { onLogout: () => void }) => {
               <View className="mb-2 flex flex-row items-center gap-2">
                 <Text className="text-lg font-medium text-gray-600">Balance</Text>
                 <TouchableOpacity onPress={refreshBalance}>
-                  <Fontisto name="spinner-refresh" size={20} color="#4b5563" />
+                  <Fontisto name="spinner-refresh" size={20} color="#0284c7" />
                 </TouchableOpacity>
               </View>
               {/* // TODO: font size switching based on text length */}
@@ -98,7 +98,7 @@ const WalletScreen = ({ onLogout }: { onLogout: () => void }) => {
             <TouchableOpacity
               className="rounded-xl bg-sky-600 py-4"
               onPress={() => navigation.navigate('Send')}>
-              <Text className="text-center text-lg font-semibold text-white">Send Payment</Text>
+              <Text className="text-center text-xl font-medium text-white">Send Payment</Text>
             </TouchableOpacity>
             <View className="gap-y-3">
               <Text className="text-lg font-medium text-gray-600">Recent Transactions</Text>
@@ -111,7 +111,9 @@ const WalletScreen = ({ onLogout }: { onLogout: () => void }) => {
             <TouchableOpacity
               className="flex flex-row justify-center"
               onPress={() => navigation.navigate('TxHistory')}>
-              <Text className="rounded-full border px-4 py-2 font-semibold">See More Txs</Text>
+              <Text className="rounded-full border border-sky-600/50 px-4 py-2 font-semibold text-sky-600">
+                See Full Tx List
+              </Text>
             </TouchableOpacity>
 
             {/* // TODO: Move this behind a security screen */}

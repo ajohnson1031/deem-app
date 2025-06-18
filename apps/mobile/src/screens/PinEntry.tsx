@@ -32,7 +32,7 @@ export default function PinEntryScreen({ onSuccess }: PinEntryScreenProps) {
   return (
     <Container>
       <View className="flex-1 items-center justify-center px-4">
-        <Text className="mb-4 text-lg">Enter Your PIN</Text>
+        <Text className="mb-4 text-2xl">Enter PIN</Text>
 
         <PinInputField
           onPinChange={handlePinChange}

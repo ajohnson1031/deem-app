@@ -7,6 +7,7 @@ import { Text, View } from 'react-native';
 import Toast from 'react-native-toast-message';
 
 import AppNavigator from '~/navigation';
+import { toastConfig } from '~/utils';
 import './global.css';
 
 export default function App() {
@@ -30,7 +31,7 @@ export default function App() {
   return (
     <>
       <AppNavigator />
-      <Toast />
+      <Toast config={toastConfig} />
       <StatusBar style="auto" />
     </>
   );

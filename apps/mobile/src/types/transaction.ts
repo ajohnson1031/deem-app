@@ -1,4 +1,4 @@
-type TxStatus = 'pending' | 'accepted' | 'declined';
+type TxStatus = 'pending' | 'accepted' | 'declined' | 'incomplete';
 type TxType = 'PAYMENT' | 'REQUEST';
 type TxListType = 'CONFIRMATION' | 'TX';
 type TxDirection = 'incoming' | 'outgoing' | null;

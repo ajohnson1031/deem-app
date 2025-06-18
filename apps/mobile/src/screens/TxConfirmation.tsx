@@ -32,26 +32,26 @@ const TxConfirmationScreen = ({
         <TxListItem contactId={recipientId!} type="CONFIRMATION" />
 
         {/* Amount Display TODO: Add USD value */}
-        <View className="rounded-xl bg-slate-800 p-3 ">
-          <Text className="mb-1 font-bold text-sky-300">Tx. Amount:</Text>
+        <View className="rounded-xl bg-white p-3 ">
+          <Text className="mb-1 ml-3 font-bold text-sky-800">Tx. Amount:</Text>
           <View className="flex flex-row items-baseline p-3 pt-5">
-            <Text className="text-5xl text-white">{formatWithCommas(amount)}</Text>
-            <Text className="text-xl font-semibold text-white">XRP</Text>
+            <Text className="text-5xl text-stone-900">{formatWithCommas(amount)}</Text>
+            <Text className="text-xl font-semibold text-stone-900">XRP</Text>
           </View>
         </View>
 
         {/* Memo Display */}
-        <View className="rounded-lg bg-slate-800 p-3">
-          <Text className="mb-2 font-medium text-sky-300">For:</Text>
+        <View className="rounded-lg bg-white p-3">
+          <Text className="mb-2 ml-3 font-bold text-sky-800">For:</Text>
           <View className="flex flex-row items-baseline rounded-lg p-3">
-            <Text className="text-xl font-semibold text-white">{memo}</Text>
+            <Text className="text-xl font-semibold text-stone-900">{memo}</Text>
           </View>
         </View>
 
         {/* Action Buttons TODO: Make functional */}
         <View className="mt-8 flex flex-row justify-center gap-x-5">
           <TouchableOpacity
-            onPress={() => navigation.navigate('TxFinalConfirmation', { tx })}
+            onPress={() => navigation.navigate('TxSubmission', { tx })}
             className={cn(
               ' flex w-full flex-row items-center justify-center gap-2 rounded-xl py-4',
               {

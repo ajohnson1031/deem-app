@@ -1,6 +1,6 @@
 import { Octicons } from '@expo/vector-icons';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useNavigationState } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import cn from 'classnames';
 import { useAtomValue } from 'jotai';
@@ -29,6 +29,15 @@ const HeaderNav = ({
   );
 
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
+  const previousRoute = useNavigationState((state) => {
+    const routes = state.routes;
+    const currentIndex = state.index;
+
+    // Return previous route if exists
+    return currentIndex > 0 ? routes[currentIndex - 1].name : null;
+  });
+
   return (
     <View
       className={cn('m-6 flex flex-row', {
@@ -41,7 +50,10 @@ const HeaderNav = ({
           onPress={() => {
             if (onBackPress) {
               onBackPress();
-            } else navigation.goBack();
+            } else {
+              if (!!previousRoute && !['PinEntryScreen', 'PinSetupScreen'].includes(previousRoute))
+                navigation.goBack();
+            }
           }}>
           <FontAwesome6
             name="arrow-left-long"
@@ -51,7 +63,7 @@ const HeaderNav = ({
         </TouchableOpacity>
       )}
       {showHeaderOptions && (
-        <View className="flex flex-row justify-end gap-4">
+        <View className="flex flex-row justify-end gap-5">
           {!showSettingsOnly && (
             <View>
               <TouchableOpacity

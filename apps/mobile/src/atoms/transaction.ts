@@ -17,4 +17,4 @@ const pendingTransactionsAtom = atom<Transaction[]>(
   )
 );
 
-export { currentTxAtom, pendingTransactionsAtom, transactionsAtom };
+export { currentTxAtom, initialTx, pendingTransactionsAtom, transactionsAtom };

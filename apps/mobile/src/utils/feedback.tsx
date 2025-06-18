@@ -1,11 +1,5 @@
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useSetAtom } from 'jotai';
 import { useEffect, useState } from 'react';
 import { Animated, Text, Vibration, View } from 'react-native';
-
-import { txSessionAuthorizedAtom } from '~/atoms';
-import { RootStackParamList } from '~/types';
 
 const causeBuzz = () => {
   Vibration.vibrate(250);
@@ -25,27 +19,22 @@ const buzzAndShake = (ref: Animated.Value) => {
   shakeAnimation(ref);
 };
 
-const useSessionResetCountdown = (txState: string, delaySeconds: number = 5) => {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const setTxAuthorized = useSetAtom(txSessionAuthorizedAtom);
+const useSessionResetCountdown = (txState: string, delaySeconds = 5, onComplete?: () => void) => {
   const [countdown, setCountdown] = useState(delaySeconds);
 
   useEffect(() => {
     if (txState !== 'success' && txState !== 'fail') return;
     if (countdown === 0) {
-      setTxAuthorized(false);
-      navigation.navigate('Contacts');
+      onComplete?.(); // ✅ call before anything else
       return;
     }
-    const timer = setTimeout(() => {
-      setCountdown((prev) => prev - 1);
-    }, 1000);
+    const timer = setTimeout(() => setCountdown((prev) => prev - 1), 1000);
     return () => clearTimeout(timer);
   }, [txState, countdown]);
 
   const CountdownDisplay = () => (
-    <View className="mt-6 items-center">
-      <Text className="text-sm text-gray-600">Resetting in {countdown}...</Text>
+    <View className="mt-2">
+      <Text className="text-left text-lg text-stone-900">Returning in {countdown}...</Text>
     </View>
   );
 

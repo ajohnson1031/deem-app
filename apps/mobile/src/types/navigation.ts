@@ -8,7 +8,7 @@ export type RootStackParamList = {
   Send: undefined;
   TxHistory: undefined;
   TxConfirmation: { tx: Transaction };
-  TxFinalConfirmation: { tx: Transaction };
+  TxSubmission: { tx: Transaction };
   PendingTransactions: undefined;
   Contacts: undefined;
   Settings: undefined;

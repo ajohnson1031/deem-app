@@ -10,7 +10,7 @@ const ConfirmationItem = ({ contactId }: { contactId: string }) => {
   const [first, last] = name;
 
   return (
-    <View className="flex rounded-xl bg-slate-800 p-4">
+    <View className="flex rounded-xl bg-white p-4">
       <View className="flex flex-row gap-4">
         {avatarUrl ? (
           <Image
@@ -22,12 +22,12 @@ const ConfirmationItem = ({ contactId }: { contactId: string }) => {
           <View
             className="h-16 w-16 items-center justify-center rounded-full"
             style={{ backgroundColor: bgColor }}>
-            <Text className="text-3xl font-normal text-white">{`${first[0]}${last[0]}`}</Text>
+            <Text className="text-3xl font-normal text-stone-900">{`${first[0]}${last[0]}`}</Text>
           </View>
         )}
         <View className="flex justify-center">
-          <Text className="text-xl font-bold text-white">{`${first} ${last}`}</Text>
-          <Text className="text-lg font-medium text-white/70">{username}</Text>
+          <Text className="text-xl font-semibold text-stone-900">{`${first} ${last}`}</Text>
+          <Text className="text-lg font-normal text-stone-900/70">{username}</Text>
         </View>
       </View>
     </View>
@@ -58,13 +58,13 @@ const TxItem = ({ transaction }: { transaction: Transaction }) => {
           <View
             className="h-16 w-16 items-center justify-center rounded-full"
             style={{ backgroundColor: bgColor }}>
-            <Text className="text-3xl font-normal text-white">{`${first[0]}${last[0]}`}</Text>
+            <Text className="text-2xl font-normal text-white">{`${first[0]}${last[0]}`}</Text>
           </View>
         )}
         <View className="flex flex-1 flex-row items-center justify-between">
           <View className="flex justify-center">
-            <Text className="text-2xl font-normal">{`${first} ${last}`}</Text>
-            <Text className="text-lg font-light">{capitalize(memo!)}</Text>
+            <Text className="text-xl font-semibold">{`${first} ${last}`}</Text>
+            <Text className="text-lg font-normal">{capitalize(memo!)}</Text>
           </View>
 
           <Text
