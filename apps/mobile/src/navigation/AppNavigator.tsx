@@ -4,8 +4,9 @@ import * as LocalAuthentication from 'expo-local-authentication';
 import { useSetAtom } from 'jotai';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-import { txSessionAuthorizedAtom } from '~/atoms/session';
+import { txSessionAuthorizedAtom } from '~/atoms';
 import { useWallet } from '~/hooks/useWallet';
 import {
   ContactScreen,
@@ -19,7 +20,7 @@ import {
   TxHistoryScreen,
   WalletScreen,
 } from '~/screens';
-import { RootStackParamList } from '~/types/navigation';
+import { RootStackParamList } from '~/types';
 import { getStoredPin, savePin } from '~/utils';
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -130,48 +131,50 @@ export default function AppNavigator() {
   const { walletAddress } = useWallet();
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator
-        screenOptions={{
-          headerShown: false,
-          gestureEnabled: true,
-          transitionSpec: {
-            open: {
-              animation: 'timing',
-              config: {
-                duration: 200, // Fast, consistent timing!
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <NavigationContainer>
+        <Stack.Navigator
+          screenOptions={{
+            headerShown: false,
+            gestureEnabled: true,
+            transitionSpec: {
+              open: {
+                animation: 'timing',
+                config: {
+                  duration: 200, // Fast, consistent timing!
+                },
+              },
+              close: {
+                animation: 'timing',
+                config: {
+                  duration: 200,
+                },
               },
             },
-            close: {
-              animation: 'timing',
-              config: {
-                duration: 200,
-              },
-            },
-          },
-          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS, // Matches "slide_from_right" feel
-        }}>
-        {!authenticated ? (
-          <Stack.Screen name="AuthGate">
-            {() => <AuthGate onAuthSuccess={() => setAuthenticated(true)} />}
-          </Stack.Screen>
-        ) : (
-          <>
-            <Stack.Screen name="Send" component={SendScreen} />
-            <Stack.Screen name="Wallet">
-              {() => <WalletScreen onLogout={() => setAuthenticated(false)} />}
+            cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS, // Matches "slide_from_right" feel
+          }}>
+          {!authenticated ? (
+            <Stack.Screen name="AuthGate">
+              {() => <AuthGate onAuthSuccess={() => setAuthenticated(true)} />}
             </Stack.Screen>
-            <Stack.Screen name="TxHistory">
-              {() => <TxHistoryScreen address={walletAddress!} />}
-            </Stack.Screen>
-            <Stack.Screen name="Contacts" component={ContactScreen} />
-            <Stack.Screen name="TxConfirmation" component={TxConfirmationScreen} />
-            <Stack.Screen name="TxFinalConfirmation" component={TxFinalConfirmationScreen} />
-            <Stack.Screen name="Settings" component={SettingsScreen} />
-            <Stack.Screen name="PendingTransactions" component={PendingTransactionsScreen} />
-          </>
-        )}
-      </Stack.Navigator>
-    </NavigationContainer>
+          ) : (
+            <>
+              <Stack.Screen name="Send" component={SendScreen} />
+              <Stack.Screen name="Wallet">
+                {() => <WalletScreen onLogout={() => setAuthenticated(false)} />}
+              </Stack.Screen>
+              <Stack.Screen name="TxHistory">
+                {() => <TxHistoryScreen address={walletAddress!} />}
+              </Stack.Screen>
+              <Stack.Screen name="Contacts" component={ContactScreen} />
+              <Stack.Screen name="TxConfirmation" component={TxConfirmationScreen} />
+              <Stack.Screen name="TxFinalConfirmation" component={TxFinalConfirmationScreen} />
+              <Stack.Screen name="Settings" component={SettingsScreen} />
+              <Stack.Screen name="PendingTransactions" component={PendingTransactionsScreen} />
+            </>
+          )}
+        </Stack.Navigator>
+      </NavigationContainer>
+    </GestureHandlerRootView>
   );
 }

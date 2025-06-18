@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 import { View } from 'react-native';
 
 import { Container, FooterNav, HeaderNav } from '~/components';
-import { Theme } from '~/types/theme';
+import { Theme } from '~/types';
 
 interface Props {
   showBack?: boolean;
@@ -37,7 +37,7 @@ const CoreLayout = ({
         onBackPress={onBackPress}
         theme={theme}
       />
-      <View className="flex-1">{children}</View>
+      <View className="flex-1 overflow-hidden">{children}</View>
       {showFooter && <FooterNav />}
     </Container>
   );

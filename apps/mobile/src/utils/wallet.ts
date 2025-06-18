@@ -1,7 +1,7 @@
 import { RIPPLENET_URL } from '@env';
 import { Client, Wallet, XrplError } from 'xrpl';
 
-import { WalletBalanceResult } from '~/types/wallet';
+import { WalletBalanceResult } from '~/types';
 
 const createNewWallet = (): Wallet => {
   const wallet = Wallet.generate(); // Generates random seed + keypair
@@ -61,13 +61,15 @@ const getTransactionHistory = async (
       ...(marker ? { marker } : {}),
     });
 
-    const transactions = (response.result.transactions || []).map((item: any) => ({
-      hash: item.tx.hash,
-      type: item.tx.TransactionType,
-      amount: item.tx.Amount,
-      date: item.tx.date,
-      success: item.meta.TransactionResult === 'tesSUCCESS',
-    }));
+    const transactions = (response.result.transactions || [])
+      .filter((item: any) => item?.tx && item?.meta)
+      .map((item: any) => ({
+        hash: item.tx.hash,
+        type: item.tx.TransactionType,
+        amount: item.tx.Amount,
+        date: item.tx.date,
+        success: item.meta.TransactionResult === 'tesSUCCESS',
+      }));
 
     return {
       transactions,

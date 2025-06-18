@@ -1,7 +1,7 @@
 import { atom } from 'jotai';
 
 import { MOCK_ALL_CONTACTS } from '~/mocks/contacts';
-import { Contact } from '~/types/contacts';
+import { Contact } from '~/types';
 
 const contactsAtom = atom<Contact[]>(MOCK_ALL_CONTACTS);
 

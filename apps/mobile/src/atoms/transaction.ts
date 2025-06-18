@@ -1,31 +1,20 @@
 import { atom } from 'jotai';
 
-import { MOCK_TRANSACTIONS } from '~/mocks/transactions';
-import { Transaction, TxStatus } from '~/types/transaction';
+import { MOCK_COMPLETED_TRANSACTIONS, MOCK_PENDING_TRANSACTIONS } from '~/mocks/transactions';
+import { Transaction } from '~/types';
 
-type TxType = 'PAY' | 'REQUEST';
-
-interface CurrentTxType {
-  amount: string;
-  type: TxType;
-  memo: string | null;
-  recipient: string | null;
-  status: TxStatus | null;
-}
-
-const initialTx: CurrentTxType = {
+const initialTx: Transaction = {
   amount: '0',
-  type: 'PAY',
-  memo: null,
-  recipient: null,
-  status: null,
+  type: 'PAYMENT',
+  direction: null,
 };
 
-const currentTxAtom = atom<CurrentTxType>(initialTx);
-const transactionsAtom = atom<Transaction[]>(MOCK_TRANSACTIONS);
+const currentTxAtom = atom<Transaction>(initialTx);
+const transactionsAtom = atom<Transaction[]>(MOCK_COMPLETED_TRANSACTIONS);
 const pendingTransactionsAtom = atom<Transaction[]>(
-  MOCK_TRANSACTIONS.filter((tx) => tx.status === 'pending')
+  MOCK_PENDING_TRANSACTIONS.filter(
+    (tx) => tx.status === 'pending' && tx.direction === 'incoming' && tx.type === 'REQUEST'
+  )
 );
 
 export { currentTxAtom, pendingTransactionsAtom, transactionsAtom };
-export type { CurrentTxType, TxType };

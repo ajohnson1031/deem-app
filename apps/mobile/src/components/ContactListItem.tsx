@@ -2,8 +2,8 @@ import cn from 'classnames';
 import { useAtom } from 'jotai';
 import { Image, Text, TouchableOpacity, View } from 'react-native';
 
-import { currentTxAtom } from '~/atoms/transaction';
-import { Contact } from '~/types/contacts';
+import { currentTxAtom } from '~/atoms';
+import { Contact } from '~/types';
 import { getColorIndex } from '~/utils';
 
 const ContactListItem = ({
@@ -21,7 +21,7 @@ const ContactListItem = ({
   const splitName = name.split(' ');
   const [first, last] = [splitName[0], splitName[1] || ''];
   const backgroundColor = getColorIndex(contact.id);
-  const isSelected = tx.recipient === contact.id;
+  const isSelected = tx.recipientId === contact.id;
 
   return (
     <TouchableOpacity

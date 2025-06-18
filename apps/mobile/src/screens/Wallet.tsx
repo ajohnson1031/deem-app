@@ -3,17 +3,18 @@ import Fontisto from '@expo/vector-icons/Fontisto';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useAtom } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import { useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import ShimmerPlaceHolder from 'react-native-shimmer-placeholder';
 
-import { currencyAtom } from '~/atoms/wallet';
+import { currencyAtom, transactionsAtom } from '~/atoms';
+import { TxListItem } from '~/components';
 import { ApprovedCurrency } from '~/constants';
 import { useWallet } from '~/hooks/useWallet';
 import CoreLayout from '~/layouts/CoreLayout';
-import { RootStackParamList } from '~/types/navigation';
+import { RootStackParamList } from '~/types';
 import { useCopyToClipboard } from '~/utils';
 
 const WalletScreen = ({ onLogout }: { onLogout: () => void }) => {
@@ -21,6 +22,8 @@ const WalletScreen = ({ onLogout }: { onLogout: () => void }) => {
   const [currency, setCurrency] = useAtom(currencyAtom);
   const { copied, copy } = useCopyToClipboard();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  // TODO: Get recent transactions via an API call
+  const recentTransactions = useAtomValue(transactionsAtom).slice(0, 3);
 
   const [currencyOptions] = useState<Record<string, ApprovedCurrency>[]>([
     { label: 'XRP', value: 'XRP' },
@@ -29,7 +32,7 @@ const WalletScreen = ({ onLogout }: { onLogout: () => void }) => {
 
   return (
     <CoreLayout showFooter showBack={false}>
-      <View className="m-6 flex-1 items-center justify-center">
+      <View className="mx-6 flex-1 items-center justify-center">
         {walletAddress ? (
           <View className="w-full flex-1 flex-col gap-y-6">
             {/* Balance, Currency Functionality */}
@@ -96,6 +99,19 @@ const WalletScreen = ({ onLogout }: { onLogout: () => void }) => {
               className="rounded-xl bg-sky-600 py-4"
               onPress={() => navigation.navigate('Send')}>
               <Text className="text-center text-lg font-semibold text-white">Send Payment</Text>
+            </TouchableOpacity>
+            <View className="gap-y-3">
+              <Text className="text-lg font-medium text-gray-600">Recent Transactions</Text>
+              <View className="gap-y-2">
+                {recentTransactions.map((tx) => (
+                  <TxListItem key={tx.id} type="TX" transaction={tx} />
+                ))}
+              </View>
+            </View>
+            <TouchableOpacity
+              className="flex flex-row justify-center"
+              onPress={() => navigation.navigate('TxHistory')}>
+              <Text className="rounded-full border px-4 py-2 font-semibold">See More Txs</Text>
             </TouchableOpacity>
 
             {/* // TODO: Move this behind a security screen */}

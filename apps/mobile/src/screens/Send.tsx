@@ -8,12 +8,11 @@ import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Animated, Text, TouchableOpacity, View } from 'react-native';
 import Toast from 'react-native-toast-message';
 
-import { txSessionAuthorizedAtom } from '~/atoms/session';
-import { currentTxAtom, TxType } from '~/atoms/transaction';
+import { currentTxAtom, txSessionAuthorizedAtom } from '~/atoms';
 import { useWallet } from '~/hooks/useWallet';
 import CoreLayout from '~/layouts/CoreLayout';
 import PinEntryScreen from '~/screens/PinEntry';
-import { RootStackParamList } from '~/types/navigation';
+import { RootStackParamList, TxType } from '~/types';
 import { buzzAndShake, formatWithCommas, getStoredPin } from '~/utils';
 
 export default function SendScreen() {
@@ -112,7 +111,7 @@ export default function SendScreen() {
 
     if (isDisabled) return;
 
-    if (type === 'PAY' && parseFloat(tx.amount) > Number(walletBalance?.balance)) {
+    if (type === 'PAYMENT' && parseFloat(tx.amount) > Number(walletBalance?.balance)) {
       buzzAndShake(shakeAnim);
       Toast.show({
         type: 'error',
@@ -124,7 +123,7 @@ export default function SendScreen() {
       return;
     }
 
-    setTx({ ...tx, type });
+    setTx({ ...tx, type, direction: type === 'PAYMENT' ? 'outgoing' : 'incoming' });
     navigation.navigate('Contacts');
   };
 
@@ -200,7 +199,7 @@ export default function SendScreen() {
                 'opacity-40': isDisabled,
               })}
               disabled={isDisabled}
-              onPress={() => handleRequestPress('PAY')}>
+              onPress={() => handleRequestPress('PAYMENT')}>
               <Text className="text-center text-lg font-semibold text-white">Pay</Text>
             </TouchableOpacity>
           </View>

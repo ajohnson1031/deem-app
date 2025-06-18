@@ -3,8 +3,7 @@ import { useAtom, useSetAtom } from 'jotai';
 import { useRef, useState } from 'react';
 import { ActivityIndicator, Animated, Text, View } from 'react-native';
 
-import { txSessionAuthorizedAtom } from '~/atoms/session';
-import { currentTxAtom } from '~/atoms/transaction';
+import { currentTxAtom, txSessionAuthorizedAtom } from '~/atoms';
 import PinInputField from '~/components/PinInputField';
 import CoreLayout from '~/layouts/CoreLayout';
 import { useSessionResetCountdown } from '~/utils/feedback';
@@ -48,7 +47,7 @@ const TxFinalConfirmationScreen = () => {
       showBack
       showFooter={false}
       showHeaderOptions={false}
-      containerClassName={tx.type === 'PAY' ? 'bg-green-600' : 'bg-sky-700'}
+      containerClassName={tx.type === 'PAYMENT' ? 'bg-green-600' : 'bg-sky-700'}
       theme="LIGHT">
       <View className="flex-1 items-center justify-center px-6">
         <Text className="mb-6 text-2xl font-semibold text-gray-800">Confirm Pin</Text>

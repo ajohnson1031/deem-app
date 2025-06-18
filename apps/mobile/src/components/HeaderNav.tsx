@@ -6,9 +6,8 @@ import cn from 'classnames';
 import { useAtomValue } from 'jotai';
 import { Text, TouchableOpacity, View } from 'react-native';
 
-import { transactionsAtom } from '~/atoms/transaction';
-import { RootStackParamList } from '~/types/navigation';
-import { Theme } from '~/types/theme';
+import { pendingTransactionsAtom } from '~/atoms';
+import { RootStackParamList, Theme } from '~/types';
 
 const HeaderNav = ({
   showBack = true,
@@ -25,8 +24,8 @@ const HeaderNav = ({
   theme?: Theme;
   onBackPress?: () => void;
 }) => {
-  const pendingTransactions = useAtomValue(transactionsAtom).filter(
-    (tx) => tx.status === 'pending'
+  const pendingTransactions = useAtomValue(pendingTransactionsAtom).filter(
+    (tx) => tx.status === 'pending' && tx.direction === 'incoming' && tx.type === 'REQUEST'
   );
 
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();

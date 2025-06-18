@@ -1,4 +1,4 @@
-import { TxType } from '~/atoms/transaction';
+import { TxType } from '~/types';
 
 const formatWithCommas = (value: string) => {
   if (value.endsWith('.')) {

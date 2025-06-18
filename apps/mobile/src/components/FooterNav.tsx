@@ -3,7 +3,7 @@ import { useNavigation, useNavigationState } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { TouchableOpacity, View } from 'react-native';
 
-import type { RootStackParamList } from '~/types/navigation';
+import type { RootStackParamList } from '~/types';
 
 const FooterNav = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -17,7 +17,7 @@ const FooterNav = () => {
     ];
 
   return (
-    <View className="absolute bottom-8 left-0 right-0 flex-row justify-around overflow-hidden py-4">
+    <View className="w-full flex-row justify-around bg-gray-100 py-4 shadow-sm">
       {navItems.map(({ icon, route }) => {
         const isActive = currentRoute === route;
         return (

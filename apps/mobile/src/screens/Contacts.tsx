@@ -5,13 +5,11 @@ import { useAtom, useAtomValue } from 'jotai';
 import { useState } from 'react';
 import { FlatList, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-import { contactsAtom, suggestedContactsAtom } from '~/atoms/contacts';
-import { currentTxAtom } from '~/atoms/transaction';
+import { contactsAtom, currentTxAtom, suggestedContactsAtom } from '~/atoms';
 import { Container } from '~/components';
 import ContactListItem from '~/components/ContactListItem';
-import { Contact } from '~/types/contacts';
-import { RootStackParamList } from '~/types/navigation';
-import { capitalize, formatWithCommas } from '~/utils';
+import { Contact, RootStackParamList } from '~/types';
+import { formatWithCommas } from '~/utils';
 
 const ContactScreen = ({
   navigation,
@@ -22,9 +20,10 @@ const ContactScreen = ({
   const contacts = useAtomValue(contactsAtom);
   const suggestedContacts = useAtomValue(suggestedContactsAtom);
   const [search, setSearch] = useState(
-    tx.recipient ? contacts.filter((contact) => contact.id === tx.recipient)[0].name : ''
+    tx.recipientId ? contacts.filter((contact) => contact.id === tx.recipientId)[0].name : ''
   );
-  const buttonWidth = tx.type === 'PAY' ? 'w-10' : 'w-20';
+  const buttonWidth = tx.type === 'PAYMENT' ? 'w-10' : 'w-20';
+  const buttonText = tx.type === 'PAYMENT' ? 'Pay' : 'Request';
 
   const filteredContacts: Contact[] = contacts.filter(
     (c) =>
@@ -34,17 +33,17 @@ const ContactScreen = ({
 
   const handleSearch = (val: string) => {
     if (!val) {
-      setTx((prev) => ({ ...prev, recipient: null }));
+      setTx((prev) => ({ ...prev, recipientId: null }));
     }
     setSearch(val);
   };
 
   const handleSelect = (contact: Contact) => {
-    if (tx.recipient !== contact.id) {
-      setTx((prev) => ({ ...prev, recipient: contact.id }));
+    if (tx.recipientId !== contact.id) {
+      setTx((prev) => ({ ...prev, recipientId: contact.id }));
       setSearch(contact.name);
     } else {
-      setTx((prev) => ({ ...prev, recipient: null }));
+      setTx((prev) => ({ ...prev, recipientId: null }));
       setSearch('');
     }
   };
@@ -55,7 +54,7 @@ const ContactScreen = ({
 
   const handleNav = (screenName: any) => {
     if (screenName === 'Send') {
-      setTx((prev) => ({ ...prev, memo: null, recipient: null }));
+      setTx((prev) => ({ ...prev, memo: null, recipientId: null }));
     }
     navigation.navigate(screenName, { tx });
   };
@@ -76,14 +75,14 @@ const ContactScreen = ({
 
           <TouchableOpacity
             className={cn('rounded-full px-4 py-2', {
-              'bg-green-600': tx.type === 'PAY',
+              'bg-green-600': tx.type === 'PAYMENT',
               'bg-sky-600': tx.type === 'REQUEST',
               buttonWidth,
-              'opacity-40': !tx.recipient || !tx.memo,
+              'opacity-40': !tx.recipientId || !tx.memo,
             })}
-            disabled={!tx.recipient || !tx.memo}
+            disabled={!tx.recipientId || !tx.memo}
             onPress={() => handleNav('TxConfirmation')}>
-            <Text className="font-semibold text-white">{capitalize(tx.type)}</Text>
+            <Text className="font-semibold text-white">{buttonText}</Text>
           </TouchableOpacity>
         </View>
 

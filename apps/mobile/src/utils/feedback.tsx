@@ -4,8 +4,8 @@ import { useSetAtom } from 'jotai';
 import { useEffect, useState } from 'react';
 import { Animated, Text, Vibration, View } from 'react-native';
 
-import { txSessionAuthorizedAtom } from '~/atoms/session';
-import { RootStackParamList } from '~/types/navigation';
+import { txSessionAuthorizedAtom } from '~/atoms';
+import { RootStackParamList } from '~/types';
 
 const causeBuzz = () => {
   Vibration.vibrate(250);

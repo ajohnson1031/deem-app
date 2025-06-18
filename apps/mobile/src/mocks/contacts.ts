@@ -1,4 +1,4 @@
-import { Contact } from '~/types/contacts';
+import { Contact } from '~/types';
 
 // Mock contact data
 const MOCK_SUGGESTED: Contact[] = [

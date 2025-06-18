@@ -1,7 +1,8 @@
 import { useAtomValue } from 'jotai';
-import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 
-import { pendingTransactionsAtom } from '~/atoms/transaction';
+import { pendingTransactionsAtom } from '~/atoms';
+import { SwipeableTransactionRow } from '~/components';
 import CoreLayout from '~/layouts/CoreLayout';
 
 const PendingTransactionsScreen = () => {
@@ -9,31 +10,21 @@ const PendingTransactionsScreen = () => {
 
   return (
     <CoreLayout showBack showHeaderOptions showSettingsOnly showFooter={false}>
-      <ScrollView className="flex-1 px-4 pb-6">
-        <Text className="mb-4 text-lg font-bold text-gray-800">Pending Transactions</Text>
+      <ScrollView className="flex-1 px-6 pb-6">
+        <Text className="text-2xl font-medium text-gray-800">Pending Requests</Text>
+        <Text className="text-md mb-6">Swipe right to approve; left to decline.</Text>
         {pendingTxs.length === 0 ? (
           <Text className="mt-12 text-center text-gray-500">No pending transactions.</Text>
         ) : (
-          <View className="gap-4">
+          <View className="gap-2">
             {pendingTxs.map((tx) => (
-              <View
+              <SwipeableTransactionRow
                 key={tx.id}
-                className="rounded-lg border border-gray-300 bg-white p-4 shadow-sm">
-                <Text className="text-base font-semibold text-gray-800">
-                  {tx.type === 'PAY' ? 'Payment' : 'Request'}{' '}
-                  {tx.direction === 'incoming' ? 'from' : 'to'} {tx.contactId}
-                </Text>
-                <Text className="mt-1 text-lg font-bold text-stone-900">${tx.amount}</Text>
-                {tx.memo && <Text className="mt-1 text-sm italic text-gray-600">"{tx.memo}"</Text>}
-                <View className="mt-3 flex-row gap-2">
-                  <TouchableOpacity className="flex-1 rounded bg-green-500 py-2" onPress={() => {}}>
-                    <Text className="text-center font-bold text-white">Approve</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity className="flex-1 rounded bg-red-500 py-2" onPress={() => {}}>
-                    <Text className="text-center font-bold text-white">Decline</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
+                transaction={tx}
+                // TODO: Make API call and Update transactions atom
+                onApprove={(tx) => console.log('Approved:', tx.id)}
+                onDeny={(tx) => console.log('Denied:', tx.id)}
+              />
             ))}
           </View>
         )}

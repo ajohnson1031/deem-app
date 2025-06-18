@@ -1,13 +1,11 @@
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import cn from 'classnames';
-import { useSetAtom } from 'jotai';
 import { Text, TouchableOpacity, View } from 'react-native';
 
-import { currentTxAtom, CurrentTxType } from '~/atoms/transaction';
-import TxContactListItem from '~/components/TxContactListItem';
+import { TxListItem } from '~/components';
 import CoreLayout from '~/layouts/CoreLayout';
-import { RootStackParamList } from '~/types/navigation';
+import { RootStackParamList, Transaction } from '~/types';
 import { capitalize, formatWithCommas } from '~/utils';
 
 const TxConfirmationScreen = ({
@@ -16,17 +14,13 @@ const TxConfirmationScreen = ({
   },
   navigation,
 }: {
-  route: { params: { tx: CurrentTxType } };
+  route: { params: { tx: Transaction } };
   navigation: NativeStackNavigationProp<RootStackParamList, 'TxConfirmation'>;
 }) => {
-  const setTx = useSetAtom(currentTxAtom);
-
-  const { type, amount, memo, recipient } = tx;
-
-  const title = type === 'PAY' ? 'Confirm\nPayment?' : 'Confirm\nRequest?';
+  const { type, amount, memo, recipientId } = tx;
+  const title = type === 'PAYMENT' ? 'Confirm\nPayment?' : 'Confirm\nRequest?';
 
   const handleBackPress = () => {
-    setTx((prev) => ({ ...prev, memo: null, recipient: null }));
     navigation.navigate('Contacts');
   };
 
@@ -35,7 +29,7 @@ const TxConfirmationScreen = ({
       <View className="mx-6 flex-1 justify-center gap-y-4">
         <Text className="mb-2 text-5xl font-semibold text-stone-900">{title}</Text>
 
-        <TxContactListItem id={recipient!} />
+        <TxListItem contactId={recipientId!} type="CONFIRMATION" />
 
         {/* Amount Display TODO: Add USD value */}
         <View className="rounded-xl bg-slate-800 p-3 ">
@@ -61,12 +55,12 @@ const TxConfirmationScreen = ({
             className={cn(
               ' flex w-full flex-row items-center justify-center gap-2 rounded-xl py-4',
               {
-                'bg-green-600': type === 'PAY',
+                'bg-green-600': type === 'PAYMENT',
                 'bg-sky-600': type === 'REQUEST',
               }
             )}>
             <Text className="text-xl font-bold text-white">
-              Send {capitalize(type === 'PAY' ? 'Payment' : type)}
+              Send {capitalize(type === 'PAYMENT' ? 'Payment' : type)}
             </Text>
             <FontAwesome6 name="arrow-right-long" size={16} color="#FFF" />
           </TouchableOpacity>
