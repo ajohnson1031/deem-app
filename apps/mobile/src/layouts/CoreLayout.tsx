@@ -6,6 +6,7 @@ import { Theme } from '~/types';
 
 interface Props {
   showBack?: boolean;
+  showClose?: boolean;
   showHeaderOptions?: boolean;
   showSettingsOnly?: boolean;
   showNotificationsOnly?: boolean;
@@ -19,10 +20,11 @@ interface Props {
 const CoreLayout = ({
   children,
   showBack,
+  showClose,
   showHeaderOptions,
   showSettingsOnly,
   showNotificationsOnly,
-  showFooter = true,
+  showFooter = false,
   containerClassName,
   theme = 'DARK',
   onBackPress,
@@ -31,6 +33,7 @@ const CoreLayout = ({
     <Container className={containerClassName}>
       <HeaderNav
         showBack={showBack}
+        showClose={showClose}
         showHeaderOptions={showHeaderOptions}
         showSettingsOnly={showSettingsOnly}
         showNotificationsOnly={showNotificationsOnly}

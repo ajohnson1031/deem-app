@@ -1,10 +1,12 @@
 export { default as ContactScreen } from './Contacts';
-export { default as Home } from './Home';
+export { default as Convert } from './Convert';
+export { default as HomeScreen } from './Home';
 export { default as PendingTransactionsScreen } from './PendingTransactions';
 export { default as PinEntryScreen } from './PinEntry';
 export { default as PinSetupScreen } from './PinSetup';
 export { default as SendScreen } from './Send';
 export { default as SettingsScreen } from './Settings';
+export { default as SignupScreen } from './Signup';
 export { default as TxConfirmationScreen } from './TxConfirmation';
 export { default as TxHistoryScreen } from './TxHistory';
 export { default as TxSubmissionScreen } from './TxSubmission';

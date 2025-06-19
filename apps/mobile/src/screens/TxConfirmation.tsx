@@ -25,7 +25,7 @@ const TxConfirmationScreen = ({
   };
 
   return (
-    <CoreLayout showBack showHeaderOptions showFooter={false} onBackPress={handleBackPress}>
+    <CoreLayout showBack onBackPress={handleBackPress}>
       <View className="mx-6 flex-1 justify-center gap-y-4">
         <Text className="mb-2 text-5xl font-semibold text-stone-900">{title}</Text>
 
@@ -59,7 +59,7 @@ const TxConfirmationScreen = ({
                 'bg-sky-600': type === 'REQUEST',
               }
             )}>
-            <Text className="text-xl font-bold text-white">
+            <Text className="text-xl font-medium text-white">
               Send {capitalize(type === 'PAYMENT' ? 'Payment' : type)}
             </Text>
             <FontAwesome6 name="arrow-right-long" size={16} color="#FFF" />

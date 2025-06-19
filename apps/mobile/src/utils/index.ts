@@ -1,5 +1,3 @@
-export { submitXrplTransaction } from '~/utils/xrpl';
-
 export { clearAuthData } from './auth';
 export { colors, getColorIndex } from './colors';
 export { useGetContact } from './contacts';
@@ -9,3 +7,4 @@ export { capitalize, formatWithCommas } from './format';
 export { getStoredPin, savePin } from './securePin';
 export { toastConfig } from './toast';
 export { createNewWallet, getTransactionHistory, getWalletBalance } from './wallet';
+export { submitXrplTransaction } from './xrpl';

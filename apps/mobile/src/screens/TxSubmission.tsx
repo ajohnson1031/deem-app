@@ -57,7 +57,7 @@ const TxSubmissionScreen = () => {
   }, []);
 
   return (
-    <CoreLayout showBack={false} showFooter={false} showHeaderOptions={false}>
+    <CoreLayout>
       <View className="mt-6 flex-1 justify-center px-6">
         {isSubmitting ? (
           <View className="items-center">

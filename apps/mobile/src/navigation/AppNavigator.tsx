@@ -1,20 +1,24 @@
 import { NavigationContainer } from '@react-navigation/native';
-import { CardStyleInterpolators, createStackNavigator } from '@react-navigation/stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { useSetAtom } from 'jotai';
+import LottieView from 'lottie-react-native';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { txSessionAuthorizedAtom } from '~/atoms';
 import { useWallet } from '~/hooks/useWallet';
 import {
   ContactScreen,
+  Convert,
+  HomeScreen,
   PendingTransactionsScreen,
   PinEntryScreen,
   PinSetupScreen,
   SendScreen,
   SettingsScreen,
+  SignupScreen,
   TxConfirmationScreen,
   TxHistoryScreen,
   TxSubmissionScreen,
@@ -23,7 +27,7 @@ import {
 import { RootStackParamList } from '~/types';
 import { getStoredPin, savePin } from '~/utils';
 
-const Stack = createStackNavigator<RootStackParamList>();
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const AuthGate = ({ onAuthSuccess }: { onAuthSuccess: () => void }) => {
   const [checking, setChecking] = useState(true);
@@ -73,7 +77,12 @@ const AuthGate = ({ onAuthSuccess }: { onAuthSuccess: () => void }) => {
   if (checking) {
     return (
       <View className="flex-1 items-center justify-center">
-        <ActivityIndicator size="large" />
+        <LottieView
+          source={require('~/../assets/animations/loading-spinner.json')}
+          autoPlay
+          loop
+          style={{ width: 120, height: 120 }}
+        />
         <Text className="mt-4 text-gray-600">Authenticating...</Text>
         {errorMessage && <Text className="mt-2 text-sky-700">{errorMessage}</Text>}
       </View>
@@ -137,32 +146,33 @@ export default function AppNavigator() {
           screenOptions={{
             headerShown: false,
             gestureEnabled: true,
-            transitionSpec: {
-              open: {
-                animation: 'timing',
-                config: {
-                  duration: 200, // Fast, consistent timing!
-                },
-              },
-              close: {
-                animation: 'timing',
-                config: {
-                  duration: 200,
-                },
-              },
-            },
-            cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS, // Matches "slide_from_right" feel
+            animation: 'slide_from_right',
           }}>
           {!authenticated ? (
-            <Stack.Screen name="AuthGate">
-              {() => <AuthGate onAuthSuccess={() => setAuthenticated(true)} />}
-            </Stack.Screen>
+            <>
+              <Stack.Screen name="Home" component={HomeScreen} />
+              <Stack.Screen name="Signup" component={SignupScreen} />
+              <Stack.Screen name="AuthGate">
+                {() => <AuthGate onAuthSuccess={() => setAuthenticated(true)} />}
+              </Stack.Screen>
+            </>
           ) : (
             <>
               <Stack.Screen name="Send" component={SendScreen} />
               <Stack.Screen name="Wallet">
                 {() => <WalletScreen onLogout={() => setAuthenticated(false)} />}
               </Stack.Screen>
+              <Stack.Screen
+                name="Convert"
+                component={Convert}
+                options={{
+                  presentation: 'modal',
+                  animation: 'slide_from_bottom',
+                  gestureEnabled: true,
+                  gestureDirection: 'vertical',
+                  headerShown: false,
+                }}
+              />
               <Stack.Screen name="TxHistory">
                 {() => <TxHistoryScreen address={walletAddress!} />}
               </Stack.Screen>

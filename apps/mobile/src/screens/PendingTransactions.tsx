@@ -9,7 +9,7 @@ const PendingTransactionsScreen = () => {
   const pendingTxs = useAtomValue(pendingTransactionsAtom);
 
   return (
-    <CoreLayout showBack showHeaderOptions showSettingsOnly showFooter={false}>
+    <CoreLayout showBack showHeaderOptions showSettingsOnly>
       <ScrollView className="flex-1 px-6 pb-6">
         <Text className="text-2xl font-medium text-gray-800">Pending Requests</Text>
         <Text className="text-md mb-6">Swipe right to approve; left to decline.</Text>

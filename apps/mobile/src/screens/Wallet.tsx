@@ -31,7 +31,7 @@ const WalletScreen = ({ onLogout }: { onLogout: () => void }) => {
   ]);
 
   return (
-    <CoreLayout showFooter showBack={false}>
+    <CoreLayout showFooter showHeaderOptions>
       <View className="mx-6 flex-1 items-center justify-center">
         {walletAddress ? (
           <View className="w-full flex-1 flex-col gap-y-6">
@@ -95,11 +95,20 @@ const WalletScreen = ({ onLogout }: { onLogout: () => void }) => {
             </View>
 
             {/* Send Button */}
-            <TouchableOpacity
-              className="rounded-xl bg-sky-600 py-4"
-              onPress={() => navigation.navigate('Send')}>
-              <Text className="text-center text-xl font-medium text-white">Send Payment</Text>
-            </TouchableOpacity>
+            <View className="flex-row">
+              <TouchableOpacity
+                className="mr-3 flex-1 rounded-xl bg-sky-600 py-4"
+                onPress={() => navigation.navigate('Send')}>
+                <Text className="text-center text-xl font-medium text-white">Send New Tx</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                className="flex-1 rounded-xl bg-rose-600 py-4"
+                onPress={() => navigation.navigate('Convert')}>
+                <Text className="text-center text-xl font-medium text-white">Convert</Text>
+              </TouchableOpacity>
+            </View>
+
             <View className="gap-y-3">
               <Text className="text-lg font-medium text-gray-600">Recent Transactions</Text>
               <View className="gap-y-2">

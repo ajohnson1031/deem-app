@@ -40,7 +40,7 @@ const TxHistory = ({ address }: { address: string }) => {
   // if (loading) return <ActivityIndicator className="mt-4" />;
 
   return (
-    <CoreLayout showHeaderOptions showFooter showBack={false}>
+    <CoreLayout showHeaderOptions showFooter>
       <View className="mx-6 flex flex-1">
         <Text className="mb-4 text-2xl font-medium text-gray-800">
           Transactions ({transactions.length})

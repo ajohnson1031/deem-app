@@ -19,7 +19,7 @@ interface SwipeableTransactionRowProps {
   onDeny: (tx: Transaction) => void;
 }
 
-const SWIPE_THRESHOLD = 120;
+const SWIPE_THRESHOLD = 200;
 const ROW_HEIGHT = 84;
 
 export default function SwipeableTransactionRow({
@@ -89,10 +89,10 @@ export default function SwipeableTransactionRow({
     <Animated.View style={[containerStyle, styles.overflowHidden]}>
       <Animated.View style={[styles.background, backgroundColorStyle]}>
         <Animated.Text style={[styles.backgroundLabel, styles.approveText, approveTextStyle]}>
-          Approving...
+          Approved
         </Animated.Text>
         <Animated.Text style={[styles.backgroundLabel, styles.denyText, denyTextStyle]}>
-          Declining...
+          Declined
         </Animated.Text>
       </Animated.View>
 
@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
   backgroundLabel: {
     position: 'absolute',
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: 'semibold',
     color: 'white',
   },
   approveText: {

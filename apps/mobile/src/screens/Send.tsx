@@ -153,7 +153,7 @@ export default function SendScreen() {
   }
 
   return (
-    <CoreLayout showFooter showHeaderOptions showBack={false}>
+    <CoreLayout showFooter showHeaderOptions>
       <View className="flex-1 px-4 pb-20">
         <Animated.View
           style={{ transform: [{ translateX: shakeAnim }] }}

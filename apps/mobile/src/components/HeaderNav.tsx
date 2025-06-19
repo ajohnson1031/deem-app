@@ -1,4 +1,4 @@
-import { Octicons } from '@expo/vector-icons';
+import { Ionicons, Octicons } from '@expo/vector-icons';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { useNavigation, useNavigationState } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -10,14 +10,16 @@ import { pendingTransactionsAtom } from '~/atoms';
 import { RootStackParamList, Theme } from '~/types';
 
 const HeaderNav = ({
-  showBack = true,
-  showHeaderOptions = true,
+  showBack = false,
+  showClose = false,
+  showHeaderOptions = false,
   showSettingsOnly = false,
   showNotificationsOnly = false,
   theme = 'DARK',
   onBackPress,
 }: {
   showBack?: boolean;
+  showClose?: boolean;
   showHeaderOptions?: boolean;
   showSettingsOnly?: boolean;
   showNotificationsOnly?: boolean;
@@ -45,7 +47,7 @@ const HeaderNav = ({
         '!justify-between': showBack && showHeaderOptions,
         'justify-end': !showBack && showHeaderOptions,
       })}>
-      {showBack && (
+      {(showBack || showClose) && (
         <TouchableOpacity
           onPress={() => {
             if (onBackPress) {
@@ -55,11 +57,16 @@ const HeaderNav = ({
                 navigation.goBack();
             }
           }}>
-          <FontAwesome6
-            name="arrow-left-long"
-            size={20}
-            color={theme === 'LIGHT' ? '#FFF' : '#000'}
-          />
+          {showBack && (
+            <FontAwesome6
+              name="arrow-left-long"
+              size={20}
+              color={theme === 'LIGHT' ? '#FFF' : '#000'}
+            />
+          )}
+          {showClose && (
+            <Ionicons name="close" size={32} color={theme === 'LIGHT' ? '#FFF' : '#000'} />
+          )}
         </TouchableOpacity>
       )}
       {showHeaderOptions && (

@@ -2,6 +2,7 @@ import { Transaction } from '~/types';
 
 export type RootStackParamList = {
   Home: undefined;
+  Signup: undefined;
   Pin: undefined;
   Wallet: undefined;
   AuthGate: undefined;
@@ -11,5 +12,6 @@ export type RootStackParamList = {
   TxSubmission: { tx: Transaction };
   PendingTransactions: undefined;
   Contacts: undefined;
+  Convert: undefined;
   Settings: undefined;
 };
