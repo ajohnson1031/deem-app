@@ -34,7 +34,9 @@ const useSessionResetCountdown = (txState: string, delaySeconds = 5, onComplete?
 
   const CountdownDisplay = () => (
     <View className="mt-2">
-      <Text className="text-left text-lg text-stone-900">Returning in {countdown}...</Text>
+      <Text className="text-left text-lg text-stone-900">
+        Returning to wallet in {countdown}...
+      </Text>
     </View>
   );
 

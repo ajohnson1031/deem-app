@@ -1,5 +1,5 @@
 {
-  "name": "xrpay-mobile",
+  "name": "deem-mobile",
   "version": "1.0.0",
   "scripts": {
     "android": "expo start --android",
@@ -42,6 +42,7 @@
     "react-native-shimmer-placeholder": "^2.0.9",
     "react-native-svg": "15.11.2",
     "react-native-toast-message": "^2.3.0",
+    "react-native-toggle-element": "^2.1.1",
     "uuid": "^11.1.0",
     "xrpl": "^4.2.5"
   },

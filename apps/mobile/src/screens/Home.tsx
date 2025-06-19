@@ -9,7 +9,7 @@ const HomeScreen = () => {
 
   return (
     <View className="flex-1 items-center justify-center bg-white px-6">
-      <Text className="mb-8 text-4xl font-bold text-black">Welcome to XRPay</Text>
+      <Text className="mb-8 text-4xl font-bold text-black">Welcome to Deem</Text>
 
       <TouchableOpacity
         onPress={() => navigation.navigate('AuthGate')}

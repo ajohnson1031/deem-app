@@ -1,6 +1,7 @@
 export { default as CardsScreen } from './Cards';
 export { default as ContactScreen } from './Contacts';
 export { default as Convert } from './Convert';
+export { default as FeePolicyScreen } from './FeePolicy';
 export { default as HomeScreen } from './Home';
 export { default as PendingTransactionsScreen } from './PendingTransactions';
 export { default as PinEntryScreen } from './PinEntry';

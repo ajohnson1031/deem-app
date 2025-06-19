@@ -98,7 +98,7 @@ export default function SwipeableTransactionRow({
 
       <GestureDetector gesture={pan}>
         <Animated.View style={[animatedRowStyle]}>
-          <TxListItem type="TX" transaction={transaction} />
+          <TxListItem listType="TX" transaction={transaction} />
         </Animated.View>
       </GestureDetector>
     </Animated.View>

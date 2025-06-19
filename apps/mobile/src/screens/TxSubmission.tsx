@@ -1,5 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import cn from 'classnames';
 import { useAtom, useSetAtom } from 'jotai';
 import LottieView from 'lottie-react-native';
 import { useEffect, useState } from 'react';
@@ -25,7 +26,7 @@ const TxSubmissionScreen = () => {
     () => {
       navigation.reset({
         index: 0,
-        routes: [{ name: 'Send' }],
+        routes: [{ name: 'Wallet' }],
       });
       setTimeout(() => {
         setTx({ ...initialTx });
@@ -58,7 +59,7 @@ const TxSubmissionScreen = () => {
 
   return (
     <CoreLayout>
-      <View className="mt-6 flex-1 justify-center px-6">
+      <View className={cn('mt-6 flex-1 px-6', { 'justify-center': isSubmitting })}>
         {isSubmitting ? (
           <View className="items-center">
             <LottieView
@@ -69,7 +70,7 @@ const TxSubmissionScreen = () => {
             />
           </View>
         ) : (
-          <View className="mx-6">
+          <View className="mx-6 mt-10">
             <Text className="text-5xl font-semibold text-stone-900">
               {txSuccess ? 'Transaction\nSuccessful' : 'Transaction\nFailed'}
             </Text>

@@ -13,6 +13,7 @@ import {
   CardsScreen,
   ContactScreen,
   Convert,
+  FeePolicyScreen,
   HomeScreen,
   PendingTransactionsScreen,
   PinEntryScreen,
@@ -183,6 +184,17 @@ export default function AppNavigator() {
                 {() => <SettingsScreen onLogout={() => setAuthenticated(false)} />}
               </Stack.Screen>
               <Stack.Screen name="PendingTransactions" component={PendingTransactionsScreen} />
+              <Stack.Screen
+                name="FeePolicy"
+                component={FeePolicyScreen}
+                options={{
+                  presentation: 'modal',
+                  animation: 'slide_from_bottom',
+                  gestureEnabled: true,
+                  gestureDirection: 'vertical',
+                  headerShown: false,
+                }}
+              />
             </>
           )}
         </Stack.Navigator>

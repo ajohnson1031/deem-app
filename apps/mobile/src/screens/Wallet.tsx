@@ -151,7 +151,7 @@ const WalletScreen = () => {
                   keyExtractor={(item) => item.id!}
                   renderItem={({ item }) => (
                     <View className="mb-2">
-                      <TxListItem type="TX" transaction={item} />
+                      <TxListItem listType="TX" transaction={item} />
                     </View>
                   )}
                   showsVerticalScrollIndicator={false}

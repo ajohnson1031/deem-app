@@ -51,7 +51,7 @@ const TxHistory = ({ address }: { address: string }) => {
             keyExtractor={(item) => item.id!}
             contentContainerStyle={{ paddingVertical: 8, paddingRight: 12 }}
             ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
-            renderItem={({ item }) => <TxListItem type="TX" transaction={item} />}
+            renderItem={({ item }) => <TxListItem listType="TX" transaction={item} />}
           />
           // <FlatList
           //   className="my-6 flex flex-1 gap-2 overflow-auto"
@@ -63,7 +63,7 @@ const TxHistory = ({ address }: { address: string }) => {
           // onEndReachedThreshold={0.5}
           // ListFooterComponent={loadingMore ? <ActivityIndicator className="my-4" /> : null}
           // renderItem={({ item }) => (
-          //   <TxListItem key={item.id!} type="TX" transaction={item} />
+          //   <TxListItem key={item.id!} listType="TX" transaction={item} />
           // TODO: Uncomment when ready for real data
           // <View className="mb-4 rounded border border-gray-300 p-4">
           //   <Text className="font-bold">{item.type}</Text>

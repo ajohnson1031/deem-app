@@ -15,4 +15,5 @@ export type RootStackParamList = {
   Convert: undefined;
   Settings: undefined;
   Cards: undefined;
+  FeePolicy: undefined;
 };
