@@ -2,10 +2,11 @@ import Feather from '@expo/vector-icons/Feather';
 import Fontisto from '@expo/vector-icons/Fontisto';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import cn from 'classnames';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAtom, useAtomValue } from 'jotai';
 import { useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import ShimmerPlaceHolder from 'react-native-shimmer-placeholder';
 
@@ -17,18 +18,24 @@ import CoreLayout from '~/layouts/CoreLayout';
 import { RootStackParamList } from '~/types';
 import { useCopyToClipboard } from '~/utils';
 
-const WalletScreen = ({ onLogout }: { onLogout: () => void }) => {
+const WalletScreen = () => {
   const { walletAddress, walletBalance, createWallet, refreshBalance, loading } = useWallet();
   const [currency, setCurrency] = useAtom(currencyAtom);
   const { copied, copy } = useCopyToClipboard();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   // TODO: Get recent transactions via an API call
-  const recentTransactions = useAtomValue(transactionsAtom).slice(0, 3);
+  const recentTransactions = useAtomValue(transactionsAtom).slice(0, 4);
 
   const [currencyOptions] = useState<Record<string, ApprovedCurrency>[]>([
     { label: 'XRP', value: 'XRP' },
     { label: 'USD', value: 'USD' },
   ]);
+
+  const ITEM_HEIGHT = 80;
+  const ITEM_SPACING = 8;
+  const VISIBLE_ITEMS = 3;
+
+  const containerHeight = ITEM_HEIGHT * VISIBLE_ITEMS + ITEM_SPACING * (VISIBLE_ITEMS - 1);
 
   return (
     <CoreLayout showFooter showHeaderOptions>
@@ -44,22 +51,49 @@ const WalletScreen = ({ onLogout }: { onLogout: () => void }) => {
                   <Fontisto name="spinner-refresh" size={20} color="#0284c7" />
                 </TouchableOpacity>
               </View>
-              {/* // TODO: font size switching based on text length */}
               {/* Balance Display */}
               <View className="flex flex-row items-baseline">
+                {currency === 'USD' && (
+                  <ShimmerPlaceHolder
+                    LinearGradient={LinearGradient}
+                    visible={!loading}
+                    style={{ height: 36, borderRadius: 4 }}>
+                    <Text
+                      className={cn('text-5xl font-semibold', {
+                        '!text-4xl':
+                          walletBalance.balance.length > 6 && walletBalance.balance.length <= 9,
+                        '!text-2xl':
+                          walletBalance.balance.length > 8 && walletBalance.balance.length < 12,
+                        '!text-xl': walletBalance.balance.length >= 12,
+                      })}>
+                      $
+                    </Text>
+                  </ShimmerPlaceHolder>
+                )}
                 <ShimmerPlaceHolder
                   LinearGradient={LinearGradient}
                   visible={!loading}
-                  style={{ height: 80, width: 'fit-content', borderRadius: 8 }}>
-                  <Text className="text-8xl font-semibold">{walletBalance?.balance}</Text>
+                  style={{ height: 'fit-content', width: 'fit-content', borderRadius: 8 }}>
+                  <Text
+                    className={cn('text-8xl font-semibold', {
+                      '!text-7xl':
+                        walletBalance.balance.length > 6 && walletBalance.balance.length <= 9,
+                      '!text-5xl':
+                        walletBalance.balance.length > 8 && walletBalance.balance.length < 12,
+                      '!text-4xl': walletBalance.balance.length >= 12,
+                    })}>
+                    {walletBalance?.balance}
+                  </Text>
                 </ShimmerPlaceHolder>
 
-                <ShimmerPlaceHolder
-                  LinearGradient={LinearGradient}
-                  visible={!loading}
-                  style={{ height: 30, width: 50, borderRadius: 4 }}>
-                  <Text className="text-xl font-semibold">{currency}</Text>
-                </ShimmerPlaceHolder>
+                {currency === 'XRP' && (
+                  <ShimmerPlaceHolder
+                    LinearGradient={LinearGradient}
+                    visible={!loading}
+                    style={{ height: 30, width: 50, borderRadius: 4 }}>
+                    <Text className="text-xl font-semibold">{currency}</Text>
+                  </ShimmerPlaceHolder>
+                )}
               </View>
 
               {/* Wallet Copy, Currency Switcher */}
@@ -111,10 +145,17 @@ const WalletScreen = ({ onLogout }: { onLogout: () => void }) => {
 
             <View className="gap-y-3">
               <Text className="text-lg font-medium text-gray-600">Recent Transactions</Text>
-              <View className="gap-y-2">
-                {recentTransactions.map((tx) => (
-                  <TxListItem key={tx.id} type="TX" transaction={tx} />
-                ))}
+              <View className="border-b border-gray-200 pb-6" style={{ height: containerHeight }}>
+                <FlatList
+                  data={recentTransactions}
+                  keyExtractor={(item) => item.id!}
+                  renderItem={({ item }) => (
+                    <View className="mb-2">
+                      <TxListItem type="TX" transaction={item} />
+                    </View>
+                  )}
+                  showsVerticalScrollIndicator={false}
+                />
               </View>
             </View>
             <TouchableOpacity

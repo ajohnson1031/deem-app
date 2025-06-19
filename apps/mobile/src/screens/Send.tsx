@@ -5,23 +5,37 @@ import cn from 'classnames';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { useAtom } from 'jotai';
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Animated, Text, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Animated,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { Dropdown } from 'react-native-element-dropdown';
 import Toast from 'react-native-toast-message';
 
-import { currentTxAtom, txSessionAuthorizedAtom } from '~/atoms';
+import { currencyAtom, currentTxAtom, txSessionAuthorizedAtom } from '~/atoms';
+import { ApprovedCurrency } from '~/constants';
 import { useWallet } from '~/hooks/useWallet';
 import CoreLayout from '~/layouts/CoreLayout';
 import PinEntryScreen from '~/screens/PinEntry';
 import { RootStackParamList, TxType } from '~/types';
 import { buzzAndShake, formatWithCommas, getStoredPin } from '~/utils';
 
-export default function SendScreen() {
+const SendScreen = () => {
   const [checking, setChecking] = useState(true);
   const [fallbackToPin, setFallbackToPin] = useState<null | boolean>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [txAuthorized, setTxAuthorized] = useAtom(txSessionAuthorizedAtom);
   const [tx, setTx] = useAtom(currentTxAtom);
+  const [currency, setCurrency] = useAtom(currencyAtom);
   const { walletBalance } = useWallet();
+  const [currencyOptions] = useState<Record<string, ApprovedCurrency>[]>([
+    { label: 'XRP', value: 'XRP' },
+    { label: 'USD', value: 'USD' },
+  ]);
 
   const shakeAnim = useRef(new Animated.Value(0)).current;
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -158,7 +172,16 @@ export default function SendScreen() {
         <Animated.View
           style={{ transform: [{ translateX: shakeAnim }] }}
           className="flex-1 items-center justify-center">
-          <View className="flex h-32 flex-row items-baseline">
+          <View className="h-25 flex flex-row items-baseline">
+            {currency === 'USD' && (
+              <Text
+                className={cn('mb-6 text-center font-inter-medium text-5xl', {
+                  '!text-3xl': tx.amount!.length > 5 && tx.amount!.length <= 9,
+                  '!text-xl': tx.amount!.length > 8,
+                })}>
+                $
+              </Text>
+            )}
             <Text
               className={cn('mb-6 text-center font-inter-medium text-8xl', {
                 '!text-6xl': tx.amount!.length > 5 && tx.amount!.length <= 9,
@@ -166,8 +189,23 @@ export default function SendScreen() {
               })}>
               {formatWithCommas(tx.amount! || '0')}
             </Text>
-            <Text className="text-xl font-semibold">XRP</Text>
+            {currency === 'XRP' && <Text className="text-xl font-semibold">{currency}</Text>}
           </View>
+
+          <Dropdown
+            style={[styles.dropdown]}
+            placeholderStyle={styles.placeholderStyle}
+            selectedTextStyle={styles.selectedTextStyle}
+            inputSearchStyle={styles.inputSearchStyle}
+            iconStyle={styles.iconStyle}
+            data={currencyOptions}
+            labelField="label"
+            valueField="value"
+            value={currency}
+            onChange={(item) => {
+              setCurrency(item.value);
+            }}
+          />
 
           {/* TODO: Add USD Value, Ratio, Polling */}
 
@@ -207,4 +245,53 @@ export default function SendScreen() {
       </View>
     </CoreLayout>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: 'white',
+    padding: 16,
+  },
+  dropdown: {
+    width: '25%',
+    backgroundColor: '#e5e7eb',
+    borderColor: '#d1d5db',
+    borderWidth: 1,
+    borderRadius: 100,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    marginBottom: 32,
+    marginTop: -16,
+  },
+  icon: {
+    marginRight: 5,
+  },
+  label: {
+    position: 'absolute',
+    backgroundColor: 'white',
+    left: 22,
+    top: 8,
+    zIndex: 999,
+    paddingHorizontal: 8,
+    fontSize: 14,
+    color: '#4B5563',
+  },
+  placeholderStyle: {
+    fontSize: 16,
+  },
+  selectedTextStyle: {
+    fontSize: 16,
+    color: '#4B5563',
+    fontWeight: 500,
+  },
+  iconStyle: {
+    width: 20,
+    height: 20,
+  },
+  inputSearchStyle: {
+    height: 25,
+    fontSize: 16,
+  },
+});
+
+export default SendScreen;

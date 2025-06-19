@@ -10,6 +10,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { txSessionAuthorizedAtom } from '~/atoms';
 import { useWallet } from '~/hooks/useWallet';
 import {
+  CardsScreen,
   ContactScreen,
   Convert,
   HomeScreen,
@@ -159,9 +160,8 @@ export default function AppNavigator() {
           ) : (
             <>
               <Stack.Screen name="Send" component={SendScreen} />
-              <Stack.Screen name="Wallet">
-                {() => <WalletScreen onLogout={() => setAuthenticated(false)} />}
-              </Stack.Screen>
+              <Stack.Screen name="Cards" component={CardsScreen} />
+              <Stack.Screen name="Wallet" component={WalletScreen} />
               <Stack.Screen
                 name="Convert"
                 component={Convert}
@@ -179,7 +179,9 @@ export default function AppNavigator() {
               <Stack.Screen name="Contacts" component={ContactScreen} />
               <Stack.Screen name="TxConfirmation" component={TxConfirmationScreen} />
               <Stack.Screen name="TxSubmission" component={TxSubmissionScreen} />
-              <Stack.Screen name="Settings" component={SettingsScreen} />
+              <Stack.Screen name="Settings">
+                {() => <SettingsScreen onLogout={() => setAuthenticated(false)} />}
+              </Stack.Screen>
               <Stack.Screen name="PendingTransactions" component={PendingTransactionsScreen} />
             </>
           )}

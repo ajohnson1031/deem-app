@@ -7,6 +7,7 @@ import CoreLayout from '~/layouts/CoreLayout';
 
 const TxHistory = ({ address }: { address: string }) => {
   const transactions = useAtomValue(transactionsAtom);
+
   // TODO: Uncomment when ready for real data
   // const [transactions, setTransactions] = useState<any[]>([]);
   // const [marker, setMarker] = useState<any>(null);
@@ -42,9 +43,7 @@ const TxHistory = ({ address }: { address: string }) => {
   return (
     <CoreLayout showHeaderOptions showFooter>
       <View className="mx-6 flex flex-1">
-        <Text className="mb-4 text-2xl font-medium text-gray-800">
-          Transactions ({transactions.length})
-        </Text>
+        <Text className="mb-4 text-2xl font-medium text-gray-800">Activity</Text>
         {!!transactions.length && (
           <FlatList
             className="flex-1"

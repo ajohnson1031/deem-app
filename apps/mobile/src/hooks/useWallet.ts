@@ -4,11 +4,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useCallback, useEffect, useState } from 'react';
 import { Client, Wallet } from 'xrpl';
 
-type WalletBalance = { success: boolean; balance?: string; error?: string };
+type WalletBalance = { success: boolean; balance: string; error?: string };
 
 export function useWallet() {
   const [wallet, setWallet] = useState<Wallet | null>(null);
-  const [walletBalance, setWalletBalance] = useState<WalletBalance | null>(null);
+  const [walletBalance, setWalletBalance] = useState<WalletBalance>({
+    success: false,
+    balance: '0',
+  });
   const [loading, setLoading] = useState(true);
 
   const loadWallet = useCallback(async () => {
@@ -46,7 +49,7 @@ export function useWallet() {
       const balance = await client.getXrpBalance(wallet.classicAddress);
       setWalletBalance({ success: true, balance: balance.toString() });
     } catch (e: any) {
-      setWalletBalance({ success: false, error: e.message });
+      setWalletBalance({ success: false, balance: '0', error: e.message });
     } finally {
       await client.disconnect();
       setLoading(false);

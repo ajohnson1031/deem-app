@@ -1,6 +1,6 @@
 type WalletBalanceResult = {
   success: boolean;
-  balance?: number;
+  balance: number;
   error?: string;
 };
 

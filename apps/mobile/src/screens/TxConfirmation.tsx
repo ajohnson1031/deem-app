@@ -1,7 +1,9 @@
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import cn from 'classnames';
+import { useAtomValue } from 'jotai';
 import { Text, TouchableOpacity, View } from 'react-native';
+import { currencyAtom } from '~/atoms';
 
 import { TxListItem } from '~/components';
 import CoreLayout from '~/layouts/CoreLayout';
@@ -17,6 +19,7 @@ const TxConfirmationScreen = ({
   route: { params: { tx: Transaction } };
   navigation: NativeStackNavigationProp<RootStackParamList, 'TxConfirmation'>;
 }) => {
+  const currency = useAtomValue(currencyAtom);
   const { type, amount, memo, recipientId } = tx;
   const title = type === 'PAYMENT' ? 'Confirm\nPayment?' : 'Confirm\nRequest?';
 
@@ -31,24 +34,27 @@ const TxConfirmationScreen = ({
 
         <TxListItem contactId={recipientId!} type="CONFIRMATION" />
 
-        {/* Amount Display TODO: Add USD value */}
-        <View className="rounded-xl bg-white p-3 ">
+        {/* Amount Display // TODO: Add USD value */}
+        <View className="rounded-xl bg-white px-3 py-2">
           <Text className="mb-1 ml-3 font-bold text-sky-800">Tx. Amount:</Text>
           <View className="flex flex-row items-baseline p-3 pt-5">
+            {currency === 'USD' && <Text className="text-3xl font-semibold">$</Text>}
             <Text className="text-5xl text-stone-900">{formatWithCommas(amount)}</Text>
-            <Text className="text-xl font-semibold text-stone-900">XRP</Text>
+            {currency === 'XRP' && (
+              <Text className="text-xl font-semibold text-stone-900">XRP</Text>
+            )}
           </View>
         </View>
 
         {/* Memo Display */}
-        <View className="rounded-lg bg-white p-3">
+        <View className="rounded-lg bg-white px-3 py-2">
           <Text className="mb-2 ml-3 font-bold text-sky-800">For:</Text>
           <View className="flex flex-row items-baseline rounded-lg p-3">
             <Text className="text-xl font-semibold text-stone-900">{memo}</Text>
           </View>
         </View>
 
-        {/* Action Buttons TODO: Make functional */}
+        {/* Action Buttons // TODO: Make functional */}
         <View className="mt-8 flex flex-row justify-center gap-x-5">
           <TouchableOpacity
             onPress={() => navigation.navigate('TxSubmission', { tx })}

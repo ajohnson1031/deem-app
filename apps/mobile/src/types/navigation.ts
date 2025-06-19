@@ -14,4 +14,5 @@ export type RootStackParamList = {
   Contacts: undefined;
   Convert: undefined;
   Settings: undefined;
+  Cards: undefined;
 };

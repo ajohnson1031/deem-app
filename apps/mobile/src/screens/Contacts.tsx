@@ -5,7 +5,7 @@ import { useAtom, useAtomValue } from 'jotai';
 import { useState } from 'react';
 import { FlatList, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-import { contactsAtom, currentTxAtom, suggestedContactsAtom } from '~/atoms';
+import { contactsAtom, currencyAtom, currentTxAtom, suggestedContactsAtom } from '~/atoms';
 import { Container } from '~/components';
 import ContactListItem from '~/components/ContactListItem';
 import { Contact, RootStackParamList } from '~/types';
@@ -17,6 +17,7 @@ const ContactScreen = ({
   navigation: NativeStackNavigationProp<RootStackParamList>;
 }) => {
   const [tx, setTx] = useAtom(currentTxAtom);
+  const currency = useAtomValue(currencyAtom);
   const contacts = useAtomValue(contactsAtom);
   const suggestedContacts = useAtomValue(suggestedContactsAtom);
   const [search, setSearch] = useState(
@@ -68,8 +69,9 @@ const ContactScreen = ({
           </TouchableOpacity>
 
           <View className="flex-1 flex-row items-baseline justify-center gap-0.5">
+            {currency === 'USD' && <Text className="text-2xl font-semibold">$</Text>}
             <Text className="text-2xl font-semibold">{formatWithCommas(tx.amount)}</Text>
-            <Text className="text-md font-semibold">XRP</Text>
+            {currency === 'XRP' && <Text className="text-md font-semibold">{currency}</Text>}
             {/* // TODO: Add USD value */}
           </View>
 
@@ -82,7 +84,7 @@ const ContactScreen = ({
             })}
             disabled={!tx.recipientId || !tx.memo}
             onPress={() => handleNav('TxConfirmation')}>
-            <Text className=" text-xl font-medium text-white">{buttonText}</Text>
+            <Text className=" text-xl font-semibold text-white">{buttonText}</Text>
           </TouchableOpacity>
         </View>
 
