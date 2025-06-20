@@ -26,8 +26,8 @@ const WalletDetails = ({
   };
 
   return (
-    <View className="mt-6 flex w-full gap-y-4 border">
-      <Text className="text-lg font-bold">Wallet Details</Text>
+    <View className="mt-6 flex w-full gap-y-4">
+      <Text className="text-xl font-semibold">Wallet Details</Text>
 
       <View className="w-full rounded bg-gray-100 p-3">
         <Text className="text-xs text-gray-500">Classic Address</Text>
@@ -50,7 +50,7 @@ const WalletDetails = ({
       </View>
 
       <View className="rounded bg-gray-100 p-3">
-        <Text className="text-xs text-gray-500">Private Key</Text>
+        <Text className="text-md mb-1 text-gray-500">Private Key</Text>
         <View className="flex-row items-center justify-between">
           {seed && (
             <Text className="flex-1 font-mono">{showSeed ? seed : '•'.repeat(seed.length)}</Text>

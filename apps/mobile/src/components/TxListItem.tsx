@@ -1,8 +1,9 @@
 import cn from 'classnames';
 import { Image, Text, View } from 'react-native';
 
+import { useGetContact } from '~/hooks';
 import { Transaction, TxListType } from '~/types';
-import { capitalize, useGetContact } from '~/utils';
+import { capitalize } from '~/utils';
 
 const TxListItem = ({
   transaction,
@@ -21,7 +22,10 @@ const TxListItem = ({
   const amountSymbol = direction === 'incoming' && type === 'PAYMENT' ? '+' : '-';
 
   return (
-    <View className="flex rounded-xl bg-white py-4">
+    <View
+      className={cn('flex rounded-xl bg-white py-4', {
+        'bg-[#f5f5f4]': transaction.status === 'pending',
+      })}>
       <View className="flex flex-row gap-4 px-4">
         {avatarUrl ? (
           <Image

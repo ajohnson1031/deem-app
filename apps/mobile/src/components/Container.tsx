@@ -1,7 +1,7 @@
 import cn from 'classnames';
 import { SafeAreaView } from 'react-native';
 
-export const Container = ({
+const Container = ({
   children,
   className = '',
 }: {
@@ -12,5 +12,7 @@ export const Container = ({
 };
 
 const styles = {
-  container: 'flex flex-1',
+  container: 'flex flex-1 bg-white',
 };
+
+export default Container;

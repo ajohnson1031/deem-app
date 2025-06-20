@@ -1,5 +1,5 @@
 import cn from 'classnames';
-import { useAtom } from 'jotai';
+import { useAtomValue } from 'jotai';
 import { Image, Text, TouchableOpacity, View } from 'react-native';
 
 import { currentTxAtom } from '~/atoms';
@@ -16,7 +16,7 @@ const ContactListItem = ({
   onPress: () => void;
 }) => {
   const { name, username, avatarUrl } = contact;
-  const [tx] = useAtom(currentTxAtom);
+  const tx = useAtomValue(currentTxAtom);
 
   const splitName = name.split(' ');
   const [first, last] = [splitName[0], splitName[1] || ''];
@@ -31,7 +31,7 @@ const ContactListItem = ({
       className={cn('rounded-full', {
         'mr-4 w-20 items-center': isSuggested,
         'flex-row items-center gap-4': !isSuggested,
-        'bg-slate-200': isSelected && !isSuggested,
+        'bg-slate-100': isSelected && !isSuggested,
       })}>
       {avatarUrl ? (
         <Image

@@ -22,11 +22,7 @@ interface SwipeableTransactionRowProps {
 const SWIPE_THRESHOLD = 200;
 const ROW_HEIGHT = 84;
 
-export default function SwipeableTransactionRow({
-  transaction,
-  onApprove,
-  onDeny,
-}: SwipeableTransactionRowProps) {
+function SwipeableTransactionRow({ transaction, onApprove, onDeny }: SwipeableTransactionRowProps) {
   const translateX = useSharedValue(0);
   const rowHeight = useSharedValue(ROW_HEIGHT);
   const rowOpacity = useSharedValue(1);
@@ -133,3 +129,5 @@ const styles = StyleSheet.create({
     color: '#E7000B', // red-500
   },
 });
+
+export default SwipeableTransactionRow;

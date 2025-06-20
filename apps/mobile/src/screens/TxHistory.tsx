@@ -1,80 +1,99 @@
+import { format, isSameMonth } from 'date-fns';
 import { useAtomValue } from 'jotai';
-import { FlatList, Text, View } from 'react-native';
+import { useMemo, useState } from 'react';
+import { SectionList, Text, TextInput, View } from 'react-native';
 
-import { transactionsAtom } from '~/atoms';
+import { contactsAtom, transactionsAtom } from '~/atoms';
 import { TxListItem } from '~/components';
 import CoreLayout from '~/layouts/CoreLayout';
+import { Transaction } from '~/types';
 
 const TxHistory = ({ address }: { address: string }) => {
+  // TODO: Get tx data from API calls
   const transactions = useAtomValue(transactionsAtom);
+  const contacts = useAtomValue(contactsAtom);
+  const [search, setSearch] = useState('');
 
-  // TODO: Uncomment when ready for real data
-  // const [transactions, setTransactions] = useState<any[]>([]);
-  // const [marker, setMarker] = useState<any>(null);
-  // const [loading, setLoading] = useState(true);
-  // const [loadingMore, setLoadingMore] = useState(false);
+  const contactMap = useMemo(() => {
+    const map: Record<string, { name?: string; username?: string }> = {};
+    contacts.forEach((c) => {
+      map[c.id] = { name: c.name, username: c.username };
+    });
+    return map;
+  }, [contacts]);
 
-  // useEffect(() => {
-  //   const fetchInitial = async () => {
-  //     const { transactions, marker } = await getTransactionHistory(address);
-  //     setTransactions(transactions);
-  //     setMarker(marker);
-  //     setLoading(false);
-  //   };
+  const filteredTxs = useMemo(() => {
+    return transactions.filter((tx: Transaction) => {
+      const memoMatch = tx.memo?.toLowerCase().includes(search.toLowerCase());
+      const amountMatch = tx.amount.includes(search);
+      const dateMatch = tx.timestamp?.toString().includes(search.toLowerCase());
 
-  //   fetchInitial();
-  // }, [address]);
+      const contact = contactMap[tx.recipientId!];
+      const nameMatch = contact?.name?.toLowerCase().includes(search.toLowerCase());
+      const usernameMatch = contact?.username?.toLowerCase().includes(search.toLowerCase());
 
-  // const fetchMore = async () => {
-  //   if (!marker || loadingMore) return;
+      return memoMatch || amountMatch || dateMatch || nameMatch || usernameMatch;
+    });
+  }, [transactions, contactMap, search]);
 
-  //   setLoadingMore(true);
-  //   const { transactions: moreTxs, marker: newMarker } = await getTransactionHistory(
-  //     address,
-  //     marker
-  //   );
-  //   setTransactions((prev) => [...prev, ...moreTxs]);
-  //   setMarker(newMarker);
-  //   setLoadingMore(false);
-  // };
+  const sections = useMemo(() => {
+    const grouped: Record<string, Transaction[]> = {};
 
-  // if (loading) return <ActivityIndicator className="mt-4" />;
+    const now = new Date();
+
+    filteredTxs.forEach((tx) => {
+      const date = new Date(tx.timestamp!);
+
+      // Use 'This month' if the transaction is in the current month
+      const key = isSameMonth(date, now) ? 'This month' : format(date, 'MMMM yyyy');
+
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(tx);
+    });
+
+    return Object.entries(grouped)
+      .sort(
+        (a, b) => new Date(b[1][0].timestamp!).getTime() - new Date(a[1][0].timestamp!).getTime()
+      )
+      .map(([title, data]) => ({ title, data }));
+  }, [filteredTxs]);
 
   return (
     <CoreLayout showHeaderOptions showFooter>
-      <View className="mx-6 flex flex-1">
+      <View className="mx-6 flex-1">
         <Text className="mb-4 text-2xl font-medium text-gray-800">Activity</Text>
-        {!!transactions.length && (
-          <FlatList
-            className="flex-1"
-            data={transactions}
-            keyExtractor={(item) => item.id!}
-            contentContainerStyle={{ paddingVertical: 8, paddingRight: 12 }}
-            ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
-            renderItem={({ item }) => <TxListItem listType="TX" transaction={item} />}
+        <View className="rounded-lg bg-gray-100 p-3 py-4">
+          <TextInput
+            value={search}
+            onChangeText={setSearch}
+            placeholder="Search txs"
+            placeholderTextColor="#777"
+            className="w-[92.5%] font-medium"
+            style={{
+              fontSize: 18,
+              lineHeight: 22,
+              paddingTop: 0, // adjust as needed
+              paddingBottom: 0, // adjust as needed
+            }}
           />
-          // <FlatList
-          //   className="my-6 flex flex-1 gap-2 overflow-auto"
-          //   contentContainerStyle={{ paddingBottom: 32 }}
-          //   data={transactions}
-          //   keyExtractor={(item) => item.hash!}
-          // TODO: Uncomment when ready for real data
-          // onEndReached={fetchMore}
-          // onEndReachedThreshold={0.5}
-          // ListFooterComponent={loadingMore ? <ActivityIndicator className="my-4" /> : null}
-          // renderItem={({ item }) => (
-          //   <TxListItem key={item.id!} listType="TX" transaction={item} />
-          // TODO: Uncomment when ready for real data
-          // <View className="mb-4 rounded border border-gray-300 p-4">
-          //   <Text className="font-bold">{item.type}</Text>
-          //   <Text>{item.amount ? `Amount: ${item.amount}` : 'No amount'}</Text>
-          //   <Text className="text-sm text-gray-500">Hash: {item.hash.slice(0, 10)}...</Text>
-          //   <Text className="text-sm text-gray-500">
-          //     Status: {item.success ? '✅ Success' : '❌ Failed'}
-          //   </Text>
-          // </View>
-          // )}
-          // />
+        </View>
+        {sections.length > 0 && (
+          <SectionList
+            sections={sections}
+            keyExtractor={(item: Transaction) => item.id!}
+            contentContainerStyle={{ paddingVertical: 8 }}
+            ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
+            renderItem={({ item }: { item: Transaction }) => (
+              <TxListItem listType="TX" transaction={item} />
+            )}
+            renderSectionHeader={({ section: { title } }) => (
+              <View className="bg-white pb-2 pt-6">
+                <Text className="text-xl font-semibold text-gray-700">{title}</Text>
+              </View>
+            )}
+            stickySectionHeadersEnabled
+            showsVerticalScrollIndicator={false}
+          />
         )}
       </View>
     </CoreLayout>

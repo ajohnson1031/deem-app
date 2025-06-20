@@ -12,6 +12,7 @@ import { useWallet } from '~/hooks/useWallet';
 import {
   CardsScreen,
   ContactScreen,
+  ConversionsScreen,
   Convert,
   FeePolicyScreen,
   HomeScreen,
@@ -195,6 +196,7 @@ export default function AppNavigator() {
                   headerShown: false,
                 }}
               />
+              <Stack.Screen name="Conversions" component={ConversionsScreen} />
             </>
           )}
         </Stack.Navigator>

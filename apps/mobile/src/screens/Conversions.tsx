@@ -2,14 +2,14 @@ import { Text, View } from 'react-native';
 
 import CoreLayout from '~/layouts/CoreLayout';
 
-const SignupScreen = () => {
+const Conversions = () => {
   return (
     <CoreLayout showBack>
       <View className="flex flex-1 items-center justify-center">
-        <Text className="text-4xl font-semibold">Signup</Text>
+        <Text className="text-4xl font-semibold">Conversions</Text>
       </View>
     </CoreLayout>
   );
 };
 
-export default SignupScreen;
+export default Conversions;

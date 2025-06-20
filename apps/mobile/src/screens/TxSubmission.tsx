@@ -8,10 +8,10 @@ import { Text, View } from 'react-native';
 
 import { currentTxAtom, txSessionAuthorizedAtom } from '~/atoms';
 import { initialTx } from '~/atoms/transaction';
+import { useSessionResetCountdown } from '~/hooks';
 import CoreLayout from '~/layouts/CoreLayout';
 import { RootStackParamList } from '~/types';
-import { useSessionResetCountdown } from '~/utils/feedback';
-import { submitStandardTransaction, submitXrplTransaction } from '~/utils/xrpl';
+import { submitStandardTransaction, submitXrplTransaction } from '~/utils/';
 
 const TxSubmissionScreen = () => {
   const [tx, setTx] = useAtom(currentTxAtom);

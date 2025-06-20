@@ -1,19 +1,8 @@
-import ContactListItem from './ContactListItem';
-import { Container } from './Container';
-import FooterNav from './FooterNav';
-import HeaderNav from './HeaderNav';
-import PinInputField from './PinInputField';
-import SwipeableTransactionRow from './SwipeableTransactionRow';
-import TxListItem from './TxListItem';
-import WalletDetails from './WalletDetails';
-
-export {
-  ContactListItem,
-  Container,
-  FooterNav,
-  HeaderNav,
-  PinInputField,
-  SwipeableTransactionRow,
-  TxListItem,
-  WalletDetails,
-};
+export { default as ContactListItem } from './ContactListItem';
+export { default as Container } from './Container';
+export { default as FooterNav } from './FooterNav';
+export { default as HeaderNav } from './HeaderNav';
+export { default as PinInputField } from './PinInputField';
+export { default as SwipeableTransactionRow } from './SwipeableTransactionRow';
+export { default as TxListItem } from './TxListItem';
+export { default as WalletDetails } from './WalletDetails';

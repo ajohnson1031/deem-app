@@ -1,14 +1,17 @@
-import 'react-native-get-random-values';
-
 import { useFonts } from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
+import { Provider as JotaiProvider } from 'jotai';
 import { verifyInstallation } from 'nativewind';
 import { Text, View } from 'react-native';
+import 'react-native-get-random-values';
 import Toast from 'react-native-toast-message';
 
 import AppNavigator from '~/navigation';
 import { toastConfig } from '~/utils';
+
 import './global.css';
+
+verifyInstallation();
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -21,18 +24,17 @@ export default function App() {
 
   if (!fontsLoaded) {
     return (
-      <View>
-        <Text>Loading fonts...</Text>
+      <View className="flex-1 items-center justify-center bg-white">
+        <Text className="text-semtext-lg text-gray-800">Loading fonts…</Text>
       </View>
     );
   }
-  verifyInstallation();
 
   return (
-    <>
+    <JotaiProvider>
       <AppNavigator />
       <Toast config={toastConfig} />
       <StatusBar style="auto" />
-    </>
+    </JotaiProvider>
   );
 }

@@ -11,6 +11,7 @@ interface Props {
   showSettingsOnly?: boolean;
   showNotificationsOnly?: boolean;
   showFooter?: boolean;
+  footerClassName?: string;
   children: ReactNode;
   containerClassName?: string;
   theme?: Theme;
@@ -25,6 +26,7 @@ const CoreLayout = ({
   showSettingsOnly,
   showNotificationsOnly,
   showFooter = false,
+  footerClassName,
   containerClassName,
   theme = 'DARK',
   onBackPress,
@@ -41,7 +43,7 @@ const CoreLayout = ({
         theme={theme}
       />
       <View className="flex-1 overflow-hidden">{children}</View>
-      {showFooter && <FooterNav />}
+      {showFooter && <FooterNav footerClassName={footerClassName} />}
     </Container>
   );
 };

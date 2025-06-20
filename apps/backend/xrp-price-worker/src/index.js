@@ -1,25 +1,32 @@
-let cachedPrice = 2.15;
-let lastFetched = 0;
-const CACHE_DURATION = 60 * 1000; // 60 seconds
-
 export default {
-	async fetch(request, env, ctx) {
-		const now = Date.now();
-		const isStale = now - lastFetched > CACHE_DURATION;
+	async fetch(request) {
+		const corsHeaders = {
+			'Access-Control-Allow-Origin': '*',
+			'Access-Control-Allow-Methods': 'GET, OPTIONS',
+			'Access-Control-Allow-Headers': '*',
+		};
 
-		if (isStale) {
-			try {
-				const result = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ripple&vs_currencies=usd');
-				const data = await result.json();
-				cachedPrice = data?.ripple?.usd ?? cachedPrice;
-				lastFetched = now;
-			} catch (err) {
-				console.error('Failed to fetch XRP price:', err);
-			}
+		// Handle CORS preflight
+		if (request.method === 'OPTIONS') {
+			return new Response(null, {
+				status: 204,
+				headers: corsHeaders,
+			});
 		}
 
-		return new Response(JSON.stringify({ price: cachedPrice }), {
-			headers: { 'Content-Type': 'application/json' },
+		// Your mock response (or fetch from real API)
+		const price = 2.16;
+		const body = JSON.stringify({
+			price,
+			updatedAt: new Date().toISOString(),
+		});
+
+		return new Response(body, {
+			status: 200,
+			headers: {
+				'Content-Type': 'application/json',
+				...corsHeaders,
+			},
 		});
 	},
 };

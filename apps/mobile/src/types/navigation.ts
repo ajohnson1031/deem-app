@@ -13,6 +13,7 @@ export type RootStackParamList = {
   PendingTransactions: undefined;
   Contacts: undefined;
   Convert: undefined;
+  Conversions: undefined;
   Settings: undefined;
   Cards: undefined;
   FeePolicy: undefined;

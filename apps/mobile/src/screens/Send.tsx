@@ -3,7 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import cn from 'classnames';
 import * as LocalAuthentication from 'expo-local-authentication';
-import { useAtom } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -16,13 +16,19 @@ import {
 import { Dropdown } from 'react-native-element-dropdown';
 import Toast from 'react-native-toast-message';
 
-import { currencyAtom, currentTxAtom, txSessionAuthorizedAtom } from '~/atoms';
+import { currencyAtom, currentTxAtom, txSessionAuthorizedAtom, xrpPriceAtom } from '~/atoms';
 import { ApprovedCurrency } from '~/constants';
 import { useWallet } from '~/hooks/useWallet';
 import CoreLayout from '~/layouts/CoreLayout';
 import PinEntryScreen from '~/screens/PinEntry';
 import { RootStackParamList, TxType } from '~/types';
-import { buzzAndShake, formatWithCommas, getStoredPin } from '~/utils';
+import {
+  buzzAndShake,
+  convertCurrencyAmount,
+  formatFloatClean,
+  formatWithCommas,
+  getStoredPin,
+} from '~/utils';
 
 const SendScreen = () => {
   const [checking, setChecking] = useState(true);
@@ -31,6 +37,15 @@ const SendScreen = () => {
   const [txAuthorized, setTxAuthorized] = useAtom(txSessionAuthorizedAtom);
   const [tx, setTx] = useAtom(currentTxAtom);
   const [currency, setCurrency] = useAtom(currencyAtom);
+  const xrpPriceUSD = useAtomValue(xrpPriceAtom);
+  const parsedAmount = parseFloat(tx.amount || '0');
+
+  const converted = convertCurrencyAmount({
+    amount: parsedAmount,
+    fromCurrency: currency,
+    xrpPriceUSD,
+  });
+
   const { walletBalance } = useWallet();
   const [currencyOptions] = useState<Record<string, ApprovedCurrency>[]>([
     { label: 'XRP', value: 'XRP' },
@@ -172,10 +187,10 @@ const SendScreen = () => {
         <Animated.View
           style={{ transform: [{ translateX: shakeAnim }] }}
           className="flex-1 items-center justify-center">
-          <View className="h-25 flex flex-row items-baseline">
+          <View className={cn('h-25 flex flex-row items-baseline', { 'mb-6': parsedAmount === 0 })}>
             {currency === 'USD' && (
               <Text
-                className={cn('mb-6 text-center font-inter-medium text-5xl', {
+                className={cn('text-center font-inter-medium text-5xl', {
                   '!text-3xl': tx.amount!.length > 5 && tx.amount!.length <= 9,
                   '!text-xl': tx.amount!.length > 8,
                 })}>
@@ -183,14 +198,22 @@ const SendScreen = () => {
               </Text>
             )}
             <Text
-              className={cn('mb-6 text-center font-inter-medium text-8xl', {
+              className={cn('text-center font-inter-medium text-8xl', {
                 '!text-6xl': tx.amount!.length > 5 && tx.amount!.length <= 9,
                 '!text-4xl': tx.amount!.length > 8,
               })}>
-              {formatWithCommas(tx.amount! || '0')}
+              {formatWithCommas(formatFloatClean(parsedAmount))}
             </Text>
             {currency === 'XRP' && <Text className="text-xl font-semibold">{currency}</Text>}
           </View>
+
+          {parsedAmount > 0 && xrpPriceUSD > 0 && (
+            <Text className="mb-8 text-lg font-medium text-gray-500">
+              {currency === 'USD'
+                ? `${formatFloatClean(converted.xrpAmount)} XRP`
+                : `$${formatFloatClean(converted.usdAmount)}`}
+            </Text>
+          )}
 
           <Dropdown
             style={[styles.dropdown]}
@@ -203,7 +226,31 @@ const SendScreen = () => {
             valueField="value"
             value={currency}
             onChange={(item) => {
-              setCurrency(item.value);
+              const newCurrency = item.value as ApprovedCurrency;
+
+              const amountNumber = parseFloat(tx.amount || '0');
+              if (isNaN(amountNumber) || amountNumber === 0 || !xrpPriceUSD) {
+                setCurrency(newCurrency);
+                setTx((prev) => ({ ...prev, currency: newCurrency }));
+                return;
+              }
+
+              const { usdAmount, xrpAmount } = convertCurrencyAmount({
+                amount: amountNumber,
+                fromCurrency: currency,
+                xrpPriceUSD,
+              });
+
+              const newAmount = newCurrency === 'USD' ? usdAmount.toFixed(2) : xrpAmount.toFixed(6);
+
+              setCurrency(newCurrency);
+
+              setTx((prev) => ({
+                ...prev,
+                amount: newAmount,
+                currency: newCurrency,
+                originalAmount: prev.originalAmount ? newAmount : undefined,
+              }));
             }}
           />
 
@@ -254,8 +301,8 @@ const styles = StyleSheet.create({
   },
   dropdown: {
     width: '25%',
-    backgroundColor: '#e5e7eb',
-    borderColor: '#d1d5db',
+    backgroundColor: '#f3f4f6',
+    borderColor: '#e5e7eb',
     borderWidth: 1,
     borderRadius: 100,
     paddingHorizontal: 16,

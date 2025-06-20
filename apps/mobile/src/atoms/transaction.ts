@@ -7,6 +7,7 @@ const initialTx: Transaction = {
   amount: '0',
   type: 'PAYMENT',
   direction: null,
+  currency: 'XRP',
 };
 
 const currentTxAtom = atom<Transaction>(initialTx);

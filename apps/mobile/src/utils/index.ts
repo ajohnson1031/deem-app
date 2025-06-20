@@ -1,10 +1,10 @@
 export { clearAuthData } from './auth';
+export { calculateFees } from './calculateFees';
 export { colors, getColorIndex } from './colors';
-export { useGetContact } from './contacts';
-export { useCopyToClipboard } from './copy';
+export { convertCurrencyAmount } from './convert';
 export { buzzAndShake, causeBuzz, shakeAnimation } from './feedback';
-export { capitalize, formatWithCommas } from './format';
+export { capitalize, formatFloatClean, formatWithCommas } from './format';
 export { getStoredPin, savePin } from './securePin';
 export { toastConfig } from './toast';
 export { createNewWallet, getTransactionHistory, getWalletBalance } from './wallet';
-export { submitXrplTransaction } from './xrpl';
+export { submitStandardTransaction, submitXrplTransaction } from './xrpl';

@@ -2,12 +2,16 @@ import { useSetAtom } from 'jotai';
 import { Text, TouchableOpacity, View } from 'react-native';
 
 import { currencyAtom, currentTxAtom, initialTx, walletBalanceAtom } from '~/atoms';
+import { WalletDetails } from '~/components';
+import { useWallet } from '~/hooks/useWallet';
 import CoreLayout from '~/layouts/CoreLayout';
 
 const SettingsScreen = ({ onLogout }: { onLogout: () => void }) => {
   const setTxAtom = useSetAtom(currentTxAtom);
   const setWbAtom = useSetAtom(walletBalanceAtom);
   const setCurrencyAtom = useSetAtom(currencyAtom);
+
+  const { wallet, walletAddress } = useWallet();
 
   const handleLogout = async () => {
     await new Promise((resolve): void => {
@@ -23,6 +27,13 @@ const SettingsScreen = ({ onLogout }: { onLogout: () => void }) => {
     <CoreLayout showBack>
       <View className="m-6 flex-1 items-center justify-center">
         <Text className="text-4xl font-semibold">Settings</Text>
+        {!!walletAddress && (
+          <WalletDetails
+            address={walletAddress}
+            publicKey={wallet!.publicKey}
+            seed={wallet!.seed}
+          />
+        )}
         <View className="absolute bottom-4 flex w-full">
           <TouchableOpacity
             onPress={handleLogout}

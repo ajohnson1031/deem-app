@@ -10,12 +10,13 @@ interface FeeCalculationInput {
 
 interface FeeCalculationResult {
   fee: number; // in USD
-  withFeesIncluded: number; // in USD
-  totalInXrp: number; // total including fee, in XRP
+  totalUsdWithFees: number; // USD amount + fee
+  totalInXrp: number; // total including fee (in XRP)
+  feeInXrp?: number; // optional, only when input is in XRP
   breakdown: string;
 }
 
-const calculateFee = ({
+const calculateFees = ({
   type,
   amount,
   currency,
@@ -24,36 +25,46 @@ const calculateFee = ({
   if (amount <= 0 || xrpPriceUSD <= 0) {
     return {
       fee: 0,
-      withFeesIncluded: 0,
+      totalUsdWithFees: 0,
       totalInXrp: 0,
       breakdown: 'Invalid input',
     };
   }
 
-  const amountInUSD = currency === 'XRP' ? amount * xrpPriceUSD : amount;
+  const isXrpInput = currency === 'XRP';
+  const amountInUSD = isXrpInput ? amount * xrpPriceUSD : amount;
+
   let fee = 0;
 
   if (type === 'BANK') {
-    fee = 1.49; // flat fee
+    fee = amountInUSD < 100 ? 0.99 : 1.49;
   }
 
   if (type === 'GIFT_CARD') {
     const rawFee = amountInUSD * 0.15;
-    fee = Math.max(rawFee, 0.25); // min $0.25
+    fee = Math.max(rawFee, 0.25);
   }
 
-  const withFeesIncluded = amountInUSD + fee;
-  const totalInXrp = withFeesIncluded / xrpPriceUSD;
+  const totalUsdWithFees = amountInUSD + fee;
+  const totalInXrp = totalUsdWithFees / xrpPriceUSD;
 
-  return {
+  const result: FeeCalculationResult = {
     fee: parseFloat(fee.toFixed(2)),
-    withFeesIncluded: parseFloat(withFeesIncluded.toFixed(2)),
+    totalUsdWithFees: parseFloat(totalUsdWithFees.toFixed(2)),
     totalInXrp: parseFloat(totalInXrp.toFixed(4)),
     breakdown:
       type === 'BANK'
-        ? `Flat fee of $${fee.toFixed(2)} applied for bank transfer`
-        : `15% fee ($${(amountInUSD * 0.15).toFixed(2)}) applied${fee === 0.25 ? ' (minimum $0.25)' : ''}`,
+        ? `Flat fee of $${fee.toFixed(2)} for bank transfer`
+        : `15% fee ($${(amountInUSD * 0.15).toFixed(2)}) ${
+            fee === 0.25 ? '(minimum applied)' : ''
+          }`,
   };
+
+  if (isXrpInput) {
+    result.feeInXrp = parseFloat((fee / xrpPriceUSD).toFixed(4));
+  }
+
+  return result;
 };
 
-export { calculateFee };
+export { calculateFees };

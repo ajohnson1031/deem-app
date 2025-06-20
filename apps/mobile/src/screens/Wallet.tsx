@@ -10,21 +10,21 @@ import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native
 import { Dropdown } from 'react-native-element-dropdown';
 import ShimmerPlaceHolder from 'react-native-shimmer-placeholder';
 
-import { currencyAtom, transactionsAtom } from '~/atoms';
+import { currencyAtom, transactionsAtom, xrpPriceAtom } from '~/atoms';
 import { TxListItem } from '~/components';
 import { ApprovedCurrency } from '~/constants';
-import { useWallet } from '~/hooks/useWallet';
+import { useCopyToClipboard, useWallet } from '~/hooks';
 import CoreLayout from '~/layouts/CoreLayout';
 import { RootStackParamList } from '~/types';
-import { useCopyToClipboard } from '~/utils';
+import { convertCurrencyAmount, formatFloatClean, formatWithCommas } from '~/utils';
 
 const WalletScreen = () => {
   const { walletAddress, walletBalance, createWallet, refreshBalance, loading } = useWallet();
   const [currency, setCurrency] = useAtom(currencyAtom);
   const { copied, copy } = useCopyToClipboard();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  // TODO: Get recent transactions via an API call
   const recentTransactions = useAtomValue(transactionsAtom).slice(0, 4);
+  const xrpPriceUSD = useAtomValue(xrpPriceAtom);
 
   const [currencyOptions] = useState<Record<string, ApprovedCurrency>[]>([
     { label: 'XRP', value: 'XRP' },
@@ -34,23 +34,38 @@ const WalletScreen = () => {
   const ITEM_HEIGHT = 80;
   const ITEM_SPACING = 8;
   const VISIBLE_ITEMS = 3;
-
   const containerHeight = ITEM_HEIGHT * VISIBLE_ITEMS + ITEM_SPACING * (VISIBLE_ITEMS - 1);
+
+  const balanceAsNumber = parseFloat(walletBalance?.balance || '0');
+  const { usdAmount, xrpAmount } = convertCurrencyAmount({
+    amount: balanceAsNumber,
+    fromCurrency: 'XRP', // Wallet balance is always in XRP
+    xrpPriceUSD,
+  });
+
+  const primaryAmount =
+    currency === 'USD' ? formatFloatClean(usdAmount) : formatFloatClean(xrpAmount);
+
+  const secondaryAmount =
+    currency === 'USD'
+      ? `${formatFloatClean(xrpAmount)} XRP`
+      : `$${formatWithCommas(formatFloatClean(usdAmount))}`;
 
   return (
     <CoreLayout showFooter showHeaderOptions>
       <View className="mx-6 flex-1 items-center justify-center">
         {walletAddress ? (
           <View className="w-full flex-1 flex-col gap-y-6">
-            {/* Balance, Currency Functionality */}
+            {/* Balance Header */}
             <View className="flex flex-col gap-y-2">
-              {/* Balance Refresher */}
+              {/* Refresher */}
               <View className="mb-2 flex flex-row items-center gap-2">
                 <Text className="text-lg font-medium text-gray-600">Balance</Text>
                 <TouchableOpacity onPress={refreshBalance}>
                   <Fontisto name="spinner-refresh" size={20} color="#0284c7" />
                 </TouchableOpacity>
               </View>
+
               {/* Balance Display */}
               <View className="flex flex-row items-baseline">
                 {currency === 'USD' && (
@@ -58,31 +73,21 @@ const WalletScreen = () => {
                     LinearGradient={LinearGradient}
                     visible={!loading}
                     style={{ height: 36, borderRadius: 4 }}>
-                    <Text
-                      className={cn('text-5xl font-semibold', {
-                        '!text-4xl':
-                          walletBalance.balance.length > 6 && walletBalance.balance.length <= 9,
-                        '!text-2xl':
-                          walletBalance.balance.length > 8 && walletBalance.balance.length < 12,
-                        '!text-xl': walletBalance.balance.length >= 12,
-                      })}>
-                      $
-                    </Text>
+                    <Text className="text-5xl font-semibold">$</Text>
                   </ShimmerPlaceHolder>
                 )}
+
                 <ShimmerPlaceHolder
                   LinearGradient={LinearGradient}
                   visible={!loading}
                   style={{ height: 'fit-content', width: 'fit-content', borderRadius: 8 }}>
                   <Text
                     className={cn('text-8xl font-semibold', {
-                      '!text-7xl':
-                        walletBalance.balance.length > 6 && walletBalance.balance.length <= 9,
-                      '!text-5xl':
-                        walletBalance.balance.length > 8 && walletBalance.balance.length < 12,
-                      '!text-4xl': walletBalance.balance.length >= 12,
+                      '!text-7xl': primaryAmount.length > 6 && primaryAmount.length <= 9,
+                      '!text-5xl': primaryAmount.length > 8 && primaryAmount.length < 12,
+                      '!text-4xl': primaryAmount.length >= 12,
                     })}>
-                    {walletBalance?.balance}
+                    {formatWithCommas(primaryAmount)}
                   </Text>
                 </ShimmerPlaceHolder>
 
@@ -96,9 +101,14 @@ const WalletScreen = () => {
                 )}
               </View>
 
-              {/* Wallet Copy, Currency Switcher */}
-              <View className="flex flex-row gap-4">
-                <View className="flex w-9/12 flex-row items-center justify-center gap-2 rounded-lg border border-gray-300 bg-gray-200 py-4">
+              {/* ≈ Equivalent Value */}
+              {balanceAsNumber > 0 && xrpPriceUSD > 0 && (
+                <Text className="-mt-4 text-lg font-medium text-gray-500">{`${secondaryAmount} ${currency === 'XRP' ? '(in USD)' : ''}`}</Text>
+              )}
+
+              {/* Wallet address + currency switch */}
+              <View className="mt-4 flex flex-row gap-4">
+                <View className="flex w-9/12 flex-row items-center justify-center gap-2 rounded-lg border border-gray-200 bg-gray-100 py-4">
                   <Text
                     className="m-0 w-9/12 p-0"
                     numberOfLines={1}
@@ -128,23 +138,18 @@ const WalletScreen = () => {
               </View>
             </View>
 
-            {/* Send Button */}
+            {/* Convert Button */}
             <View className="flex-row">
               <TouchableOpacity
-                className="mr-3 flex-1 rounded-xl bg-sky-600 py-4"
-                onPress={() => navigation.navigate('Send')}>
-                <Text className="text-center text-xl font-medium text-white">Send New Tx</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                className="flex-1 rounded-xl bg-rose-600 py-4"
+                className="flex-1 rounded-xl bg-sky-600 py-4"
                 onPress={() => navigation.navigate('Convert')}>
                 <Text className="text-center text-xl font-medium text-white">Convert</Text>
               </TouchableOpacity>
             </View>
 
+            {/* Recent Conversions */}
             <View className="gap-y-3">
-              <Text className="text-lg font-medium text-gray-600">Recent Transactions</Text>
+              <Text className="text-lg font-medium text-gray-600">Recent Conversions</Text>
               <View className="border-b border-gray-200 pb-6" style={{ height: containerHeight }}>
                 <FlatList
                   data={recentTransactions}
@@ -158,30 +163,14 @@ const WalletScreen = () => {
                 />
               </View>
             </View>
+
             <TouchableOpacity
               className="flex flex-row justify-center"
-              onPress={() => navigation.navigate('TxHistory')}>
+              onPress={() => navigation.navigate('Conversions')}>
               <Text className="rounded-full border border-sky-600/50 px-4 py-2 font-semibold text-sky-600">
-                See Full Tx List
+                See All Conversions
               </Text>
             </TouchableOpacity>
-
-            {/* // TODO: Move this behind a security screen */}
-            {/* <WalletDetails
-              address={walletAddress}
-              publicKey={wallet!.publicKey}
-              seed={wallet!.seed}
-            /> */}
-
-            {/* // TODO: Let's put this behind another layer of functionality as a later enhancement (i.e., Wallet Swapping) */}
-            {/* <TouchableOpacity onPress={createWallet} className="rounded-xl bg-sky-700 px-4 py-2">
-            <Text className="font-bold text-white">Regenerate Wallet</Text>
-          </TouchableOpacity> */}
-
-            {/* // TODO: Move this to the settings page */}
-            {/* <TouchableOpacity onPress={onLogout} className="mt-8 rounded bg-sky-700 px-6 py-3">
-              <Text className="font-bold text-white">Logout</Text>
-            </TouchableOpacity> */}
           </View>
         ) : (
           <TouchableOpacity onPress={createWallet} className="rounded-xl bg-blue-600 px-6 py-3">
@@ -202,8 +191,8 @@ const styles = StyleSheet.create({
   },
   dropdown: {
     width: '20.6666667%',
-    backgroundColor: '#e5e7eb',
-    borderColor: '#d1d5db',
+    backgroundColor: '#f3f4f6',
+    borderColor: '#e5e7eb',
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 8,
@@ -228,7 +217,7 @@ const styles = StyleSheet.create({
   selectedTextStyle: {
     fontSize: 16,
     color: '#4B5563',
-    fontWeight: 500,
+    fontWeight: '500',
   },
   iconStyle: {
     width: 20,

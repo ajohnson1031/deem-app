@@ -9,7 +9,7 @@ import { contactsAtom, currencyAtom, currentTxAtom, suggestedContactsAtom } from
 import { Container } from '~/components';
 import ContactListItem from '~/components/ContactListItem';
 import { Contact, RootStackParamList } from '~/types';
-import { formatWithCommas } from '~/utils';
+import { formatFloatClean, formatWithCommas } from '~/utils';
 
 const ContactScreen = ({
   navigation,
@@ -70,7 +70,9 @@ const ContactScreen = ({
 
           <View className="flex-1 flex-row items-baseline justify-center gap-0.5">
             {currency === 'USD' && <Text className="text-2xl font-semibold">$</Text>}
-            <Text className="text-2xl font-semibold">{formatWithCommas(tx.amount)}</Text>
+            <Text className="text-2xl font-semibold">
+              {formatWithCommas(formatFloatClean(tx.amount))}
+            </Text>
             {currency === 'XRP' && <Text className="text-md font-semibold">{currency}</Text>}
             {/* // TODO: Add USD value */}
           </View>
