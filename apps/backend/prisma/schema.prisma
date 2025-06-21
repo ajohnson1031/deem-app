@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String        @id @default(cuid())
+  username      String        @unique
+  name          String
+  email         String?       @unique
+  phoneNumber   String?       @unique
+  avatarUrl     String?
+  walletAddress String        @unique
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  contacts      Contact[]     @relation("UserContacts")
+  transactions  Transaction[] @relation("UserTransactions")
+}
+
+model Contact {
+  id            String   @id @default(cuid())
+  userId        String
+  name          String
+  username      String
+  avatarUrl     String?
+  walletAddress String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  user          User     @relation("UserContacts", fields: [userId], references: [id])
+}
+
+model Transaction {
+  id                        String   @id @default(cuid())
+  type                      String
+  direction                 String
+  amount                    String
+  currency                  String?  @default("XRP")
+  feeAmount                 String?
+  feeInXrp                  String?
+  originalAmount            String?
+  feeIncluded               Boolean? @default(false)
+  memo                      String?
+  status                    String
+  createdAt                 DateTime @default(now())
+  hash                      String?
+  ledgerIndex               Int?
+  destinationTag            Int?
+  deliveredAmount           String?
+  conversionRateAtExecution Float?
+  xrplTimestamp             Int?
+  timestamps                Json?
+  userId                    String
+  user                      User     @relation("UserTransactions", fields: [userId], references: [id])
+}
