@@ -1,4 +1,4 @@
 export { useCopyToClipboard } from './useCopyToClipboard';
-export { useGetContact } from './useGetContact';
+export { useGetRecipient } from './useGetRecipient';
 export { useSessionResetCountdown } from './useSessionResetCountdown';
 export { useWallet } from './useWallet';

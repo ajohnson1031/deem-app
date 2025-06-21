@@ -26,9 +26,7 @@ const HeaderNav = ({
   theme?: Theme;
   onBackPress?: () => void;
 }) => {
-  const pendingTransactions = useAtomValue(pendingTransactionsAtom).filter(
-    (tx) => tx.status === 'pending' && tx.direction === 'incoming' && tx.type === 'REQUEST'
-  );
+  const pendingTransactions = useAtomValue(pendingTransactionsAtom);
 
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
@@ -42,13 +40,14 @@ const HeaderNav = ({
 
   return (
     <View
-      className={cn('m-6 flex flex-row', {
+      className={cn('mx-3 mb-6 mt-3 flex flex-row', {
         'justify-start': showBack && !showHeaderOptions,
         '!justify-between': showBack && showHeaderOptions,
         'justify-end': !showBack && showHeaderOptions,
       })}>
       {(showBack || showClose) && (
         <TouchableOpacity
+          className="relative p-3"
           onPress={() => {
             if (onBackPress) {
               onBackPress();
@@ -70,23 +69,25 @@ const HeaderNav = ({
         </TouchableOpacity>
       )}
       {showHeaderOptions && (
-        <View className="flex flex-row justify-end gap-5">
+        <View className="flex flex-row justify-end gap-1">
           {!showSettingsOnly && (
             <View>
               <TouchableOpacity
-                className="mt-[1px]"
+                className="p-3"
                 onPress={() => navigation.navigate('PendingTransactions')}>
                 <Octicons name="bell" size={24} color={theme === 'LIGHT' ? '#FFF' : '#000'} />
+                {!!pendingTransactions.length && (
+                  <View className="absolute right-1.5 top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-orange-600">
+                    <Text className="text-xs font-bold text-white">
+                      {pendingTransactions.length}
+                    </Text>
+                  </View>
+                )}
               </TouchableOpacity>
-              {!!pendingTransactions.length && (
-                <View className="absolute -right-2 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-orange-600">
-                  <Text className="text-xs font-bold text-white">{pendingTransactions.length}</Text>
-                </View>
-              )}
             </View>
           )}
           {!showNotificationsOnly && (
-            <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
+            <TouchableOpacity className="p-3" onPress={() => navigation.navigate('Settings')}>
               <Octicons name="gear" size={24} color={theme === 'LIGHT' ? '#FFF' : '#000'} />
             </TouchableOpacity>
           )}

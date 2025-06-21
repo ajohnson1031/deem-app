@@ -1,5 +1,15 @@
-export type { Contact } from './contacts';
+export type { Contact, SwipeableTransactionRowProps } from './contacts';
 export type { RootStackParamList } from './navigation';
 export type { Theme } from './theme';
-export type { Transaction, TxDirection, TxListType, TxStatus, TxType } from './transaction';
+export type {
+  ApprovedCurrency,
+  Transaction,
+  TxDirection,
+  TxListType,
+  TxStatus,
+  TxSubmissionScreenProps,
+  TxType,
+} from './transaction';
 export type { WalletBalanceResult } from './wallet';
+
+export { STATUS_GROUPS, TX_STATUS_LABELS } from './transaction';

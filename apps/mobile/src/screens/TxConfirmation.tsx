@@ -1,34 +1,29 @@
 import { Feather } from '@expo/vector-icons';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import cn from 'classnames';
 import { useAtomValue } from 'jotai';
 import { useMemo, useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import Toggle from 'react-native-toggle-element';
 
-import { currencyAtom, xrpInitialPriceAtom, xrpPriceAtom } from '~/atoms';
+import { currencyAtom, recipientAtom, xrpInitialPriceAtom, xrpPriceAtom } from '~/atoms';
 import { TxListItem } from '~/components';
 import CoreLayout from '~/layouts/CoreLayout';
-import { RootStackParamList, Transaction } from '~/types';
+import { Transaction } from '~/types';
+import { TxConfirmationScreenProps } from '~/types/transaction';
 import { calculateFees, capitalize, formatWithCommas } from '~/utils';
 
-const TxConfirmationScreen = ({
-  route: {
-    params: { tx: initialTx },
-  },
-  navigation,
-}: {
-  route: { params: { tx: Transaction } };
-  navigation: NativeStackNavigationProp<RootStackParamList, 'TxConfirmation'>;
-}) => {
+const TxConfirmationScreen = ({ route, navigation }: TxConfirmationScreenProps) => {
+  const currentTx = route.params.tx;
+
   const currency = useAtomValue(currencyAtom);
   const xrpInitial = useAtomValue(xrpInitialPriceAtom);
   const xrpLive = useAtomValue(xrpPriceAtom);
+  const recipient = useAtomValue(recipientAtom);
 
   const xrpPriceUSD = xrpLive || xrpInitial;
-  const [payFees, setPayFees] = useState(initialTx.feeIncluded || false);
-  const [tx, setTx] = useState<Transaction>({ ...initialTx, currency });
+  const [payFees, setPayFees] = useState(currentTx.feeIncluded || false);
+  const [tx, setTx] = useState<Transaction>({ ...currentTx, currency });
 
   const parsedAmount = parseFloat(tx.amount);
 
@@ -42,9 +37,7 @@ const TxConfirmationScreen = ({
     });
   }, [parsedAmount, currency, xrpPriceUSD]);
 
-  const handleBackPress = () => {
-    navigation.navigate('Contacts');
-  };
+  const handleBackPress = () => navigation.navigate('Contacts');
 
   const handleFeeToggle = () => {
     const newValue = !payFees;
@@ -52,7 +45,7 @@ const TxConfirmationScreen = ({
 
     if (!feeData) return;
 
-    const newTx: Transaction = newValue
+    const updatedTx: Transaction = newValue
       ? {
           ...tx,
           originalAmount: tx.amount,
@@ -73,7 +66,22 @@ const TxConfirmationScreen = ({
           feeInXrp: undefined,
         };
 
-    setTx(newTx);
+    setTx(updatedTx);
+  };
+
+  const handleSubmit = () => {
+    const now = Date.now();
+
+    const txToSubmit: Transaction = {
+      ...tx,
+      status: 'PENDING',
+      timestamps: {
+        ...tx.timestamps,
+        createdAt: now,
+      },
+    };
+
+    navigation.navigate('TxSubmission', { tx: txToSubmit, recipient: recipient! });
   };
 
   const displayAmount = parseFloat(tx.amount);
@@ -105,7 +113,6 @@ const TxConfirmationScreen = ({
                   )}
                 </View>
 
-                {/* Equivalent currency display */}
                 {xrpPriceUSD && (
                   <Text className="-mt-1 ml-1 text-lg font-medium text-gray-500">
                     {currency === 'USD'
@@ -117,7 +124,7 @@ const TxConfirmationScreen = ({
             </View>
           </View>
 
-          {/* Fee Toggle & Breakdown */}
+          {/* Fee Toggle */}
           <View className="rounded-lg bg-white px-3 pb-3">
             <View className="flex flex-row items-center justify-between">
               <Text className="my-1 ml-3 font-bold text-stone-800">
@@ -164,7 +171,7 @@ const TxConfirmationScreen = ({
         {/* Action Button */}
         <View className="absolute bottom-4 mt-8 flex flex-row justify-center gap-x-5">
           <TouchableOpacity
-            onPress={() => navigation.navigate('TxSubmission', { tx })}
+            onPress={handleSubmit}
             className={cn(
               'flex w-full flex-row items-center justify-center gap-2 rounded-xl py-4',
               {

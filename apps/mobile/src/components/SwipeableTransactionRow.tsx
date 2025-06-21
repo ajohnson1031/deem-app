@@ -11,18 +11,17 @@ import Animated, {
 
 import { TxListItem } from './';
 
-import type { Transaction } from '~/types';
-
-interface SwipeableTransactionRowProps {
-  transaction: Transaction;
-  onApprove: (tx: Transaction) => void;
-  onDeny: (tx: Transaction) => void;
-}
+import type { SwipeableTransactionRowProps } from '~/types';
 
 const SWIPE_THRESHOLD = 200;
 const ROW_HEIGHT = 84;
 
-function SwipeableTransactionRow({ transaction, onApprove, onDeny }: SwipeableTransactionRowProps) {
+function SwipeableTransactionRow({
+  transaction,
+  onApprove,
+  onDeny,
+  contact,
+}: SwipeableTransactionRowProps) {
   const translateX = useSharedValue(0);
   const rowHeight = useSharedValue(ROW_HEIGHT);
   const rowOpacity = useSharedValue(1);
@@ -85,16 +84,16 @@ function SwipeableTransactionRow({ transaction, onApprove, onDeny }: SwipeableTr
     <Animated.View style={[containerStyle, styles.overflowHidden]}>
       <Animated.View style={[styles.background, backgroundColorStyle]}>
         <Animated.Text style={[styles.backgroundLabel, styles.approveText, approveTextStyle]}>
-          Approved
+          {transaction.type === 'REQUEST' ? 'Approve' : 'Accept'}
         </Animated.Text>
         <Animated.Text style={[styles.backgroundLabel, styles.denyText, denyTextStyle]}>
-          Declined
+          Decline
         </Animated.Text>
       </Animated.View>
 
       <GestureDetector gesture={pan}>
         <Animated.View style={[animatedRowStyle]}>
-          <TxListItem listType="TX" transaction={transaction} />
+          <TxListItem listType="TX" transaction={transaction} contact={contact} />
         </Animated.View>
       </GestureDetector>
     </Animated.View>

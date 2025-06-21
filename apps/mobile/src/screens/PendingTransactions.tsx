@@ -1,12 +1,23 @@
 import { useAtomValue } from 'jotai';
+import { useMemo } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 
-import { pendingTransactionsAtom } from '~/atoms';
+import { contactsAtom, pendingTransactionsAtom } from '~/atoms';
 import { SwipeableTransactionRow } from '~/components';
 import CoreLayout from '~/layouts/CoreLayout';
+import { Contact } from '~/types';
 
 const PendingTransactionsScreen = () => {
+  const contacts = useAtomValue(contactsAtom);
   const pendingTxs = useAtomValue(pendingTransactionsAtom);
+
+  const contactMap = useMemo(() => {
+    const map: Record<string, Contact> = {};
+    contacts.forEach((c) => {
+      map[c.id] = c;
+    });
+    return map;
+  }, [contacts]);
 
   return (
     <CoreLayout showBack>
@@ -17,15 +28,21 @@ const PendingTransactionsScreen = () => {
           <Text className="mt-12 text-center text-gray-500">No pending transactions.</Text>
         ) : (
           <View className="gap-2">
-            {pendingTxs.map((tx) => (
-              <SwipeableTransactionRow
-                key={tx.id}
-                transaction={tx}
-                // TODO: Make API call and Update transactions atom
-                onApprove={(tx) => console.log('Approved:', tx.id)}
-                onDeny={(tx) => console.log('Denied:', tx.id)}
-              />
-            ))}
+            {pendingTxs.map((tx) => {
+              const contact = contactMap[tx.recipientId!];
+              if (!contact) return null;
+
+              return (
+                <SwipeableTransactionRow
+                  key={tx.id}
+                  transaction={tx}
+                  contact={contact}
+                  // TODO: Make API call and Update transactions atom
+                  onApprove={(tx) => console.log('Approved:', tx.id)}
+                  onDeny={(tx) => console.log('Denied:', tx.id)}
+                />
+              );
+            })}
           </View>
         )}
       </ScrollView>

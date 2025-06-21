@@ -24,13 +24,16 @@ const FooterNav = ({ footerClassName }: { footerClassName?: string }) => {
   return (
     <View
       className={cn(
-        'w-full flex-row justify-around border-t border-gray-200 bg-white py-4 shadow-sm',
+        'w-full flex-row justify-around border-t border-gray-200 bg-white shadow-sm',
         footerClassName
       )}>
       {navItems.map(({ icon, route }) => {
         const isActive = currentRoute === route;
         return (
-          <TouchableOpacity key={route} onPress={() => navigation.navigate(route as any)}>
+          <TouchableOpacity
+            key={route}
+            className="p-3"
+            onPress={() => navigation.navigate(route as any)}>
             {route === 'Cards' ? (
               <FontAwesome name={icon} size={24} color={isActive ? '#000' : '#AAA'} />
             ) : (

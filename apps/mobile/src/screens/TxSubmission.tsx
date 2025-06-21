@@ -1,24 +1,23 @@
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import cn from 'classnames';
-import { useAtom, useSetAtom } from 'jotai';
+import { useSetAtom } from 'jotai';
 import LottieView from 'lottie-react-native';
 import { useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
 
-import { currentTxAtom, txSessionAuthorizedAtom } from '~/atoms';
-import { initialTx } from '~/atoms/transaction';
+import { currentTxAtom, initialTx, recipientAtom } from '~/atoms/';
 import { useSessionResetCountdown } from '~/hooks';
 import CoreLayout from '~/layouts/CoreLayout';
-import { RootStackParamList } from '~/types';
-import { submitStandardTransaction, submitXrplTransaction } from '~/utils/';
+import { TxSubmissionScreenProps } from '~/types';
+import { formatFloatClean, formatWithCommas, submitStandardTransaction } from '~/utils';
 
-const TxSubmissionScreen = () => {
-  const [tx, setTx] = useAtom(currentTxAtom);
-  const setTxAuthorized = useSetAtom(txSessionAuthorizedAtom);
+const TxSubmissionScreen = ({ route, navigation }: TxSubmissionScreenProps) => {
   const [isSubmitting, setIsSubmitting] = useState(true);
   const [txSuccess, setTxSuccess] = useState<boolean | null>(null);
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const setTx = useSetAtom(currentTxAtom);
+  const setRecipient = useSetAtom(recipientAtom);
+
+  const { tx, recipient } = route.params;
+  const { name } = recipient;
 
   const { CountdownDisplay } = useSessionResetCountdown(
     txSuccess === true ? 'success' : txSuccess === false ? 'fail' : '',
@@ -36,13 +35,20 @@ const TxSubmissionScreen = () => {
 
   useEffect(() => {
     const submitTransaction = async () => {
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-      const txFunc = tx.type === 'PAYMENT' ? submitXrplTransaction : submitStandardTransaction;
+      await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulate delay
+
       try {
-        const result = await txFunc(tx);
+        const result = await submitStandardTransaction({
+          ...tx,
+          status: 'PENDING',
+          timestamps: {
+            ...(tx.timestamps ?? {}),
+            createdAt: Date.now(),
+          },
+        });
+
         if (result?.success) {
           setTxSuccess(true);
-          setTxAuthorized(true);
         } else {
           setTxSuccess(false);
         }
@@ -51,6 +57,7 @@ const TxSubmissionScreen = () => {
         setTxSuccess(false);
       } finally {
         setIsSubmitting(false);
+        setRecipient(null);
       }
     };
 
@@ -68,13 +75,22 @@ const TxSubmissionScreen = () => {
               loop
               style={{ width: 120, height: 120 }}
             />
+            <Text className="mt-4 text-lg text-gray-500">Submitting transaction...</Text>
           </View>
         ) : (
           <View className="mx-6 mt-10">
             <Text className="text-5xl font-semibold text-stone-900">
               {txSuccess ? 'Transaction\nSuccessful' : 'Transaction\nFailed'}
             </Text>
-            <Text className="text-2xl">{`Your ${tx.type.toLowerCase()} was received.`}</Text>
+            <Text className="mt-2 text-2xl text-gray-700">
+              {txSuccess
+                ? `Your ${tx.type.toLowerCase()} of ${
+                    tx.currency === 'USD'
+                      ? `$${formatWithCommas(formatFloatClean(tx.amount))}`
+                      : `${formatWithCommas(formatFloatClean(tx.amount))} XRP`
+                  }\n${tx.type === 'PAYMENT' ? 'to' : 'from'} ${name} is pending approval.`
+                : `Your ${tx.type.toLowerCase()} ${tx.type === 'PAYMENT' ? 'to' : 'from'} ${name} could not be submitted.`}
+            </Text>
             <CountdownDisplay />
           </View>
         )}

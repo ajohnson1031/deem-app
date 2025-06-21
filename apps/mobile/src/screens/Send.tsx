@@ -17,11 +17,10 @@ import { Dropdown } from 'react-native-element-dropdown';
 import Toast from 'react-native-toast-message';
 
 import { currencyAtom, currentTxAtom, txSessionAuthorizedAtom, xrpPriceAtom } from '~/atoms';
-import { ApprovedCurrency } from '~/constants';
 import { useWallet } from '~/hooks/useWallet';
 import CoreLayout from '~/layouts/CoreLayout';
 import PinEntryScreen from '~/screens/PinEntry';
-import { RootStackParamList, TxType } from '~/types';
+import { ApprovedCurrency, RootStackParamList, TxType } from '~/types';
 import {
   buzzAndShake,
   convertCurrencyAmount,
@@ -54,7 +53,7 @@ const SendScreen = () => {
 
   const shakeAnim = useRef(new Animated.Value(0)).current;
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const [whole, decimal] = tx.amount.split('.');
+  const [whole, decimal = ''] = (tx.amount || '').split('.');
   const isDisabled =
     !tx.amount || (whole === '0' && parseInt(decimal, 10) === 0) || (whole === '0' && !decimal);
 
@@ -98,10 +97,17 @@ const SendScreen = () => {
   }, [txAuthorized]);
 
   const handleNumberPress = (num: string) => {
-    const { amount } = tx;
+    const { amount, timestamps } = tx;
 
     if (amount === '0' && num === '.') {
-      setTx({ ...tx, amount: '0.' });
+      setTx({
+        ...tx,
+        amount: '0.',
+        timestamps: {
+          ...timestamps,
+          draftedAt: timestamps?.draftedAt ?? Date.now(),
+        },
+      });
       return;
     }
 
@@ -110,7 +116,14 @@ const SendScreen = () => {
     }
 
     if (amount === '0' && num !== '.') {
-      setTx({ ...tx, amount: num });
+      setTx({
+        ...tx,
+        amount: num,
+        timestamps: {
+          ...timestamps,
+          draftedAt: timestamps?.draftedAt ?? Date.now(),
+        },
+      });
       return;
     }
 
@@ -125,14 +138,27 @@ const SendScreen = () => {
     }
 
     const next = amount + num;
-    setTx({ ...tx, amount: next });
+    setTx({
+      ...tx,
+      amount: next,
+      timestamps: {
+        ...timestamps,
+        draftedAt: timestamps?.draftedAt ?? Date.now(),
+      },
+    });
   };
 
   const handleBackspace = () => {
-    const { amount } = tx;
+    const { amount, timestamps } = tx;
     if (!amount || amount === '0') return buzzAndShake(shakeAnim);
     const next = amount.length <= 1 ? '0' : amount.slice(0, -1);
-    setTx({ ...tx, amount: next });
+    const shouldResetDraftedAt = next === '0';
+
+    setTx({
+      ...tx,
+      amount: next,
+      timestamps: shouldResetDraftedAt ? undefined : timestamps,
+    });
   };
 
   const handleRequestPress = (type: TxType) => {
@@ -152,7 +178,17 @@ const SendScreen = () => {
       return;
     }
 
-    setTx({ ...tx, type, direction: type === 'PAYMENT' ? 'outgoing' : 'incoming' });
+    setTx({
+      ...tx,
+      type,
+      direction: type === 'PAYMENT' ? 'OUTGOING' : 'INCOMING',
+      status: 'PENDING',
+      timestamps: {
+        ...tx.timestamps,
+        createdAt: Date.now(),
+      },
+    });
+
     navigation.navigate('Contacts');
   };
 
@@ -210,8 +246,8 @@ const SendScreen = () => {
           {parsedAmount > 0 && xrpPriceUSD > 0 && (
             <Text className="mb-8 text-lg font-medium text-gray-500">
               {currency === 'USD'
-                ? `${formatFloatClean(converted.xrpAmount)} XRP`
-                : `$${formatFloatClean(converted.usdAmount)}`}
+                ? `${formatWithCommas(formatFloatClean(converted.xrpAmount))} XRP`
+                : `$${formatWithCommas(formatFloatClean(converted.usdAmount))}`}
             </Text>
           )}
 
@@ -253,8 +289,6 @@ const SendScreen = () => {
               }));
             }}
           />
-
-          {/* TODO: Add USD Value, Ratio, Polling */}
 
           <View className="flex-row flex-wrap justify-center gap-x-4 gap-y-6">
             {['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0'].map((num) => (
@@ -329,7 +363,7 @@ const styles = StyleSheet.create({
   selectedTextStyle: {
     fontSize: 16,
     color: '#4B5563',
-    fontWeight: 500,
+    fontWeight: '500',
   },
   iconStyle: {
     width: 20,

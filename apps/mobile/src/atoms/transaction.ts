@@ -13,9 +13,7 @@ const initialTx: Transaction = {
 const currentTxAtom = atom<Transaction>(initialTx);
 const transactionsAtom = atom<Transaction[]>(MOCK_COMPLETED_TRANSACTIONS);
 const pendingTransactionsAtom = atom<Transaction[]>(
-  MOCK_PENDING_TRANSACTIONS.filter(
-    (tx) => tx.status === 'pending' && tx.direction === 'incoming' && tx.type === 'REQUEST'
-  )
+  MOCK_PENDING_TRANSACTIONS.filter((tx) => tx.status === 'PENDING' && tx.direction === 'INCOMING')
 );
 
 export { currentTxAtom, initialTx, pendingTransactionsAtom, transactionsAtom };

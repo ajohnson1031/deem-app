@@ -1,8 +1,7 @@
 import { atom } from 'jotai';
 import { Wallet } from 'xrpl';
 
-import { ApprovedCurrency } from '~/constants';
-import { WalletBalanceResult } from '~/types';
+import { ApprovedCurrency, WalletBalanceResult } from '~/types';
 
 const walletAtom = atom<Wallet | null>(null);
 const walletAddressAtom = atom(
