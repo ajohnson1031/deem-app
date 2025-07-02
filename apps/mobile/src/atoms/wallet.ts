@@ -4,10 +4,13 @@ import { Wallet } from 'xrpl';
 import { ApprovedCurrency, WalletBalanceResult } from '~/types';
 
 const walletAtom = atom<Wallet | null>(null);
-const walletAddressAtom = atom(
-  (get) => get(walletAtom)?.address ?? 'rEco4zsuN7pjMfZ6BFYbjSCVYgUsxNvYj5'
-); // TODO: Remove static value and replace with null
-const walletBalanceAtom = atom<WalletBalanceResult>({ success: false, balance: 0 });
+const walletAddressAtom = atom((get) => get(walletAtom)?.address ?? null);
+
+const walletBalanceAtom = atom<WalletBalanceResult & { loading?: boolean }>({
+  success: false,
+  balance: 0,
+  loading: true,
+});
 
 const currencyAtom = atom<ApprovedCurrency>('XRP');
 

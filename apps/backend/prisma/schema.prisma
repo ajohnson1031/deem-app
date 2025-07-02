@@ -8,17 +8,41 @@ datasource db {
 }
 
 model User {
-  id            String        @id @default(cuid())
-  username      String        @unique
-  name          String
-  email         String?       @unique
-  phoneNumber   String?       @unique
-  avatarUrl     String?
-  walletAddress String        @unique
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  contacts      Contact[]     @relation("UserContacts")
-  transactions  Transaction[] @relation("UserTransactions")
+  id                 String              @id @default(cuid())
+  username           String              @unique
+  name               String
+  email              String?             @unique
+  phoneNumber        String?             @unique
+  password           String
+  avatarUrl          String?
+  walletAddress      String              @unique
+  wallet             Wallet?             @relation("UserToWallet") // Name the relation
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  contacts           Contact[]           @relation("UserContacts")
+  transactions       Transaction[]       @relation("UserTransactions")
+  refreshTokens      RefreshToken[]      @relation("UserRefreshTokens")
+  passwordResetCodes PasswordResetCode[] @relation("UserPasswordResets")
+}
+
+model PasswordResetCode {
+  id        String   @id @default(cuid())
+  userId    String
+  code      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation("UserPasswordResets", fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model Wallet {
+  id            String   @id @default(cuid())
+  encryptedSeed String
+  userId        String   @unique
+  user          User     @relation("UserToWallet", fields: [userId], references: [id])
+  createdAt     DateTime @default(now())
 }
 
 model Contact {
@@ -30,7 +54,9 @@ model Contact {
   walletAddress String
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-  user          User     @relation("UserContacts", fields: [userId], references: [id])
+
+  // 👇 Match relation name here
+  user User @relation("UserContacts", fields: [userId], references: [id])
 }
 
 model Transaction {
@@ -53,6 +79,20 @@ model Transaction {
   conversionRateAtExecution Float?
   xrplTimestamp             Int?
   timestamps                Json?
-  userId                    String
-  user                      User     @relation("UserTransactions", fields: [userId], references: [id])
+
+  userId String
+
+  // 👇 Match relation name here
+  user User @relation("UserTransactions", fields: [userId], references: [id])
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation("UserRefreshTokens", fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  @@index([userId])
 }

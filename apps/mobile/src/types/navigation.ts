@@ -2,10 +2,9 @@ import { Contact, Transaction } from '~/types';
 
 export type RootStackParamList = {
   Home: undefined;
-  Signup: undefined;
+  Register: undefined;
   Pin: undefined;
   Wallet: undefined;
-  AuthGate: undefined;
   Send: undefined;
   TxHistory: undefined;
   TxConfirmation: { tx: Transaction };

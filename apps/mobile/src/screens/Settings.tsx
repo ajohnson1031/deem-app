@@ -3,24 +3,27 @@ import { Text, TouchableOpacity, View } from 'react-native';
 
 import { currencyAtom, currentTxAtom, initialTx, walletBalanceAtom } from '~/atoms';
 import { WalletDetails } from '~/components';
+import { useAuth } from '~/contexts/AuthContext';
 import { useWallet } from '~/hooks/useWallet';
 import CoreLayout from '~/layouts/CoreLayout';
 
-const SettingsScreen = ({ onLogout }: { onLogout: () => void }) => {
+const SettingsScreen = () => {
   const setTxAtom = useSetAtom(currentTxAtom);
   const setWbAtom = useSetAtom(walletBalanceAtom);
   const setCurrencyAtom = useSetAtom(currencyAtom);
+  const { logout } = useAuth();
 
-  const { wallet, walletAddress } = useWallet();
+  const { wallet, walletAddress, deleteWallet } = useWallet();
 
   const handleLogout = async () => {
     await new Promise((resolve): void => {
       setTxAtom(initialTx);
       setWbAtom({ success: false, balance: 0 });
       setCurrencyAtom('XRP');
+      deleteWallet();
+      logout();
       resolve(null);
     });
-    onLogout();
   };
 
   return (

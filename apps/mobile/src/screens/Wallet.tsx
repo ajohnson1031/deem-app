@@ -35,7 +35,7 @@ const WalletScreen = () => {
   const VISIBLE_ITEMS = 3;
   const containerHeight = ITEM_HEIGHT * VISIBLE_ITEMS + ITEM_SPACING * (VISIBLE_ITEMS - 1);
 
-  const balanceAsNumber = parseFloat(walletBalance?.balance || '0');
+  const balanceAsNumber = parseFloat(walletBalance?.balance.toString() || '0');
   const { usdAmount, xrpAmount } = convertCurrencyAmount({
     amount: balanceAsNumber,
     fromCurrency: 'XRP', // Wallet balance is always in XRP

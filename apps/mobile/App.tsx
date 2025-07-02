@@ -6,6 +6,7 @@ import { Text, View } from 'react-native';
 import 'react-native-get-random-values';
 import Toast from 'react-native-toast-message';
 
+import { AuthProvider } from '~/contexts/AuthContext';
 import AppNavigator from '~/navigation';
 import { toastConfig } from '~/utils';
 
@@ -31,10 +32,12 @@ export default function App() {
   }
 
   return (
-    <JotaiProvider>
-      <AppNavigator />
-      <Toast config={toastConfig} />
-      <StatusBar style="auto" />
-    </JotaiProvider>
+    <AuthProvider>
+      <JotaiProvider>
+        <AppNavigator />
+        <Toast config={toastConfig} />
+        <StatusBar style="auto" />
+      </JotaiProvider>
+    </AuthProvider>
   );
 }
