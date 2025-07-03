@@ -59,7 +59,7 @@ type Transaction = {
 };
 
 type TxConfirmationScreenProps = {
-  route: { params: { tx: Transaction } };
+  route: { params: { tx: Transaction; recipient: Contact } };
   navigation: NativeStackNavigationProp<RootStackParamList, 'TxConfirmation'>;
 };
 

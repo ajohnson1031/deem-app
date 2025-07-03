@@ -18,7 +18,7 @@ import { ApprovedCurrency, RootStackParamList } from '~/types';
 import { convertCurrencyAmount, formatFloatClean, formatWithCommas } from '~/utils';
 
 const WalletScreen = () => {
-  const { walletAddress, walletBalance, createWallet, refreshBalance, loading } = useWallet();
+  const { walletAddress, walletBalance, refreshBalance, loading } = useWallet();
   const [currency, setCurrency] = useAtom(currencyAtom);
   const { copied, copy } = useCopyToClipboard();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -55,130 +55,124 @@ const WalletScreen = () => {
   return (
     <CoreLayout showBack showFooter showHeaderOptions>
       <View className="mx-6 flex-1 items-center justify-center">
-        {walletAddress ? (
-          <View className="w-full flex-1 flex-col gap-y-6">
-            {/* Balance Header */}
-            <View className="flex flex-col gap-y-2">
-              {/* Refresher */}
-              <View className="mb-2 flex flex-row items-center gap-2">
-                <Text className="text-lg font-medium text-gray-600">Balance</Text>
-                <TouchableOpacity onPress={refreshBalance}>
-                  <Fontisto name="spinner-refresh" size={20} color="#0284c7" />
-                </TouchableOpacity>
-              </View>
-
-              {/* Balance Display */}
-              <View className="flex flex-row items-baseline">
-                {currency === 'USD' && (
-                  <ShimmerPlaceHolder
-                    LinearGradient={LinearGradient}
-                    visible={!loading}
-                    style={{ height: 36, borderRadius: 4 }}>
-                    <Text className="text-5xl font-semibold">$</Text>
-                  </ShimmerPlaceHolder>
-                )}
-
-                <ShimmerPlaceHolder
-                  LinearGradient={LinearGradient}
-                  visible={!loading}
-                  style={{ height: 'fit-content', width: 'fit-content', borderRadius: 8 }}>
-                  <Text
-                    className={cn('text-8xl font-semibold', {
-                      '!text-7xl': primaryAmount.length > 6 && primaryAmount.length <= 9,
-                      '!text-5xl': primaryAmount.length > 8 && primaryAmount.length < 12,
-                      '!text-4xl': primaryAmount.length >= 12,
-                    })}>
-                    {formatWithCommas(primaryAmount)}
-                  </Text>
-                </ShimmerPlaceHolder>
-
-                {currency === 'XRP' && (
-                  <ShimmerPlaceHolder
-                    LinearGradient={LinearGradient}
-                    visible={!loading}
-                    style={{ height: 30, width: 50, borderRadius: 4 }}>
-                    <Text className="text-xl font-semibold">{currency}</Text>
-                  </ShimmerPlaceHolder>
-                )}
-              </View>
-
-              {/* ≈ Equivalent Value */}
-              {balanceAsNumber > 0 && xrpPriceUSD > 0 && (
-                <Text className="-mt-4 text-lg font-medium text-gray-500">{`${secondaryAmount} ${currency === 'XRP' ? 'USD' : ''}`}</Text>
-              )}
-
-              {/* Wallet address + currency switch */}
-              <View className="mt-4 flex flex-row gap-4">
-                <View className="flex w-9/12 flex-row items-center justify-center gap-2 rounded-lg border border-gray-200 bg-gray-100 py-4">
-                  <Text
-                    className="m-0 w-9/12 p-0"
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
-                    style={{ fontWeight: 500, color: copied ? '#0284c7' : '#4B5563' }}>
-                    {copied ? 'Copied!' : walletAddress}
-                  </Text>
-                  <TouchableOpacity onPress={() => copy(walletAddress)}>
-                    <Feather name="copy" size={20} color="#4B5563" />
-                  </TouchableOpacity>
-                </View>
-
-                <Dropdown
-                  style={[styles.dropdown]}
-                  placeholderStyle={styles.placeholderStyle}
-                  selectedTextStyle={styles.selectedTextStyle}
-                  inputSearchStyle={styles.inputSearchStyle}
-                  iconStyle={styles.iconStyle}
-                  data={currencyOptions}
-                  labelField="label"
-                  valueField="value"
-                  value={currency}
-                  onChange={(item) => {
-                    setCurrency(item.value);
-                  }}
-                />
-              </View>
-            </View>
-
-            {/* Convert Button */}
-            <View className="flex-row">
-              <TouchableOpacity
-                className="flex-1 rounded-xl bg-sky-600 py-4"
-                onPress={() => navigation.navigate('Convert')}>
-                <Text className="text-center text-xl font-medium text-white">Convert Currency</Text>
+        <View className="w-full flex-1 flex-col gap-y-6">
+          {/* Balance Header */}
+          <View className="flex flex-col gap-y-2">
+            {/* Refresher */}
+            <View className="mb-2 flex flex-row items-center gap-2">
+              <Text className="text-lg font-medium text-gray-600">Balance</Text>
+              <TouchableOpacity onPress={refreshBalance}>
+                <Fontisto name="spinner-refresh" size={20} color="#0284c7" />
               </TouchableOpacity>
             </View>
 
-            {/* Recent Conversions */}
-            <View className="gap-y-1">
-              <View className="flex flex-row justify-between border-y border-gray-200 p-2">
-                <Text className="text-lg font-medium text-gray-600">Recent Conversions</Text>
+            {/* Balance Display */}
+            <View className="flex flex-row items-baseline">
+              {currency === 'USD' && (
+                <ShimmerPlaceHolder
+                  LinearGradient={LinearGradient}
+                  visible={!loading}
+                  style={{ height: 36, borderRadius: 4 }}>
+                  <Text className="text-5xl font-semibold">$</Text>
+                </ShimmerPlaceHolder>
+              )}
 
-                <TouchableOpacity
-                  className="flex flex-row items-center justify-center gap-2"
-                  onPress={() => navigation.navigate('Conversions')}>
-                  <Text className="text-lg font-semibold text-sky-600">See All</Text>
-                  <FontAwesome6 name="arrow-right-long" size={16} color="#0284c7" />
+              <ShimmerPlaceHolder
+                LinearGradient={LinearGradient}
+                visible={!loading}
+                style={{ height: 'fit-content', width: 'fit-content', borderRadius: 8 }}>
+                <Text
+                  className={cn('text-8xl font-semibold', {
+                    '!text-7xl': primaryAmount.length > 6 && primaryAmount.length <= 9,
+                    '!text-5xl': primaryAmount.length > 8 && primaryAmount.length < 12,
+                    '!text-4xl': primaryAmount.length >= 12,
+                  })}>
+                  {formatWithCommas(primaryAmount)}
+                </Text>
+              </ShimmerPlaceHolder>
+
+              {currency === 'XRP' && (
+                <ShimmerPlaceHolder
+                  LinearGradient={LinearGradient}
+                  visible={!loading}
+                  style={{ height: 30, width: 50, borderRadius: 4 }}>
+                  <Text className="text-xl font-semibold">{currency}</Text>
+                </ShimmerPlaceHolder>
+              )}
+            </View>
+
+            {/* ≈ Equivalent Value */}
+            {balanceAsNumber > 0 && xrpPriceUSD > 0 && (
+              <Text className="-mt-4 text-lg font-medium text-gray-500">{`${secondaryAmount} ${currency === 'XRP' ? 'USD' : ''}`}</Text>
+            )}
+
+            {/* Wallet address + currency switch */}
+            <View className="mt-4 flex flex-row gap-4">
+              <View className="flex w-9/12 flex-row items-center justify-center gap-2 rounded-lg border border-gray-200 bg-gray-100 py-4">
+                <Text
+                  className="m-0 w-9/12 p-0"
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                  style={{ fontWeight: 500, color: copied ? '#0284c7' : '#4B5563' }}>
+                  {copied ? 'Copied!' : walletAddress}
+                </Text>
+                <TouchableOpacity onPress={() => copy(walletAddress ?? '')}>
+                  <Feather name="copy" size={20} color="#4B5563" />
                 </TouchableOpacity>
               </View>
-              <View className="" style={{ height: containerHeight }}>
-                <FlatList
-                  data={recentTransactions}
-                  keyExtractor={(item) => item.id!}
-                  renderItem={({ item }) => (
-                    <View className="mb-2">
-                      {/* <TxListItem listType="TX" transaction={item} /> */}
-                    </View>
-                  )}
-                  showsVerticalScrollIndicator={false}
-                />
-              </View>
+
+              <Dropdown
+                style={[styles.dropdown]}
+                placeholderStyle={styles.placeholderStyle}
+                selectedTextStyle={styles.selectedTextStyle}
+                inputSearchStyle={styles.inputSearchStyle}
+                iconStyle={styles.iconStyle}
+                data={currencyOptions}
+                labelField="label"
+                valueField="value"
+                value={currency}
+                onChange={(item) => {
+                  setCurrency(item.value);
+                }}
+              />
             </View>
           </View>
-        ) : (
-          <TouchableOpacity onPress={createWallet} className="rounded-xl bg-blue-600 px-6 py-3">
-            <Text className="font-bold text-white">Create Wallet</Text>
-          </TouchableOpacity>
-        )}
+
+          {/* Convert Button */}
+          <View className="flex-row">
+            <TouchableOpacity
+              className="flex-1 rounded-xl bg-sky-600 py-4"
+              onPress={() => navigation.navigate('Convert')}>
+              <Text className="text-center text-xl font-medium text-white">Convert Currency</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Recent Conversions */}
+          <View className="gap-y-1">
+            <View className="flex flex-row justify-between border-y border-gray-200 p-2">
+              <Text className="text-lg font-medium text-gray-600">Recent Conversions</Text>
+
+              <TouchableOpacity
+                className="flex flex-row items-center justify-center gap-2"
+                onPress={() => navigation.navigate('Conversions')}>
+                <Text className="text-lg font-semibold text-sky-600">See All</Text>
+                <FontAwesome6 name="arrow-right-long" size={16} color="#0284c7" />
+              </TouchableOpacity>
+            </View>
+            <View className="" style={{ height: containerHeight }}>
+              <FlatList
+                data={recentTransactions}
+                keyExtractor={(item) => item.id!}
+                renderItem={({ item }) => (
+                  <View className="mb-2">
+                    {/* <TxListItem listType="TX" transaction={item} /> */}
+                  </View>
+                )}
+                showsVerticalScrollIndicator={false}
+              />
+            </View>
+          </View>
+        </View>
       </View>
     </CoreLayout>
   );

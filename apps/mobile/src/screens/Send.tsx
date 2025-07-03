@@ -2,38 +2,19 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import cn from 'classnames';
-import * as LocalAuthentication from 'expo-local-authentication';
 import { useAtom, useAtomValue } from 'jotai';
-import { useEffect, useRef, useState } from 'react';
-import {
-  ActivityIndicator,
-  Animated,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { useRef, useState } from 'react';
+import { Animated, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import Toast from 'react-native-toast-message';
 
-import { currencyAtom, currentTxAtom, txSessionAuthorizedAtom, xrpPriceAtom } from '~/atoms';
+import { currencyAtom, currentTxAtom, xrpPriceAtom } from '~/atoms';
 import { useWallet } from '~/hooks/useWallet';
 import CoreLayout from '~/layouts/CoreLayout';
-import PinEntryScreen from '~/screens/PinEntry';
 import { ApprovedCurrency, RootStackParamList, TxType } from '~/types';
-import {
-  buzzAndShake,
-  convertCurrencyAmount,
-  formatFloatClean,
-  formatWithCommas,
-  getStoredPin,
-} from '~/utils';
+import { buzzAndShake, convertCurrencyAmount, formatFloatClean, formatWithCommas } from '~/utils';
 
 const SendScreen = () => {
-  const [checking, setChecking] = useState(true);
-  const [fallbackToPin, setFallbackToPin] = useState<null | boolean>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [txAuthorized, setTxAuthorized] = useAtom(txSessionAuthorizedAtom);
   const [tx, setTx] = useAtom(currentTxAtom);
   const [currency, setCurrency] = useAtom(currencyAtom);
   const xrpPriceUSD = useAtomValue(xrpPriceAtom);
@@ -56,45 +37,6 @@ const SendScreen = () => {
   const [whole, decimal = ''] = (tx.amount || '').split('.');
   const isDisabled =
     !tx.amount || (whole === '0' && parseInt(decimal, 10) === 0) || (whole === '0' && !decimal);
-
-  useEffect(() => {
-    const checkAndAuthenticate = async () => {
-      if (txAuthorized) {
-        setChecking(false);
-        return;
-      }
-
-      try {
-        const hasHardware = await LocalAuthentication.hasHardwareAsync();
-        const isEnrolled = await LocalAuthentication.isEnrolledAsync();
-
-        if (hasHardware && isEnrolled) {
-          const result = await LocalAuthentication.authenticateAsync({
-            promptMessage: 'Authorize Transaction',
-            fallbackLabel: 'Use PIN instead',
-          });
-
-          if (result.success) {
-            setTxAuthorized(true);
-            return;
-          }
-        }
-
-        const storedPin = await getStoredPin();
-        if (storedPin) {
-          setFallbackToPin(true);
-        } else {
-          setErrorMessage('No authentication method available.');
-        }
-      } catch (err) {
-        setErrorMessage((err as Error).message);
-      } finally {
-        setChecking(false);
-      }
-    };
-
-    checkAndAuthenticate();
-  }, [txAuthorized]);
 
   const handleNumberPress = (num: string) => {
     const { amount, timestamps } = tx;
@@ -191,31 +133,6 @@ const SendScreen = () => {
 
     navigation.navigate('Contacts');
   };
-
-  if (checking) {
-    return (
-      <View className="flex-1 items-center justify-center">
-        <ActivityIndicator size="large" />
-        <Text className="mt-4 text-gray-600">Verifying identity...</Text>
-        {errorMessage && <Text className="mt-2 text-red-600">{errorMessage}</Text>}
-      </View>
-    );
-  }
-
-  if (fallbackToPin) {
-    return (
-      <PinEntryScreen
-        onSuccess={() => {
-          setFallbackToPin(false);
-          setTxAuthorized(true);
-        }}
-      />
-    );
-  }
-
-  if (!txAuthorized) {
-    return null;
-  }
 
   return (
     <CoreLayout showFooter showHeaderOptions>

@@ -7,7 +7,7 @@ export type RootStackParamList = {
   Wallet: undefined;
   Send: undefined;
   TxHistory: undefined;
-  TxConfirmation: { tx: Transaction };
+  TxConfirmation: { tx: Transaction; recipient: Contact };
   TxSubmission: { tx: Transaction; recipient: Contact };
   PendingTransactions: undefined;
   Contacts: undefined;
@@ -16,4 +16,7 @@ export type RootStackParamList = {
   Settings: undefined;
   Cards: undefined;
   FeePolicy: undefined;
+  ForgotPassword: undefined;
+  VerifyPasswordReset: { email: string };
+  ResetPassword: { userId: string };
 };

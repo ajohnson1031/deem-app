@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { Animated, Text, TouchableOpacity, View } from 'react-native';
 
 import { Container } from '~/components';
-import PinInputField from '~/components/PinInputField';
+import PinOrCodeInputField from '~/components/PinOrCodeInputField';
 import { buzzAndShake } from '~/utils/feedback';
 
 type PinSetupScreenProps = {
@@ -34,7 +34,8 @@ export default function PinSetupScreen({ onComplete, errorMessage }: PinSetupScr
       <View className="flex-1 items-center justify-center px-4">
         <Text className="mb-4 text-lg">Set a 4 Digit PIN</Text>
 
-        <PinInputField
+        <PinOrCodeInputField
+          type="PIN"
           onPinChange={handlePinChange}
           onPinComplete={handlePinComplete}
           shakeRef={shakeRef}

@@ -41,6 +41,12 @@ const HomeScreen = () => {
     }
   };
 
+  const clearFields = () => {
+    setIdentifier('');
+    setPassword('');
+    setLoginError(null);
+  };
+
   return (
     <View className="flex-1 items-center justify-center bg-white px-6">
       <Text className="text-7xl font-extrabold text-black">Deem</Text>
@@ -95,9 +101,23 @@ const HomeScreen = () => {
 
       {/* Divider & Register Button */}
       <View className="mb-3 mt-6 h-[1px] w-3/4 border-b border-gray-200" />
-      <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-        <Text className="text-center text-xl font-medium text-sky-600">Register</Text>
-      </TouchableOpacity>
+      <View className="flex flex-row items-center gap-3">
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate('ForgotPassword');
+            setTimeout(() => clearFields(), 300);
+          }}>
+          <Text className="text-center text-lg font-medium text-sky-600">Change Password</Text>
+        </TouchableOpacity>
+        <Text className="font-bold">|</Text>
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate('Register');
+            setTimeout(() => clearFields(), 300);
+          }}>
+          <Text className="text-center text-lg font-medium text-sky-600">Register</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };

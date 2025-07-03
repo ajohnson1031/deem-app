@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { Animated, Text, View } from 'react-native';
 
 import { Container } from '~/components';
-import PinInputField from '~/components/PinInputField';
+import PinOrCodeInputField from '~/components/PinOrCodeInputField';
 import { getStoredPin } from '~/utils/securePin';
 
 type PinEntryScreenProps = {
@@ -34,7 +34,8 @@ export default function PinEntryScreen({ onSuccess }: PinEntryScreenProps) {
       <View className="flex-1 items-center justify-center px-4">
         <Text className="mb-4 text-2xl">Enter PIN</Text>
 
-        <PinInputField
+        <PinOrCodeInputField
+          type="PIN"
           onPinChange={handlePinChange}
           onPinComplete={handlePinComplete}
           shakeRef={shakeRef}

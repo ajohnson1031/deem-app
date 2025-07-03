@@ -1,4 +1,4 @@
-// PinInputField.tsx
+// PinOrCodeInputField.tsx
 import { useEffect, useRef, useState } from 'react';
 import { Animated, TextInput } from 'react-native';
 
@@ -6,20 +6,26 @@ import { Theme } from '~/types';
 import { buzzAndShake } from '~/utils/feedback';
 import { getStoredPin, PIN_CELL_COUNT } from '~/utils/securePin';
 
-interface PinInputFieldProps {
+interface PinOrCodeInputFieldProps {
+  type: 'PIN' | 'VERIFICATION_CODE';
   onPinChange?: (pin: string) => void;
   onPinComplete: () => Promise<void>;
   shakeRef: Animated.Value;
   theme?: Theme;
+  cellCount?: number;
+  hideFieldValues?: boolean;
 }
 
-const PinInputField = ({
+const PinOrCodeInputField = ({
+  type,
   onPinChange,
   onPinComplete,
   shakeRef,
   theme = 'DARK',
-}: PinInputFieldProps) => {
-  const [pinLength, setPinLength] = useState<number>(PIN_CELL_COUNT);
+  cellCount = PIN_CELL_COUNT,
+  hideFieldValues = false,
+}: PinOrCodeInputFieldProps) => {
+  const [pinLength, setPinLength] = useState<number>(cellCount);
   const [pin, setPin] = useState<string[]>(Array(pinLength).fill(''));
   const [storedPin, setStoredPin] = useState<string | null>(null);
   const inputsRef = useRef<(TextInput | null)[]>([]);
@@ -29,27 +35,34 @@ const PinInputField = ({
   };
 
   useEffect(() => {
-    getStoredPin().then((pin) => {
-      if (pin) {
-        setStoredPin(pin);
-        setPinLength(pin.length);
-      }
-    });
-  }, []);
+    if (type === 'PIN') {
+      getStoredPin().then((pin) => {
+        if (pin) {
+          setStoredPin(pin);
+          setPinLength(pin.length);
+        }
+      });
+    }
+  }, [type]);
 
   useEffect(() => {
     const joinedPin = pin.join('');
-    if (joinedPin.length === pinLength && storedPin !== null) {
-      if (joinedPin !== storedPin) {
-        buzzAndShake(shakeRef);
-        onPinComplete();
-        setPin(Array(pinLength).fill(''));
-        focusInput(0);
+    if (joinedPin.length === pinLength) {
+      if (type === 'PIN') {
+        if (storedPin && joinedPin !== storedPin) {
+          buzzAndShake(shakeRef);
+          onPinComplete();
+          setPin(Array(pinLength).fill(''));
+          focusInput(0);
+        } else {
+          onPinComplete();
+        }
       } else {
+        // VERIFICATION_CODE mode: just fire the callback
         onPinComplete();
       }
     }
-  }, [pin]);
+  }, [pin, pinLength, storedPin, type, onPinComplete, shakeRef]);
 
   const focusInput = (index: number) => {
     inputsRef.current[index]?.focus();
@@ -89,12 +102,12 @@ const PinInputField = ({
             ref={(el) => {
               inputsRef.current[index] = el;
             }}
-            value={pin[index] ? '•' : ''}
+            value={type === 'PIN' ? (pin[index] ? '•' : '') : hideFieldValues ? '*' : _}
             onChangeText={(text) => handleChange(text, index)}
             onKeyPress={(e) => handleKeyPress(e, index)}
             keyboardType="number-pad"
             maxLength={1}
-            className={`h-12 w-12 rounded-lg border-b text-center text-2xl ${
+            className={`h-12 w-12 rounded-lg ${type === 'PIN' ? 'border-b' : 'border'} text-center text-2xl ${
               pin[index] ? borderColors.focused : borderColors.blurred
             } ${theme === 'DARK' ? 'text-gray-800' : 'text-white'}`}
             textAlign="center"
@@ -105,4 +118,4 @@ const PinInputField = ({
   );
 };
 
-export default PinInputField;
+export default PinOrCodeInputField;

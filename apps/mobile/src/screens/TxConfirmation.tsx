@@ -15,6 +15,7 @@ import { calculateFees, capitalize, formatWithCommas } from '~/utils';
 
 const TxConfirmationScreen = ({ route, navigation }: TxConfirmationScreenProps) => {
   const currentTx = route.params.tx;
+  const currentRecipient = route.params.recipient;
 
   const currency = useAtomValue(currencyAtom);
   const xrpInitial = useAtomValue(xrpInitialPriceAtom);
@@ -94,7 +95,7 @@ const TxConfirmationScreen = ({ route, navigation }: TxConfirmationScreenProps) 
         </Text>
 
         <View className="rounded-xl border border-gray-200 py-3">
-          <TxListItem transaction={tx} listType="CONFIRMATION" />
+          <TxListItem transaction={tx} listType="CONFIRMATION" contact={currentRecipient} />
 
           {/* Amount Display */}
           <View className="p-3">

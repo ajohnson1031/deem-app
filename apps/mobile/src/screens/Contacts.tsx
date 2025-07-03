@@ -1,7 +1,7 @@
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import cn from 'classnames';
-import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import { useState } from 'react';
 import { FlatList, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
@@ -23,7 +23,7 @@ type Props = {
 
 const ContactScreen = ({ navigation }: Props) => {
   const [tx, setTx] = useAtom(currentTxAtom);
-  const setRecipient = useSetAtom(recipientAtom);
+  const [recipient, setRecipient] = useAtom(recipientAtom);
   const currency = useAtomValue(currencyAtom);
   const contacts = useAtomValue(contactsAtom);
   const suggestedContacts = useAtomValue(suggestedContactsAtom);
@@ -71,7 +71,8 @@ const ContactScreen = ({ navigation }: Props) => {
       setRecipient(null);
       navigation.navigate('Send');
     } else {
-      navigation.navigate('TxConfirmation', { tx });
+      if (!tx || !recipient) return;
+      navigation.navigate('TxConfirmation', { tx, recipient });
     }
   };
 
