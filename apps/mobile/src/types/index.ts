@@ -1,5 +1,6 @@
 export type { Contact, SwipeableTransactionRowProps } from './contacts';
 export type { RootStackParamList } from './navigation';
+export type { StepOneFormProps, StepOneUserInfo, UserData, UserDataKey } from './registration';
 export type { Theme } from './theme';
 export type {
   ApprovedCurrency,

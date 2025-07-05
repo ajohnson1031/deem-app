@@ -17,3 +17,8 @@ export const registerAtom = atom<UserData>({
   password: '',
   avatarUri: undefined,
 });
+
+export const usernameAvailabilityAtom = atom<{
+  checking: boolean;
+  available: boolean | null;
+}>({ checking: false, available: null });

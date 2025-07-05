@@ -12,4 +12,14 @@ interface StepOneFormProps {
   onCancel: () => void;
 }
 
-export type { StepOneFormProps, StepOneUserInfo };
+type UserData = {
+  name: string;
+  username: string;
+  email: string;
+  password: string;
+  phoneNumber?: string;
+};
+
+type UserDataKey = keyof UserData;
+
+export type { StepOneFormProps, StepOneUserInfo, UserData, UserDataKey };

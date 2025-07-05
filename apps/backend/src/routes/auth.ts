@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   changePasswordHandler,
+  checkUsernameAvailability,
   loginHandler,
   logoutHandler,
   refreshTokenHandler,
@@ -11,6 +12,7 @@ import {
 
 const router = Router();
 
+router.get("/check-username", checkUsernameAvailability);
 router.post("/login", loginHandler);
 router.post("/refresh", refreshTokenHandler);
 router.post("/logout", logoutHandler);

@@ -170,7 +170,6 @@ const refreshTokenHandler = async (req: Request, res: Response) => {
   }
 };
 
-// auth.controller.ts
 const changePasswordHandler = async (req: Request, res: Response) => {
   const userId = req.user?.id;
   const { oldPassword, newPassword } = req.body;
@@ -309,4 +308,27 @@ const resetPassword = async (req: Request, res: Response) => {
   return res.status(200).json({ message: "Password updated." });
 };
 
-export { changePasswordHandler, loginHandler, logoutHandler, refreshTokenHandler, registerHandler, requestPasswordReset, resetPassword, verifyPasswordResetCode };
+const checkUsernameAvailability = async (req: Request, res: Response) => {
+  const { username } = req.query;
+  if (typeof username !== "string" || username.trim() === "") {
+    return res.status(400).json({ available: false, error: "Invalid username" });
+  }
+
+  const existing = await prisma.user.findUnique({
+    where: { username: username.toLowerCase() },
+  });
+
+  return res.status(200).json({ available: !existing });
+};
+
+export {
+  changePasswordHandler,
+  checkUsernameAvailability,
+  loginHandler,
+  logoutHandler,
+  refreshTokenHandler,
+  registerHandler,
+  requestPasswordReset,
+  resetPassword,
+  verifyPasswordResetCode,
+};

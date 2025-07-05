@@ -27,6 +27,7 @@ const RegisterScreen = () => {
         phoneNumber: '',
         password: '',
         avatarUri: undefined,
+        fieldErrors: {},
       });
     }, 300);
   };
