@@ -11,7 +11,7 @@ import { RootStackParamList } from '~/types';
 import { api, deriveKeyFromPassword, encryptSeed } from '~/utils';
 
 const RegisterScreen = () => {
-  const [step, setStep] = useState<1 | 2>(2);
+  const [step, setStep] = useState<1 | 2>(1);
   const [userInfo, setUserInfo] = useState<any>(null);
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const setUserData = useSetAtom(registerAtom);

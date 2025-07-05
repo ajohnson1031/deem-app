@@ -48,7 +48,7 @@ const StepTwoWallet = ({ onComplete, onCancel }: StepTwoWalletProps) => {
           Setup Your Deem Wallet
         </Text>
 
-        {generated && (
+        {!generated && (
           <>
             <Text className="mb-6 text-lg text-gray-600">
               Let Deem securely create a new wallet for you.
@@ -105,7 +105,7 @@ const StepTwoWallet = ({ onComplete, onCancel }: StepTwoWalletProps) => {
           </>
         )}
 
-        {!generated && (
+        {generated && (
           <View className="mb-4">
             <Text className="mb-2 text-gray-600">Wallet Address:</Text>
             <View className="mb-4 flex flex-row items-center justify-center gap-2 rounded-lg">

@@ -3,8 +3,8 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import axios from 'axios';
 import { useState } from 'react';
 import { Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { PasswordInput } from '~/components';
 
+import { PasswordInput } from '~/components';
 import { useAuth } from '~/contexts/AuthContext';
 import { useGlobalKeyboardIdleDismiss, useWallet } from '~/hooks';
 import { RootStackParamList } from '~/types';
