@@ -8,8 +8,8 @@ import { getStoredPin, PIN_CELL_COUNT } from '~/utils/securePin';
 
 interface PinOrCodeInputFieldProps {
   type: 'PIN' | 'VERIFICATION_CODE';
-  onPinChange?: (pin: string) => void;
-  onPinComplete: () => Promise<void>;
+  onChange?: (pin: string) => void;
+  onComplete: () => Promise<void>;
   shakeRef: Animated.Value;
   theme?: Theme;
   cellCount?: number;
@@ -18,15 +18,15 @@ interface PinOrCodeInputFieldProps {
 
 const PinOrCodeInputField = ({
   type,
-  onPinChange,
-  onPinComplete,
+  onChange,
+  onComplete,
   shakeRef,
   theme = 'DARK',
   cellCount = PIN_CELL_COUNT,
   hideFieldValues = false,
 }: PinOrCodeInputFieldProps) => {
-  const [pinLength, setPinLength] = useState<number>(cellCount);
-  const [pin, setPin] = useState<string[]>(Array(pinLength).fill(''));
+  const [valLength, setValLength] = useState<number>(cellCount);
+  const [val, setVal] = useState<string[]>(Array(valLength).fill(''));
   const [storedPin, setStoredPin] = useState<string | null>(null);
   const inputsRef = useRef<(TextInput | null)[]>([]);
   const borderColors = {
@@ -39,30 +39,30 @@ const PinOrCodeInputField = ({
       getStoredPin().then((pin) => {
         if (pin) {
           setStoredPin(pin);
-          setPinLength(pin.length);
+          setValLength(pin.length);
         }
       });
     }
   }, [type]);
 
   useEffect(() => {
-    const joinedPin = pin.join('');
-    if (joinedPin.length === pinLength) {
+    const joinedVal = val.join('');
+    if (joinedVal.length === valLength) {
       if (type === 'PIN') {
-        if (storedPin && joinedPin !== storedPin) {
+        if (storedPin && joinedVal !== storedPin) {
           buzzAndShake(shakeRef);
-          onPinComplete();
-          setPin(Array(pinLength).fill(''));
+          onComplete();
+          setVal(Array(valLength).fill(''));
           focusInput(0);
         } else {
-          onPinComplete();
+          onComplete();
         }
       } else {
         // VERIFICATION_CODE mode: just fire the callback
-        onPinComplete();
+        onComplete();
       }
     }
-  }, [pin, pinLength, storedPin, type, onPinComplete, shakeRef]);
+  }, [val, valLength, storedPin, type, onComplete, shakeRef]);
 
   const focusInput = (index: number) => {
     inputsRef.current[index]?.focus();
@@ -71,22 +71,22 @@ const PinOrCodeInputField = ({
   const handleChange = (text: string, index: number) => {
     const cleanText = text.replace(/[^0-9]/g, '');
     if (!cleanText) return;
-    const newPin = [...pin];
-    newPin[index] = cleanText;
-    setPin(newPin);
-    onPinChange?.(newPin.join(''));
-    if (index < pinLength - 1) focusInput(index + 1);
+    const newVal = [...val];
+    newVal[index] = cleanText;
+    setVal(newVal);
+    onChange?.(newVal.join(''));
+    if (index < valLength - 1) focusInput(index + 1);
   };
 
   const handleKeyPress = ({ nativeEvent }: any, index: number) => {
     if (nativeEvent.key === 'Backspace') {
-      const newPin = [...pin];
-      if (pin[index]) {
-        newPin[index] = '';
-        setPin(newPin);
+      const newVal = [...val];
+      if (val[index]) {
+        newVal[index] = '';
+        setVal(newVal);
       } else if (index > 0) {
-        newPin[index - 1] = '';
-        setPin(newPin);
+        newVal[index - 1] = '';
+        setVal(newVal);
         focusInput(index - 1);
       }
     }
@@ -94,7 +94,7 @@ const PinOrCodeInputField = ({
 
   return (
     <Animated.View className="flex-row gap-2" style={{ transform: [{ translateX: shakeRef }] }}>
-      {Array(pinLength)
+      {Array(valLength)
         .fill(0)
         .map((_, index) => (
           <TextInput
@@ -102,13 +102,14 @@ const PinOrCodeInputField = ({
             ref={(el) => {
               inputsRef.current[index] = el;
             }}
-            value={type === 'PIN' ? (pin[index] ? '•' : '') : hideFieldValues ? '*' : _}
+            value={val[index]}
+            secureTextEntry={type === 'PIN' || hideFieldValues}
             onChangeText={(text) => handleChange(text, index)}
             onKeyPress={(e) => handleKeyPress(e, index)}
             keyboardType="number-pad"
             maxLength={1}
             className={`h-12 w-12 rounded-lg ${type === 'PIN' ? 'border-b' : 'border'} text-center text-2xl ${
-              pin[index] ? borderColors.focused : borderColors.blurred
+              val[index] ? borderColors.focused : borderColors.blurred
             } ${theme === 'DARK' ? 'text-gray-800' : 'text-white'}`}
             textAlign="center"
             style={{ fontSize: 24, lineHeight: 32 }}

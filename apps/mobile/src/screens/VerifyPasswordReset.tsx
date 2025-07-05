@@ -52,8 +52,8 @@ const VerifyPasswordResetScreen = ({ route }: { route: { params: { email: string
         cellCount={6}
         hideFieldValues={false}
         shakeRef={shakeAnim}
-        onPinChange={handleCodeChange}
-        onPinComplete={handleVerify}
+        onChange={handleCodeChange}
+        onComplete={handleVerify}
         theme="LIGHT"
       />
 

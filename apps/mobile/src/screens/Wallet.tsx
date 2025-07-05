@@ -20,7 +20,7 @@ import { convertCurrencyAmount, formatFloatClean, formatWithCommas } from '~/uti
 const WalletScreen = () => {
   const { walletAddress, walletBalance, refreshBalance, loading } = useWallet();
   const [currency, setCurrency] = useAtom(currencyAtom);
-  const { copied, copy } = useCopyToClipboard();
+  const { copiedKey, copy } = useCopyToClipboard();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const recentTransactions = useAtomValue(transactionsAtom).slice(0, 4);
   const xrpPriceUSD = useAtomValue(xrpPriceAtom);
@@ -113,10 +113,12 @@ const WalletScreen = () => {
                   className="m-0 w-9/12 p-0"
                   numberOfLines={1}
                   ellipsizeMode="tail"
-                  style={{ fontWeight: 500, color: copied ? '#0284c7' : '#4B5563' }}>
-                  {copied ? 'Copied!' : walletAddress}
+                  style={{ fontWeight: 500, color: copiedKey ? '#0284c7' : '#4B5563' }}>
+                  {copiedKey ? 'Copied!' : walletAddress}
                 </Text>
-                <TouchableOpacity onPress={() => copy(walletAddress ?? '')}>
+                <TouchableOpacity
+                  disabled={!walletAddress}
+                  onPress={() => copy(walletAddress ?? '', 'wallet')}>
                   <Feather name="copy" size={20} color="#4B5563" />
                 </TouchableOpacity>
               </View>

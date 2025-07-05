@@ -3,6 +3,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import axios from 'axios';
 import { useState } from 'react';
 import { Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { PasswordInput } from '~/components';
 
 import { useAuth } from '~/contexts/AuthContext';
 import { useGlobalKeyboardIdleDismiss, useWallet } from '~/hooks';
@@ -73,14 +74,12 @@ const HomeScreen = () => {
 
         {/* Input: Password */}
         <View className="w-full rounded-lg bg-gray-100">
-          <TextInput
-            className="w-full p-3 py-4 text-lg font-medium leading-[18px]"
+          <PasswordInput
             value={password}
             placeholder="Password"
             placeholderTextColor="#777"
             autoCapitalize="none"
             autoCorrect={false}
-            secureTextEntry
             onFocus={cancelIdleTimer}
             onChangeText={(val) => {
               setPassword(val);

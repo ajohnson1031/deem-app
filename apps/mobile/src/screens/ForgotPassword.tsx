@@ -57,7 +57,7 @@ const ForgotPasswordScreen = () => {
           onPress={handleSubmit}
           disabled={status === 'sending'}>
           <Text className="text-center text-xl font-medium text-white">
-            {status === 'sending' ? 'Sending...' : 'Send Reset Code'}
+            {status === 'sending' ? 'Sending...' : 'Send Password Reset Code'}
           </Text>
         </TouchableOpacity>
       </View>

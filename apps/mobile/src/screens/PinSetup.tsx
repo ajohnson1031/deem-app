@@ -36,8 +36,8 @@ export default function PinSetupScreen({ onComplete, errorMessage }: PinSetupScr
 
         <PinOrCodeInputField
           type="PIN"
-          onPinChange={handlePinChange}
-          onPinComplete={handlePinComplete}
+          onChange={handlePinChange}
+          onComplete={handlePinComplete}
           shakeRef={shakeRef}
         />
 
