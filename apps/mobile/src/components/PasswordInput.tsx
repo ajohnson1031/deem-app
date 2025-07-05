@@ -1,20 +1,44 @@
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { useState } from 'react';
-import { TextInput, TextInputProps, TouchableOpacity, View } from 'react-native';
+import { Text, TextInput, TextInputProps, TouchableOpacity, View } from 'react-native';
 
-const PasswordInput = (props: TextInputProps) => {
-  const { onChangeText, secureTextEntry, ...rest } = props;
+interface PasswordInputProps extends TextInputProps {
+  showCountdown?: boolean;
+}
+
+const PasswordInput = (props: PasswordInputProps) => {
+  const { onChangeText, maxLength, secureTextEntry, showCountdown = false, ...rest } = props;
   const [readable, setReadable] = useState<boolean>(false);
+  const [textCounter, setTextCounter] = useState<number | null>(null);
+
+  const handleChangeText = (text: string) => {
+    if (maxLength && text.length) {
+      setTextCounter(maxLength - text.length);
+    }
+
+    if (text.length === 0) {
+      setTextCounter(null);
+    }
+    if (onChangeText) {
+      onChangeText(text);
+    }
+  };
+
+  const textColor =
+    typeof textCounter === 'number' && textCounter <= 5 ? 'text-red-500' : 'text-gray-500';
+
   return (
     <View className="flex w-full flex-row items-center justify-between gap-3 rounded-lg bg-gray-100">
       <TextInput
-        className="w-[85%] p-3 py-4 text-lg font-medium leading-[18px]"
-        onChangeText={onChangeText}
+        className={`${showCountdown ? 'w-[75%]' : 'w-[85%]'} p-3 py-4 text-lg font-medium leading-[18px]`}
+        onChangeText={handleChangeText}
         secureTextEntry={!readable}
         {...rest}
       />
-
-      <TouchableOpacity className="mr-3" onPress={() => setReadable(!readable)}>
+      {showCountdown && maxLength && (
+        <Text className={`w-8 text-right font-semibold ${textColor}`}>{textCounter}</Text>
+      )}
+      <TouchableOpacity className={`${'mr-3'}`} onPress={() => setReadable(!readable)}>
         <FontAwesome6
           name={readable ? 'eye' : 'eye-slash'}
           size={20}
