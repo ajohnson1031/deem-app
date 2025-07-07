@@ -1,5 +1,5 @@
 // hooks/useWallet.ts
-import { WALLET_STORAGE_KEY, WALLET_SYNCED_FLAG } from '@env';
+import { API_BASE_URL, WALLET_STORAGE_KEY, WALLET_SYNCED_FLAG } from '@env';
 import * as SecureStore from 'expo-secure-store';
 import { useAtom } from 'jotai';
 import { useCallback, useEffect } from 'react';
@@ -24,7 +24,7 @@ export function useWallet() {
     async (password: string) => {
       try {
         // Check for local seed first
-        let seed = await SecureStore.getItemAsync(WALLET_STORAGE_KEY);
+        const seed = await SecureStore.getItemAsync(WALLET_STORAGE_KEY);
         if (seed) {
           setWallet(Wallet.fromSeed(seed));
           return;
@@ -35,7 +35,7 @@ export function useWallet() {
         if (alreadySynced) return;
 
         // Otherwise fetch from backend
-        const res = await api.get('/wallet');
+        const res = await api.get(`${API_BASE_URL}/wallet`);
         const encryptedSeed = res.data?.encryptedSeed;
 
         if (encryptedSeed) {
@@ -67,7 +67,7 @@ export function useWallet() {
       const encryptedSeed = encryptSeed(newWallet.seed!, key);
 
       try {
-        await api.post('/wallet', { encryptedSeed });
+        await api.post(`${API_BASE_URL}/wallet`, { encryptedSeed });
         await SecureStore.setItemAsync(WALLET_SYNCED_FLAG, 'true');
       } catch (err) {
         console.error('Failed to save wallet remotely:', err);
@@ -94,7 +94,7 @@ export function useWallet() {
     const key = await deriveKeyFromPassword(password);
     const encryptedSeed = encryptSeed(newWallet.seed!, key);
 
-    await api.post('/wallet', {
+    await api.post(`${API_BASE_URL}/wallet`, {
       encryptedSeed,
       walletAddress: newWallet.classicAddress,
     });
@@ -117,7 +117,7 @@ export function useWallet() {
         const newKey = await deriveKeyFromPassword(newPassword);
         const newEncryptedSeed = encryptSeed(seed, newKey);
 
-        await api.patch('/wallet', { encryptedSeed: newEncryptedSeed });
+        await api.patch(`${API_BASE_URL}/wallet`, { encryptedSeed: newEncryptedSeed });
         await SecureStore.setItemAsync(WALLET_STORAGE_KEY, seed);
       } catch (err) {
         console.error('Failed to re-encrypt wallet:', err);

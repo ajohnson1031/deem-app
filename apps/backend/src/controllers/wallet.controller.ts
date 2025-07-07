@@ -82,4 +82,4 @@ const updateWalletSeedHandler = async (req: Request, res: Response) => {
   }
 };
 
-export {createWalletHandler, updateWalletSeedHandler, getWalletHandler}
+export { createWalletHandler, getWalletHandler, updateWalletSeedHandler };

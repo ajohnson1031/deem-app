@@ -14,7 +14,12 @@ declare global {
   }
 }
 
-export const requireAuth = (req: Request, res: Response, next: NextFunction) => {
+// middleware/auth.ts
+interface RequestWithUser extends Request {
+  user?: { id: string };
+}
+
+export const requireAuth = (req: RequestWithUser, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -26,8 +31,8 @@ export const requireAuth = (req: Request, res: Response, next: NextFunction) => 
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
 
-    // ✅ Attach the user object to the request
-    req.user = { id: decoded.userId };
+    // ✅ Attach user to request so controllers can access it
+    (req as any).user = { id: decoded.userId };
 
     next();
   } catch (err) {

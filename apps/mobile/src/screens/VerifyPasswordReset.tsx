@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@env';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import axios from 'axios';
@@ -25,7 +26,7 @@ const VerifyPasswordResetScreen = ({ route }: { route: { params: { email: string
 
     try {
       setSubmitting(true);
-      const response = await axios.post('/auth/verify-reset-code', { email, code });
+      const response = await axios.post(`${API_BASE_URL}/auth/verify-reset-code`, { email, code });
 
       if (response.status === 200) {
         const userId = response.data.userId;

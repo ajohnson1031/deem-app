@@ -116,12 +116,12 @@ const StepTwoWallet = ({ onComplete, onCancel }: StepTwoWalletProps) => {
             <Text className="mb-2 text-gray-600">Wallet Address:</Text>
             <View className="mb-4 flex flex-row items-center justify-center gap-2 rounded-lg">
               <Text
-                className="m-0 w-10/12 rounded-md border border-gray-200 bg-gray-100 p-3 text-xl"
+                className="m-0 w-10/12 rounded-md border border-gray-200 bg-gray-100 p-3"
                 text-xl
                 numberOfLines={1}
                 ellipsizeMode="tail"
                 style={{ fontWeight: 500, color: copiedKey === 'wallet' ? '#0284c7' : '#4B5563' }}>
-                {copiedKey === 'wallet' ? 'Copied Wallet Address!' : walletAddress}
+                {copiedKey === 'wallet' ? 'Wallet Address Copied!' : walletAddress}
               </Text>
               <TouchableOpacity
                 className="flex w-2/12 flex-1 items-center justify-center rounded-md border border-gray-200  bg-gray-100 p-3.5"
@@ -134,11 +134,11 @@ const StepTwoWallet = ({ onComplete, onCancel }: StepTwoWalletProps) => {
             <Text className="mb-2 text-gray-600">Wallet Seed:</Text>
             <View className="mb-6 flex flex-row items-center justify-center gap-2 rounded-lg">
               <Text
-                className="m-0 w-10/12 rounded-md  border border-gray-200 bg-gray-100 p-3 text-xl"
+                className="m-0 w-10/12 rounded-md  border border-gray-200 bg-gray-100 p-3"
                 numberOfLines={1}
                 ellipsizeMode="tail"
                 style={{ fontWeight: 500, color: copiedKey === 'seed' ? '#0284c7' : '#4B5563' }}>
-                {copiedKey === 'seed' ? 'Copied Seed!' : seed && '•'.repeat(seed.length)}
+                {copiedKey === 'seed' ? 'Seed Copied!' : seed && '•'.repeat(seed.length)}
               </Text>
               <TouchableOpacity
                 className="flex w-2/12 flex-1 items-center justify-center rounded-md border border-gray-200  bg-gray-100 p-3.5"

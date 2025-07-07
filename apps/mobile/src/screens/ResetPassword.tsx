@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@env';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import axios from 'axios';
@@ -49,7 +50,7 @@ const ResetPasswordScreen = ({ route }: { route: { params: { userId: string } } 
 
     try {
       setSubmitting(true);
-      await axios.post('/auth/reset-password', {
+      await axios.post(`${API_BASE_URL}/auth/reset-password`, {
         userId,
         newPassword,
       });

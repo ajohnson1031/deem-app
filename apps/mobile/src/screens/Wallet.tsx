@@ -114,7 +114,7 @@ const WalletScreen = () => {
                   numberOfLines={1}
                   ellipsizeMode="tail"
                   style={{ fontWeight: 500, color: copiedKey ? '#0284c7' : '#4B5563' }}>
-                  {copiedKey ? 'Copied!' : walletAddress}
+                  {copiedKey ? 'Wallet Address Copied!' : walletAddress}
                 </Text>
                 <TouchableOpacity
                   disabled={!walletAddress}

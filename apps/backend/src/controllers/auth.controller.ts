@@ -111,6 +111,7 @@ const loginHandler = async (req: Request, res: Response) => {
         maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
       })
       .json({ user: userData, token: accessToken });
+      
   } catch (err) {
     console.error("Login error:", err);
     return res.status(500).json({ error: "Internal server error." });

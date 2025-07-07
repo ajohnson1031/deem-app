@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@env';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useState } from 'react';
@@ -18,7 +19,7 @@ const ForgotPasswordScreen = () => {
     setStatus('sending');
 
     try {
-      await api.post('/auth/request-password-reset', { email });
+      await api.post(`${API_BASE_URL}/auth/request-password-reset`, { email });
       setStatus('sent');
 
       // Navigate to the next screen

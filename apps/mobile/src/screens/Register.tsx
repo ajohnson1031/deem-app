@@ -112,8 +112,9 @@ const RegisterScreen = () => {
 
       navigation.navigate('Home');
       Toast.show({
-        text1: 'Welcome to Deem',
-        text2: 'Account Successfully Created.',
+        type: 'success',
+        text1: `Welcome to Deem, ${userData.name.split(' ')[0]}!`,
+        text2: 'Please login to continue.',
       });
     } catch (err: any) {
       console.error('Registration failed:', err);
