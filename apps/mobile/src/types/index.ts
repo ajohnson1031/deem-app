@@ -1,6 +1,5 @@
 export type { Contact, SwipeableTransactionRowProps } from './contacts';
 export type { RootStackParamList } from './navigation';
-export type { StepOneFormProps, StepOneUserInfo, UserData, UserDataKey } from './registration';
 export type { Theme } from './theme';
 export type {
   ApprovedCurrency,
@@ -11,6 +10,7 @@ export type {
   TxSubmissionScreenProps,
   TxType,
 } from './transaction';
+export type { UserData, UserDataFormProps, UserDataInfo, UserDataKey } from './user';
 export type { WalletBalanceResult } from './wallet';
 
 export { STATUS_GROUPS, TX_STATUS_LABELS } from './transaction';

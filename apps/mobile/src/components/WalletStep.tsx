@@ -2,7 +2,7 @@ import { Feather } from '@expo/vector-icons';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useEffect, useState } from 'react';
 import { Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { Wallet } from 'xrpl';
+import { Wallet, isValidClassicAddress } from 'xrpl';
 
 import { useCopyToClipboard } from '~/hooks';
 
@@ -14,23 +14,31 @@ interface StepTwoWalletProps {
 const StepTwoWallet = ({ onComplete, onCancel }: StepTwoWalletProps) => {
   const [walletAddress, setWalletAddress] = useState<string | undefined>();
   const [seed, setSeed] = useState<string | undefined>();
-  const [error, setError] = useState<string | null>(null);
   const [generated, setGenerated] = useState(false);
   const [isUsingOwnWallet, setIsUsingOwnWallet] = useState<boolean>(false);
   const { copiedKey, copy } = useCopyToClipboard();
+  const isValidWalletAddress = walletAddress ? isValidClassicAddress(walletAddress.trim()) : false;
+  const isValidSeed = (() => {
+    try {
+      Wallet.fromSeed(seed!.trim());
+      return true;
+    } catch {
+      return false;
+    }
+  })();
+
+  const isFormValid = isValidWalletAddress && isValidSeed;
 
   const handleGenerate = () => {
     const wallet = Wallet.generate();
     setWalletAddress(wallet.classicAddress);
     setSeed(wallet.seed!);
     setGenerated(true);
-    setError(null);
     setIsUsingOwnWallet(false);
   };
 
   const handleSubmit = () => {
     if (!walletAddress || !seed) {
-      setError('Wallet address and seed are required.');
       return;
     }
 
@@ -82,9 +90,7 @@ const StepTwoWallet = ({ onComplete, onCancel }: StepTwoWalletProps) => {
                 placeholderTextColor="#777"
                 autoCapitalize="none"
                 value={walletAddress}
-                onChangeText={(val) => {
-                  setWalletAddress(val);
-                }}
+                onChangeText={(val) => setWalletAddress(val.trim())}
                 editable={!generated}
               />
             </View>
@@ -153,7 +159,12 @@ const StepTwoWallet = ({ onComplete, onCancel }: StepTwoWalletProps) => {
           </View>
         )}
 
-        {error && <Text className="mb-3 text-center text-red-500">{error}</Text>}
+        {!isValidWalletAddress && walletAddress && walletAddress.length > 0 && (
+          <Text className="mb-2 text-sm text-red-500">Invalid wallet address.</Text>
+        )}
+        {!isValidSeed && seed && seed.length > 0 && (
+          <Text className="mb-2 text-sm text-red-500">Invalid wallet seed.</Text>
+        )}
       </View>
       <View className="mb-8 flex-row gap-4">
         <TouchableOpacity
@@ -164,10 +175,10 @@ const StepTwoWallet = ({ onComplete, onCancel }: StepTwoWalletProps) => {
 
         <TouchableOpacity
           onPress={handleSubmit}
-          className={`mt-4 flex-1 rounded-lg py-3 ${!!walletAddress && !!seed ? 'bg-sky-600' : 'bg-gray-300'}`}
-          disabled={!isUsingOwnWallet}>
+          className={`mt-4 flex-1 rounded-lg py-3 ${isFormValid ? 'bg-sky-600' : 'bg-gray-300'}`}
+          disabled={isUsingOwnWallet ? !isFormValid : false}>
           <Text
-            className={`text-center text-xl font-medium ${!!walletAddress && !!seed ? 'text-white' : 'text-gray-400'}`}>
+            className={`text-center text-xl font-medium ${isFormValid ? 'text-white' : 'text-gray-400'}`}>
             Register Account
           </Text>
         </TouchableOpacity>

@@ -1,23 +1,70 @@
+import { API_BASE_URL, AVATAR_UPLOAD_PRESET, CLOUDINARY_CLOUD_NAME } from '@env';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useSetAtom } from 'jotai';
+import { useAtom } from 'jotai';
 import { useState } from 'react';
 import { View } from 'react-native';
+import Toast from 'react-native-toast-message';
+import { v4 as uuidv4 } from 'uuid';
 
 import { registerAtom } from '~/atoms';
-import { StepOneForm, StepTwoWallet } from '~/components';
+import { UserDataForm, WalletStep } from '~/components';
 import CoreLayout from '~/layouts/CoreLayout';
 import { RootStackParamList } from '~/types';
 import { api, deriveKeyFromPassword, encryptSeed } from '~/utils';
 
 const RegisterScreen = () => {
   const [step, setStep] = useState<1 | 2>(1);
-  const [userInfo, setUserInfo] = useState<any>(null);
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const setUserData = useSetAtom(registerAtom);
+  const [userData, setUserData] = useAtom(registerAtom);
+  const CLOUDINARY_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+
+  const handleAvatarUpload = async (): Promise<string | undefined> => {
+    if (!userData.avatarUri || userData.avatarUri.startsWith('http')) return userData.avatarUri;
+
+    const filename = `avatar_${uuidv4()}.jpg`;
+    const formData = new FormData();
+
+    formData.append('file', {
+      uri: userData.avatarUri,
+      name: filename,
+      type: 'image/jpeg',
+    } as any);
+    formData.append('upload_preset', AVATAR_UPLOAD_PRESET);
+
+    try {
+      const response = await fetch(CLOUDINARY_URL, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      const data = await response.json();
+
+      if (data.secure_url) {
+        return data.secure_url;
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: 'Upload failed',
+          text2: 'Could not upload your avatar. Try again later.',
+        });
+      }
+    } catch (err) {
+      console.error('Cloudinary upload error:', err);
+      Toast.show({
+        type: 'error',
+        text1: 'Upload error',
+        text2: 'Something went wrong while uploading your avatar.',
+      });
+    }
+
+    return undefined;
+  };
 
   const handleStepOneCancel = () => {
-    setUserInfo(null);
     navigation.navigate('Home');
     setTimeout(() => {
       setUserData({
@@ -27,12 +74,14 @@ const RegisterScreen = () => {
         phoneNumber: '',
         password: '',
         avatarUri: undefined,
+        countryCode: 'US',
+        callingCode: '1',
       });
     }, 300);
   };
 
   const handleStepOneComplete = (data: any) => {
-    setUserInfo(data);
+    setUserData(data);
     setStep(2);
   };
 
@@ -46,22 +95,34 @@ const RegisterScreen = () => {
     seed: string;
   }) => {
     try {
-      const { password, ...rest } = userInfo;
+      const { password, avatarUri, ...rest } = userData;
 
       const key = await deriveKeyFromPassword(password);
       const encryptedSeed = encryptSeed(seed, key);
 
-      await api.post('/auth/register', {
+      const uploadedAvatarUrl = await handleAvatarUpload();
+
+      await api.post(`${API_BASE_URL}/auth/register`, {
         ...rest,
+        avatarUrl: uploadedAvatarUrl,
         password,
         walletAddress,
         encryptedSeed,
       });
 
-      navigation.navigate('Home'); // Or wherever login happens
-    } catch (err) {
+      navigation.navigate('Home');
+      Toast.show({
+        text1: 'Welcome to Deem',
+        text2: 'Account Successfully Created.',
+      });
+    } catch (err: any) {
       console.error('Registration failed:', err);
-      // Optionally: show error feedback
+
+      Toast.show({
+        type: 'error',
+        text1: 'Registration Failed',
+        text2: err?.response?.data?.error || 'Please try again later.',
+      });
     }
   };
 
@@ -69,10 +130,10 @@ const RegisterScreen = () => {
     <CoreLayout>
       <View className="flex-1 justify-center">
         {step === 1 && (
-          <StepOneForm onComplete={handleStepOneComplete} onCancel={handleStepOneCancel} />
+          <UserDataForm onComplete={handleStepOneComplete} onCancel={handleStepOneCancel} />
         )}
         {step === 2 && (
-          <StepTwoWallet onComplete={handleStepTwoComplete} onCancel={handleStepTwoCancel} />
+          <WalletStep onComplete={handleStepTwoComplete} onCancel={handleStepTwoCancel} />
         )}
       </View>
     </CoreLayout>

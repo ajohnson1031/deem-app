@@ -7,7 +7,7 @@ export { decryptSeed, deriveKeyFromPassword, encryptSeed } from './crypto';
 export { emitter } from './events';
 export { buzzAndShake, causeBuzz, shakeAnimation } from './feedback';
 export { capitalize, formatFloatClean, formatWithCommas } from './format';
-export { formatInternationalPhone, isValidPhoneNumber } from './phone';
+export { formatPhoneOnBlur, isValidPhoneNumber, sanitizePhone } from './phone';
 export { getStoredPin, savePin } from './securePin';
 export { deleteToken, deleteUser, getToken, getUser, saveToken, saveUser } from './secureStore';
 export { toastConfig } from './toast';

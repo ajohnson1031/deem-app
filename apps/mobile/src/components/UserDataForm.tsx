@@ -2,20 +2,31 @@ import Feather from '@expo/vector-icons/Feather';
 import * as ImagePicker from 'expo-image-picker';
 import { useAtom, useAtomValue } from 'jotai';
 import { useState } from 'react';
-import { Image, KeyboardTypeOptions, Text, TouchableOpacity, View } from 'react-native';
+import { Image, Text, TouchableOpacity, View } from 'react-native';
 
 import { registerAtom, usernameAvailabilityAtom } from '~/atoms';
-import { CountdownInput, PasswordInput } from '~/components';
-import { useUsernameChecker } from '~/hooks';
-import { StepOneFormProps, UserDataKey } from '~/types';
-import { formatInternationalPhone, isValidPhoneNumber } from '~/utils';
+import { CountdownInput, CountryPickerTrigger, PasswordInput } from '~/components';
+import { FIELDS } from '~/constants';
+import { useCountryPicker, useUsernameChecker } from '~/hooks';
+import { UserDataFormProps } from '~/types';
+import { formatPhoneOnBlur, isValidPhoneNumber, sanitizePhone } from '~/utils';
 
-const StepOneForm = ({ onComplete, onCancel }: StepOneFormProps) => {
+const UserDataForm = ({ onComplete, onCancel }: UserDataFormProps) => {
   const [userData, setUserData] = useAtom(registerAtom);
-  const { name, username, email, phoneNumber, password, avatarUri } = userData;
+  const availability = useAtomValue(usernameAvailabilityAtom);
   const [baseError, setBaseError] = useState<string | null>(null);
   const usernameCheck = useUsernameChecker();
-  const availability = useAtomValue(usernameAvailabilityAtom);
+  const { countryCode, onSelect, callingCode } = useCountryPicker();
+  const {
+    name,
+    username,
+    email,
+    phoneNumber,
+    password,
+    avatarUri,
+    countryCode: userCountryCode,
+    callingCode: userCallingCode,
+  } = userData;
 
   const pickImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -24,15 +35,27 @@ const StepOneForm = ({ onComplete, onCancel }: StepOneFormProps) => {
       return;
     }
 
+    // If an avatar is already selected, deselect it
+    if (avatarUri) {
+      setUserData((prev) => ({ ...prev, avatarUri: undefined }));
+      return;
+    }
+
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      aspect: [1, 1],
+      aspect: [1, 1], // force square crop
       quality: 1,
     });
 
     if (!result.canceled && result.assets.length > 0) {
-      setUserData({ ...userData, avatarUri: result.assets[0].uri });
+      setUserData((prev) => ({ ...prev, avatarUri: result.assets[0].uri }));
+    }
+  };
+
+  const handleFieldBlur = (fieldName: string) => {
+    if (fieldName === 'phoneNumber') {
+      formatPhoneOnBlur(userData.phoneNumber, countryCode);
     }
   };
 
@@ -51,67 +74,15 @@ const StepOneForm = ({ onComplete, onCancel }: StepOneFormProps) => {
       phoneNumber,
       password,
       avatarUri,
+      countryCode: userCountryCode,
+      callingCode: userCallingCode,
     });
   };
-
-  const FIELDS: {
-    placeholder: string;
-    name: UserDataKey;
-    matches: RegExp;
-    keyboardType: KeyboardTypeOptions;
-    errorMessage: string;
-    maxLength: number;
-    secure?: boolean;
-  }[] = [
-    {
-      placeholder: 'Name',
-      name: 'name',
-      keyboardType: 'default',
-      maxLength: 50,
-      matches: /^[A-Za-z\s]+$/, // only letters and spaces
-      errorMessage: 'Name may contain letters and spaces only.',
-    },
-    {
-      placeholder: 'Username',
-      name: 'username',
-      keyboardType: 'default',
-      maxLength: 21,
-      matches: /^[a-zA-Z0-9_]{6,21}$/,
-      errorMessage:
-        'Username must be 6 - 21 characters in length and may contain letters, numbers & underscores only.',
-    },
-    {
-      placeholder: 'Email',
-      name: 'email',
-      keyboardType: 'email-address',
-      maxLength: 100,
-      matches: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, // simple email regex
-      errorMessage: 'Enter a valid email address.',
-    },
-    {
-      placeholder: 'Password',
-      name: 'password',
-      keyboardType: 'default',
-      secure: true,
-      maxLength: 21,
-      matches: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s@]).{8,21}$/, // strong password, excludes @
-      errorMessage:
-        'Password must be 8 - 21 chars and include uppercase, lowercase, number, and special character (not @).',
-    },
-    {
-      placeholder: 'Phone (optional)',
-      name: 'phoneNumber',
-      keyboardType: 'phone-pad',
-      maxLength: 50,
-      matches: /.*/,
-      errorMessage: 'Enter a valid phone number.',
-    },
-  ];
 
   const hasValidationErrors = FIELDS.some((field) => {
     const value = userData[field.name];
     if (field.name === 'phoneNumber') {
-      return value ? !isValidPhoneNumber(value) : false;
+      return value ? !isValidPhoneNumber(value, countryCode) : false;
     }
     return !field.matches.test(value?.trim() || '');
   });
@@ -124,21 +95,23 @@ const StepOneForm = ({ onComplete, onCancel }: StepOneFormProps) => {
         </Text>
 
         {/* Avatar Picker */}
-        <TouchableOpacity
-          onPress={pickImage}
-          className="mb-8 self-center rounded-full border border-gray-300 p-2">
-          {avatarUri ? (
-            <Image
-              source={{ uri: avatarUri }}
-              className="h-28 w-28 rounded-full"
-              resizeMode="cover"
-            />
-          ) : (
-            <View className="#0284c7 flex h-28 w-28 items-center justify-center rounded-full border-2 border-[#0284c7]">
-              <Feather name="camera" size={24} color="#0284c7" />
-            </View>
-          )}
-        </TouchableOpacity>
+        <View className="flex items-center">
+          <TouchableOpacity
+            onPress={pickImage}
+            className="mb-8 self-center rounded-full border border-gray-300 p-2">
+            {avatarUri ? (
+              <Image
+                source={{ uri: avatarUri }}
+                className="h-28 w-28 rounded-full"
+                resizeMode="cover"
+              />
+            ) : (
+              <View className="#0284c7 flex h-28 w-28 items-center justify-center rounded-full border-2 border-[#0284c7]">
+                <Feather name="camera" size={24} color="#0284c7" />
+              </View>
+            )}
+          </TouchableOpacity>
+        </View>
 
         <View className="flex">
           {/* Input fields */}
@@ -149,7 +122,7 @@ const StepOneForm = ({ onComplete, onCancel }: StepOneFormProps) => {
 
             return (
               <View key={idx}>
-                {field.name === 'username' && value.length >= 6 && (
+                {field.name === 'username' && value!.length >= 6 && (
                   <View
                     className={`mb-1 self-start rounded-lg px-2 py-1 text-sm ${
                       availability.checking
@@ -173,9 +146,23 @@ const StepOneForm = ({ onComplete, onCancel }: StepOneFormProps) => {
                     )}
                   </View>
                 )}
-                <View className="mb-2">
-                  {field.placeholder !== 'Password' ? (
+                {field.name === 'phoneNumber' && (
+                  <View className="mb-2 flex-row items-center bg-gray-100 px-3 py-1">
+                    <Text className="mr-2 text-lg font-semibold text-[#777]">Country:</Text>
+                    <CountryPickerTrigger countryCode={countryCode} onSelect={onSelect} />
+                    {countryCode === 'US' && <Text className="text-lg">(default)</Text>}
+                  </View>
+                )}
+                <View className="mb-2 flex-row gap-2">
+                  {field.name === 'phoneNumber' && (
+                    <View>
+                      <Text
+                        className={`flex-1 rounded-lg bg-gray-100 px-3 py-4 text-lg font-semibold leading-[18px] ${!phoneNumber.length ? 'text-[#777]' : 'text-black'}`}>{`+ ${callingCode}`}</Text>
+                    </View>
+                  )}
+                  {field.name !== 'password' ? (
                     <CountdownInput
+                      className="flex-1"
                       placeholder={field.placeholder}
                       placeholderTextColor="#777"
                       secureTextEntry={field.secure}
@@ -187,9 +174,7 @@ const StepOneForm = ({ onComplete, onCancel }: StepOneFormProps) => {
                       onChangeText={(val) => {
                         setBaseError(null);
                         const formattedVal =
-                          field.name === 'phoneNumber'
-                            ? formatInternationalPhone(val) // <- real-time international formatting
-                            : val;
+                          field.name === 'phoneNumber' ? sanitizePhone(val) : val;
 
                         setUserData({ ...userData, [field.name]: formattedVal });
 
@@ -197,6 +182,7 @@ const StepOneForm = ({ onComplete, onCancel }: StepOneFormProps) => {
                           usernameCheck(val);
                         }
                       }}
+                      onBlur={() => handleFieldBlur(field.name)}
                     />
                   ) : (
                     <PasswordInput
@@ -241,4 +227,4 @@ const StepOneForm = ({ onComplete, onCancel }: StepOneFormProps) => {
   );
 };
 
-export default StepOneForm;
+export default UserDataForm;
