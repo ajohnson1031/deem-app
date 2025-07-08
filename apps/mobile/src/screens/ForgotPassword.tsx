@@ -25,6 +25,7 @@ const ForgotPasswordScreen = () => {
       // Navigate to the next screen
       navigation.navigate('VerifyPasswordReset', { email });
     } catch (err: any) {
+      console.error(err);
       setError(!email ? 'Please enter a valid email.' : 'Failed to send reset code.');
       setStatus('idle');
     }

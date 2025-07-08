@@ -8,8 +8,9 @@ const formatWithCommas = (value: string) => {
   }
 
   const [whole, decimal] = value.split('.');
+  const convertedDecimal = decimal && decimal?.length === 1 ? decimal + '0' : decimal;
   const formattedWhole = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-  return decimal ? `${formattedWhole}.${decimal}` : formattedWhole;
+  return decimal ? `${formattedWhole}.${convertedDecimal}` : formattedWhole;
 };
 
 const formatFloatClean = (num: number | string): string => {

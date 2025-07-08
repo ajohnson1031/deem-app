@@ -1,12 +1,13 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useAtomValue } from 'jotai';
 import LottieView from 'lottie-react-native';
 import { useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+import { walletAtom } from '~/atoms';
 import { useAuth } from '~/contexts/AuthContext';
-import { useWallet } from '~/hooks/useWallet';
 import {
   CardsScreen,
   ContactScreen,
@@ -31,7 +32,7 @@ import { emitter } from '~/utils';
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function AppNavigator() {
-  const { walletAddress } = useWallet();
+  const walletAddress = useAtomValue(walletAtom)?.classicAddress;
   const { isLoading, user } = useAuth();
   const [navKey, setNavKey] = useState(0);
 

@@ -3,20 +3,20 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import cn from 'classnames';
 import { useAtom, useAtomValue } from 'jotai';
-import { useRef, useState } from 'react';
-import { Animated, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Dropdown } from 'react-native-element-dropdown';
+import { useRef } from 'react';
+import { Animated, Text, TouchableOpacity, View } from 'react-native';
 import Toast from 'react-native-toast-message';
 
 import { currencyAtom, currentTxAtom, xrpPriceAtom } from '~/atoms';
 import { useWallet } from '~/hooks/useWallet';
 import CoreLayout from '~/layouts/CoreLayout';
-import { ApprovedCurrency, RootStackParamList, TxType } from '~/types';
+import { RootStackParamList, TxType } from '~/types';
 import { buzzAndShake, convertCurrencyAmount, formatFloatClean, formatWithCommas } from '~/utils';
 
 const SendScreen = () => {
   const [tx, setTx] = useAtom(currentTxAtom);
-  const [currency, setCurrency] = useAtom(currencyAtom);
+  // const [currency, setCurrency] = useAtom(currencyAtom); // TODO: Related to switcher
+  const currency = useAtomValue(currencyAtom);
   const xrpPriceUSD = useAtomValue(xrpPriceAtom);
   const parsedAmount = parseFloat(tx.amount || '0');
 
@@ -27,10 +27,10 @@ const SendScreen = () => {
   });
 
   const { walletBalance } = useWallet();
-  const [currencyOptions] = useState<Record<string, ApprovedCurrency>[]>([
-    { label: 'XRP', value: 'XRP' },
-    { label: 'USD', value: 'USD' },
-  ]);
+  // const [currencyOptions] = useState<Record<string, ApprovedCurrency>[]>([ // TODO: Related to switcher
+  //   { label: 'XRP', value: 'XRP' },
+  //   { label: 'USD', value: 'USD' },
+  // ]);
 
   const shakeAnim = useRef(new Animated.Value(0)).current;
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -163,12 +163,12 @@ const SendScreen = () => {
           {parsedAmount > 0 && xrpPriceUSD > 0 && (
             <Text className="mb-8 text-lg font-medium text-gray-500">
               {currency === 'USD'
-                ? `${formatWithCommas(formatFloatClean(converted.xrpAmount))} XRP`
-                : `$${formatWithCommas(formatFloatClean(converted.usdAmount))}`}
+                ? `${formatWithCommas(converted.xrpAmount.toString())} XRP`
+                : `$${formatWithCommas(converted.usdAmount.toString())}`}
             </Text>
           )}
 
-          <Dropdown
+          {/* <Dropdown // TODO: Revisit when ready to host multiple currencies
             style={[styles.dropdown]}
             placeholderStyle={styles.placeholderStyle}
             selectedTextStyle={styles.selectedTextStyle}
@@ -205,7 +205,7 @@ const SendScreen = () => {
                 originalAmount: prev.originalAmount ? newAmount : undefined,
               }));
             }}
-          />
+          /> */}
 
           <View className="flex-row flex-wrap justify-center gap-x-4 gap-y-6">
             {['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0'].map((num) => (
@@ -245,51 +245,51 @@ const SendScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: 'white',
-    padding: 16,
-  },
-  dropdown: {
-    width: '25%',
-    backgroundColor: '#f3f4f6',
-    borderColor: '#e5e7eb',
-    borderWidth: 1,
-    borderRadius: 100,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    marginBottom: 32,
-    marginTop: -16,
-  },
-  icon: {
-    marginRight: 5,
-  },
-  label: {
-    position: 'absolute',
-    backgroundColor: 'white',
-    left: 22,
-    top: 8,
-    zIndex: 999,
-    paddingHorizontal: 8,
-    fontSize: 14,
-    color: '#4B5563',
-  },
-  placeholderStyle: {
-    fontSize: 16,
-  },
-  selectedTextStyle: {
-    fontSize: 16,
-    color: '#4B5563',
-    fontWeight: '500',
-  },
-  iconStyle: {
-    width: 20,
-    height: 20,
-  },
-  inputSearchStyle: {
-    height: 25,
-    fontSize: 16,
-  },
-});
+// const styles = StyleSheet.create({ // TODO: Related to switcher
+//   container: {
+//     backgroundColor: 'white',
+//     padding: 16,
+//   },
+//   dropdown: {
+//     width: '25%',
+//     backgroundColor: '#f3f4f6',
+//     borderColor: '#e5e7eb',
+//     borderWidth: 1,
+//     borderRadius: 100,
+//     paddingHorizontal: 16,
+//     paddingVertical: 8,
+//     marginBottom: 32,
+//     marginTop: -16,
+//   },
+//   icon: {
+//     marginRight: 5,
+//   },
+//   label: {
+//     position: 'absolute',
+//     backgroundColor: 'white',
+//     left: 22,
+//     top: 8,
+//     zIndex: 999,
+//     paddingHorizontal: 8,
+//     fontSize: 14,
+//     color: '#4B5563',
+//   },
+//   placeholderStyle: {
+//     fontSize: 16,
+//   },
+//   selectedTextStyle: {
+//     fontSize: 16,
+//     color: '#4B5563',
+//     fontWeight: '500',
+//   },
+//   iconStyle: {
+//     width: 20,
+//     height: 20,
+//   },
+//   inputSearchStyle: {
+//     height: 25,
+//     fontSize: 16,
+//   },
+// });
 
 export default SendScreen;

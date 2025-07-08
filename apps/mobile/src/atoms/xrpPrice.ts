@@ -1,10 +1,25 @@
-// atoms/xrp.ts
-import { atom } from 'jotai';
+import { getDefaultStore } from 'jotai';
 import { atomWithObservable } from 'jotai/utils';
-import { from, interval, shareReplay, startWith, switchMap } from 'rxjs';
+import {
+  BehaviorSubject,
+  catchError,
+  combineLatest,
+  defer,
+  filter,
+  from,
+  interval,
+  of,
+  shareReplay,
+  startWith,
+  switchMap,
+} from 'rxjs';
 
-const WORKER_URL = 'https://xrp-price-worker.deem-app.workers.dev';
+import { appReadyAtom } from './'; // adjust import path as needed
+
+const store = getDefaultStore();
+
 const FALLBACK_PRICE = 2.0;
+const WORKER_URL = 'https://xrp-price-worker.deem-app.workers.dev';
 const TIMEOUT_MS = 3000;
 
 const fetchWithTimeout = (url: string, timeout = TIMEOUT_MS): Promise<Response> => {
@@ -16,36 +31,38 @@ const fetchWithTimeout = (url: string, timeout = TIMEOUT_MS): Promise<Response> 
   ]) as Promise<Response>;
 };
 
-let hasWarned = false;
-
 export const fetchXrpPrice = async (): Promise<number> => {
   try {
     const res = await fetchWithTimeout(WORKER_URL, TIMEOUT_MS);
-
-    // Use text first to log raw response safely
     const text = await res.text();
     const json = JSON.parse(text);
-
     if (!json || typeof json.price !== 'number') throw new Error('Invalid API response');
-
     return json.price;
   } catch (err) {
-    if (!hasWarned) {
-      console.warn('[⚠️ XRP Price Fallback]', err);
-      hasWarned = true;
-    }
+    console.warn('[⚠️ XRP Price Fallback]', err);
     return FALLBACK_PRICE;
   }
 };
 
-// 🧠 Initial one-time fetch (useful if you want SSR or static fallback too)
-export const xrpInitialPriceAtom = atom(fetchXrpPrice());
-
-// 🔁 Live polling atom (once every 60s production / 30s dev)
 export const xrpPriceAtom = atomWithObservable(() => {
-  return interval(__DEV__ ? 30000 : 60000).pipe(
-    startWith(0),
-    switchMap(() => from(fetchXrpPrice())),
-    shareReplay(1) // ✅ emit most recent value to new subscribers
+  // Turn the appReadyAtom into a reactive stream
+  const appReady$ = new BehaviorSubject(store.get(appReadyAtom));
+  store.sub(appReadyAtom, () => {
+    appReady$.next(store.get(appReadyAtom));
+  });
+
+  return combineLatest([interval(60000).pipe(startWith(0)), appReady$]).pipe(
+    filter(([_, ready]) => ready), // only emit when app is ready
+    switchMap(() =>
+      defer(() =>
+        from(fetchXrpPrice()).pipe(
+          catchError((err) => {
+            console.warn('🔥 Price fetch failed in stream:', err);
+            return of(FALLBACK_PRICE);
+          })
+        )
+      )
+    ),
+    shareReplay(1)
   );
 });

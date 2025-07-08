@@ -3,6 +3,7 @@ import axios from 'axios';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import Toast from 'react-native-toast-message';
 
+import { useWallet } from '~/hooks'; // make sure this hook is working and imported
 import { deleteToken, deleteUser, emitter, getToken, getUser, saveToken, saveUser } from '~/utils';
 
 type User = {
@@ -27,11 +28,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const { loadWallet } = useWallet(); // ⬅️ brings in the wallet loader
+
   const setAuthHeader = (token: string | null) => {
     if (token) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     } else {
       delete axios.defaults.headers.common['Authorization'];
+    }
+  };
+
+  const loadWalletOnInit = async (token: string) => {
+    try {
+      setAuthHeader(token);
+      await loadWallet(); // assumes passwordless wallet load (via SecureStore)
+    } catch (err) {
+      console.warn('⚠️ Wallet failed to load during auth restore:', err);
     }
   };
 
@@ -45,20 +57,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setToken(localToken);
           setUser(localUser);
           setAuthHeader(localToken);
+          await loadWalletOnInit(localToken);
         } else {
           // Try refreshing from server as fallback
           const res = await axios.get(`${API_BASE_URL}/auth/refresh`, {
             withCredentials: true,
           });
           const { token: newToken } = res.data;
-          const me = await axios.get(`${API_BASE_URL}/me`);
+          setAuthHeader(newToken);
 
+          const me = await axios.get(`${API_BASE_URL}/me`);
           setToken(newToken);
           setUser(me.data.user);
-          setAuthHeader(newToken);
 
           await saveToken(newToken);
           await saveUser(me.data.user);
+          await loadWalletOnInit(newToken);
         }
       } catch (err) {
         console.log('🔒 Session not restored:', err);
@@ -75,7 +89,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const handleLogout = () => {
       logout();
-
       Toast.show({
         type: 'error',
         text1: 'Session expired',
@@ -84,10 +97,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     emitter.on('logout', handleLogout);
-
-    return () => {
-      emitter.off('logout', handleLogout);
-    };
+    return () => emitter.off('logout', handleLogout);
   }, []);
 
   const login = async (identifier: string, password: string) => {
@@ -105,6 +115,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       await saveToken(accessToken);
       await saveUser(user);
+
+      await loadWallet(password); // 🧠 decrypt + store seed on login
     } catch (err) {
       throw err;
     }
@@ -121,6 +133,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setAuthHeader(null);
       await deleteToken();
       await deleteUser();
+
       Toast.show({
         type: 'info',
         text1: 'Session Cleared',

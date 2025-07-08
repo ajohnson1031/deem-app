@@ -21,28 +21,28 @@ export function useWallet() {
   };
 
   const loadWallet = useCallback(
-    async (password: string) => {
+    async (password?: string) => {
       try {
-        // Check for local seed first
         const seed = await SecureStore.getItemAsync(WALLET_STORAGE_KEY);
         if (seed) {
           setWallet(Wallet.fromSeed(seed));
           return;
         }
 
-        // If seed is missing but we know we've already synced, don't fetch again
         const alreadySynced = await SecureStore.getItemAsync(WALLET_SYNCED_FLAG);
+
         if (alreadySynced) return;
 
-        // Otherwise fetch from backend
-        const res = await api.get(`${API_BASE_URL}/wallet`);
+        const res = await api.get('/wallet');
         const encryptedSeed = res.data?.encryptedSeed;
 
         if (encryptedSeed) {
+          if (!password) throw new Error('Password is required for decryption');
+
           const key = await deriveKeyFromPassword(password);
           const decryptedSeed = decryptSeed(encryptedSeed, key);
 
-          if (!decryptedSeed) throw new Error('Failed to decrypt wallet seed.');
+          if (!decryptedSeed) throw new Error('Decryption failed');
 
           await SecureStore.setItemAsync(WALLET_STORAGE_KEY, decryptedSeed);
           await SecureStore.setItemAsync(WALLET_SYNCED_FLAG, 'true');
@@ -50,8 +50,8 @@ export function useWallet() {
           setWallet(Wallet.fromSeed(decryptedSeed));
         }
       } catch (err) {
-        console.warn('⚠️ Failed to load wallet:', err);
-        await deleteWallet();
+        console.warn('❌ Wallet load error:', err);
+        await deleteWallet(); // This resets to null
       }
     },
     [setWallet]

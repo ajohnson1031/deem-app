@@ -1,4 +1,5 @@
 // src/utils/api.ts
+import { API_BASE_URL } from '@env';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import Toast from 'react-native-toast-message';
@@ -6,7 +7,7 @@ import Toast from 'react-native-toast-message';
 import { deleteToken, emitter, getToken, saveToken } from '~/utils';
 
 const api = axios.create({
-  baseURL: 'http://localhost:4000', // Replace with API_BASE_URL for production
+  baseURL: `${API_BASE_URL}`, // Replace with API_BASE_URL for production
   withCredentials: true, // Ensures refresh token cookies are sent
 });
 
@@ -42,7 +43,7 @@ api.interceptors.request.use(async (config) => {
         isRefreshing = true;
 
         try {
-          const res = await axios.get<{ token: string }>('http://localhost:4000/auth/refresh', {
+          const res = await axios.get<{ token: string }>(`${API_BASE_URL}/auth/refresh`, {
             withCredentials: true,
           });
 
@@ -105,7 +106,7 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const res = await axios.get<{ token: string }>('http://localhost:4000/auth/refresh', {
+        const res = await axios.get<{ token: string }>(`${API_BASE_URL}/auth/refresh`, {
           withCredentials: true,
         });
 

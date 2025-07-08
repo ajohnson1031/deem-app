@@ -5,30 +5,30 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import cn from 'classnames';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useAtom, useAtomValue } from 'jotai';
-import { useState } from 'react';
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Dropdown } from 'react-native-element-dropdown';
+import { useAtomValue } from 'jotai';
+import { FlatList, Text, TouchableOpacity, View } from 'react-native';
+// import { Dropdown } from 'react-native-element-dropdown'; // TODO: Integrate when ready
 import ShimmerPlaceHolder from 'react-native-shimmer-placeholder';
 
 import { currencyAtom, transactionsAtom, xrpPriceAtom } from '~/atoms';
 import { useCopyToClipboard, useWallet } from '~/hooks';
 import CoreLayout from '~/layouts/CoreLayout';
-import { ApprovedCurrency, RootStackParamList } from '~/types';
+import { RootStackParamList } from '~/types';
 import { convertCurrencyAmount, formatFloatClean, formatWithCommas } from '~/utils';
 
 const WalletScreen = () => {
   const { walletAddress, walletBalance, refreshBalance, loading } = useWallet();
-  const [currency, setCurrency] = useAtom(currencyAtom);
+  // const [currency, setCurrency] = useAtom(currencyAtom); // TODO: Setter related to currency switcher
+  const currency = useAtomValue(currencyAtom);
   const { copiedKey, copy } = useCopyToClipboard();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const recentTransactions = useAtomValue(transactionsAtom).slice(0, 4);
   const xrpPriceUSD = useAtomValue(xrpPriceAtom);
 
-  const [currencyOptions] = useState<Record<string, ApprovedCurrency>[]>([
-    { label: 'XRP', value: 'XRP' },
-    { label: 'USD', value: 'USD' },
-  ]);
+  // const [currencyOptions] = useState<Record<string, ApprovedCurrency>[]>([ // TODO: Related to currency switcher
+  //   { label: 'XRP', value: 'XRP' },
+  //   { label: 'USD', value: 'USD' },
+  // ]);
 
   const ITEM_HEIGHT = 80;
   const ITEM_SPACING = 8;
@@ -103,27 +103,34 @@ const WalletScreen = () => {
 
             {/* ≈ Equivalent Value */}
             {balanceAsNumber > 0 && xrpPriceUSD > 0 && (
-              <Text className="-mt-4 text-lg font-medium text-gray-500">{`${secondaryAmount} ${currency === 'XRP' ? 'USD' : ''}`}</Text>
+              <Text className="-mt-4 text-lg font-medium text-gray-500">{`Currently worth ${secondaryAmount} ${currency === 'XRP' ? 'USD' : ''}`}</Text>
             )}
 
+            <View className="h-[1px] border-b border-gray-200 pt-2" />
             {/* Wallet address + currency switch */}
-            <View className="mt-4 flex flex-row gap-4">
-              <View className="flex w-9/12 flex-row items-center justify-center gap-2 rounded-lg border border-gray-200 bg-gray-100 py-4">
+            <View className="mt-6 flex-row gap-4">
+              <Text className="absolute -top-3 left-3 z-10 rounded-md bg-white px-2 pb-0.5 text-sm font-semibold text-gray-500">
+                Wallet Address
+              </Text>
+              <View className="w-full flex-row items-center justify-center gap-2 rounded-lg border border-gray-200 bg-gray-100 py-4">
                 <Text
-                  className="m-0 w-9/12 p-0"
+                  className="m-0 flex-1 px-4 py-1"
                   numberOfLines={1}
                   ellipsizeMode="tail"
                   style={{ fontWeight: 500, color: copiedKey ? '#0284c7' : '#4B5563' }}>
                   {copiedKey ? 'Wallet Address Copied!' : walletAddress}
                 </Text>
+
                 <TouchableOpacity
+                  className="px-4"
                   disabled={!walletAddress}
                   onPress={() => copy(walletAddress ?? '', 'wallet')}>
                   <Feather name="copy" size={20} color="#4B5563" />
                 </TouchableOpacity>
               </View>
 
-              <Dropdown
+              {/* // TODO: Integrate switcher when ready to custody other assets in app; For now we'll just display currency equivalencies */}
+              {/* <Dropdown
                 style={[styles.dropdown]}
                 placeholderStyle={styles.placeholderStyle}
                 selectedTextStyle={styles.selectedTextStyle}
@@ -136,7 +143,7 @@ const WalletScreen = () => {
                 onChange={(item) => {
                   setCurrency(item.value);
                 }}
-              />
+              /> */}
             </View>
           </View>
 
@@ -182,47 +189,47 @@ const WalletScreen = () => {
 
 export default WalletScreen;
 
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: 'white',
-    padding: 16,
-  },
-  dropdown: {
-    width: '20.6666667%',
-    backgroundColor: '#f3f4f6',
-    borderColor: '#e5e7eb',
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 16,
-  },
-  icon: {
-    marginRight: 5,
-  },
-  label: {
-    position: 'absolute',
-    backgroundColor: 'white',
-    left: 22,
-    top: 8,
-    zIndex: 999,
-    paddingHorizontal: 8,
-    fontSize: 14,
-    color: '#4B5563',
-  },
-  placeholderStyle: {
-    fontSize: 16,
-  },
-  selectedTextStyle: {
-    fontSize: 16,
-    color: '#4B5563',
-    fontWeight: '500',
-  },
-  iconStyle: {
-    width: 20,
-    height: 20,
-  },
-  inputSearchStyle: {
-    height: 40,
-    fontSize: 16,
-  },
-});
+// const styles = StyleSheet.create({ // TODO: Related to currency switcher
+//   container: {
+//     backgroundColor: 'white',
+//     padding: 16,
+//   },
+//   dropdown: {
+//     width: '20.6666667%',
+//     backgroundColor: '#f3f4f6',
+//     borderColor: '#e5e7eb',
+//     borderWidth: 1,
+//     borderRadius: 8,
+//     paddingHorizontal: 8,
+//     paddingVertical: 16,
+//   },
+//   icon: {
+//     marginRight: 5,
+//   },
+//   label: {
+//     position: 'absolute',
+//     backgroundColor: 'white',
+//     left: 22,
+//     top: 8,
+//     zIndex: 999,
+//     paddingHorizontal: 8,
+//     fontSize: 14,
+//     color: '#4B5563',
+//   },
+//   placeholderStyle: {
+//     fontSize: 16,
+//   },
+//   selectedTextStyle: {
+//     fontSize: 16,
+//     color: '#4B5563',
+//     fontWeight: '500',
+//   },
+//   iconStyle: {
+//     width: 20,
+//     height: 20,
+//   },
+//   inputSearchStyle: {
+//     height: 40,
+//     fontSize: 16,
+//   },
+// });
