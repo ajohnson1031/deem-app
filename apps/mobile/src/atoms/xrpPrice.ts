@@ -14,7 +14,7 @@ import {
 import { appReadyAtom, appStateAtom } from '~/atoms/app';
 import { globalStore } from '~/state/store';
 
-const FALLBACK_PRICE = 2.0;
+const FALLBACK_PRICE: number = 2.0;
 const WORKER_URL = 'https://xrp-price-worker.deem-app.workers.dev';
 const MAX_RETRIES = 4;
 const BASE_DELAY_MS = 1000;
@@ -34,10 +34,10 @@ export const fetchXrpPrice = async (): Promise<number> => {
       throw new Error('Invalid API response');
     }
 
-    return json.price;
+    return json.price.toFixed(2);
   } catch (err) {
     console.warn('[⚠️ XRP Fallback]', err);
-    return FALLBACK_PRICE;
+    return parseFloat(FALLBACK_PRICE.toFixed(2));
   }
 };
 
