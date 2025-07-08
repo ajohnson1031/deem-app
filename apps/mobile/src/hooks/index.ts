@@ -5,3 +5,4 @@ export { useGlobalKeyboardIdleDismiss } from './useGlobalKeyboardIdleDismiss';
 export { useSessionResetCountdown } from './useSessionResetCountdown';
 export { useUsernameChecker } from './useUserNameChecker';
 export { useWallet } from './useWallet';
+export { useXrpPriceMeta } from './useXrpPriceMeta';

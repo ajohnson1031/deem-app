@@ -22,7 +22,7 @@ export default {
 
 		// Return cached price if still fresh
 		if (cachedPrice !== null && now - lastUpdated < CACHE_DURATION) {
-			return jsonResponse(cachedPrice);
+			return jsonResponse(cachedPrice, false); // ✅ explicitly mark as fresh
 		}
 
 		try {
@@ -35,16 +35,15 @@ export default {
 				throw new Error('Invalid price from CoinGecko');
 			}
 
-			// Update cache
 			cachedPrice = price;
 			lastUpdated = now;
 
-			return jsonResponse(price);
+			return jsonResponse(price, false);
 		} catch (err) {
 			console.warn('[CoinGecko Fallback]', err);
-			// Fallback: serve last known price or a static default
+
 			const fallbackPrice = cachedPrice ?? 2.0;
-			return jsonResponse(fallbackPrice, true);
+			return jsonResponse(fallbackPrice, fallbackPrice === 2.0); // true only if no cache
 		}
 	},
 };

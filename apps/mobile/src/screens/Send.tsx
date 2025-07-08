@@ -7,7 +7,8 @@ import { useRef } from 'react';
 import { Animated, Text, TouchableOpacity, View } from 'react-native';
 import Toast from 'react-native-toast-message';
 
-import { currencyAtom, currentTxAtom, xrpPriceAtom } from '~/atoms';
+import { currencyAtom, currentTxAtom } from '~/atoms';
+import { useXrpPriceMeta } from '~/hooks';
 import { useWallet } from '~/hooks/useWallet';
 import CoreLayout from '~/layouts/CoreLayout';
 import { RootStackParamList, TxType } from '~/types';
@@ -17,7 +18,7 @@ const SendScreen = () => {
   const [tx, setTx] = useAtom(currentTxAtom);
   // const [currency, setCurrency] = useAtom(currencyAtom); // TODO: Related to switcher
   const currency = useAtomValue(currencyAtom);
-  const xrpPriceUSD = useAtomValue(xrpPriceAtom);
+  const { price: xrpPriceUSD } = useXrpPriceMeta();
   const parsedAmount = parseFloat(tx.amount || '0');
 
   const converted = convertCurrencyAmount({

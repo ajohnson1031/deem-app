@@ -6,8 +6,9 @@ import { useMemo, useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import Toggle from 'react-native-toggle-element';
 
-import { currencyAtom, recipientAtom, xrpPriceAtom } from '~/atoms';
+import { currencyAtom, recipientAtom } from '~/atoms';
 import { TxListItem } from '~/components';
+import { useXrpPriceMeta } from '~/hooks';
 import CoreLayout from '~/layouts/CoreLayout';
 import { Transaction } from '~/types';
 import { TxConfirmationScreenProps } from '~/types/transaction';
@@ -18,11 +19,8 @@ const TxConfirmationScreen = ({ route, navigation }: TxConfirmationScreenProps) 
   const currentRecipient = route.params.recipient;
 
   const currency = useAtomValue(currencyAtom);
-  const xrpInitial = useAtomValue(xrpPriceAtom);
-  const xrpLive = useAtomValue(xrpPriceAtom);
   const recipient = useAtomValue(recipientAtom);
-
-  const xrpPriceUSD = xrpLive || xrpInitial;
+  const { price: xrpPriceUSD } = useXrpPriceMeta();
   const [payFees, setPayFees] = useState(currentTx.feeIncluded || false);
   const [tx, setTx] = useState<Transaction>({ ...currentTx, currency });
 

@@ -6,7 +6,8 @@ import { useCallback, useEffect } from 'react';
 import { Wallet } from 'xrpl';
 
 import { walletAtom, walletBalanceAtom } from '~/atoms';
-import { api, decryptSeed, deriveKeyFromPassword, encryptSeed, getWalletBalance } from '~/utils';
+import { decryptSeed, deriveKeyFromPassword, encryptSeed, getWalletBalance } from '~/utils';
+import { api } from '~/utils/api';
 
 export function useWallet() {
   const [wallet, setWallet] = useAtom(walletAtom);

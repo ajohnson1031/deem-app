@@ -8,10 +8,12 @@ import Toast from 'react-native-toast-message';
 import { v4 as uuidv4 } from 'uuid';
 
 import { registerAtom } from '~/atoms';
-import { UserDataForm, WalletStep } from '~/components';
+import { WalletStep } from '~/components';
+import UserDataForm from '~/components/UserDataForm';
 import CoreLayout from '~/layouts/CoreLayout';
 import { RootStackParamList } from '~/types';
-import { api, deriveKeyFromPassword, encryptSeed } from '~/utils';
+import { deriveKeyFromPassword, encryptSeed } from '~/utils';
+import { api } from '~/utils/api';
 
 const RegisterScreen = () => {
   const [step, setStep] = useState<1 | 2>(1);

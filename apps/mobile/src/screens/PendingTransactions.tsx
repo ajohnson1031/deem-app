@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 
 import { contactsAtom, pendingTransactionsAtom } from '~/atoms';
-import { SwipeableTransactionRow } from '~/components';
+import SwipeableTransactionRow from '~/components/SwipeableTransactionRow';
 import CoreLayout from '~/layouts/CoreLayout';
 import { Contact } from '~/types';
 

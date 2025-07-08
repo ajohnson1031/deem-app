@@ -1,4 +1,3 @@
-export { api } from './api';
 export { clearAuthData } from './auth';
 export { calculateFees } from './calculateFees';
 export { colors, getColorIndex } from './colors';

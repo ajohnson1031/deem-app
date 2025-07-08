@@ -8,10 +8,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useAtomValue } from 'jotai';
 import { FlatList, Text, TouchableOpacity, View } from 'react-native';
 // import { Dropdown } from 'react-native-element-dropdown'; // TODO: Integrate when ready
+import dayjs from 'dayjs';
 import ShimmerPlaceHolder from 'react-native-shimmer-placeholder';
 
-import { currencyAtom, transactionsAtom, xrpPriceAtom } from '~/atoms';
-import { useCopyToClipboard, useWallet } from '~/hooks';
+import { currencyAtom, transactionsAtom } from '~/atoms';
+import { useCopyToClipboard, useWallet, useXrpPriceMeta } from '~/hooks';
 import CoreLayout from '~/layouts/CoreLayout';
 import { RootStackParamList } from '~/types';
 import { convertCurrencyAmount, formatFloatClean, formatWithCommas } from '~/utils';
@@ -23,7 +24,8 @@ const WalletScreen = () => {
   const { copiedKey, copy } = useCopyToClipboard();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const recentTransactions = useAtomValue(transactionsAtom).slice(0, 4);
-  const xrpPriceUSD = useAtomValue(xrpPriceAtom);
+
+  const { price: xrpPriceUSD, isFresh, lastUpdated, secondsUntilNextUpdate } = useXrpPriceMeta();
 
   // const [currencyOptions] = useState<Record<string, ApprovedCurrency>[]>([ // TODO: Related to currency switcher
   //   { label: 'XRP', value: 'XRP' },
@@ -60,7 +62,7 @@ const WalletScreen = () => {
           <View className="flex flex-col gap-y-2">
             {/* Refresher */}
             <View className="mb-2 flex flex-row items-center gap-2">
-              <Text className="text-lg font-medium text-gray-600">Balance</Text>
+              <Text className="text-lg font-medium text-gray-500">Balance</Text>
               <TouchableOpacity onPress={refreshBalance}>
                 <Fontisto name="spinner-refresh" size={20} color="#0284c7" />
               </TouchableOpacity>
@@ -102,10 +104,26 @@ const WalletScreen = () => {
             </View>
 
             {/* ≈ Equivalent Value */}
-            {balanceAsNumber > 0 && xrpPriceUSD > 0 && (
-              <Text className="-mt-4 text-lg font-medium text-gray-500">{`Currently worth ${secondaryAmount} ${currency === 'XRP' ? 'USD' : ''}`}</Text>
-            )}
-
+            <View
+              className={`flex-row justify-between rounded-lg border border-gray-200 pb-3 pl-3`}>
+              <View className="mt-3 flex gap-1">
+                <Text className="font-medium text-gray-500">{`Current Value: ${secondaryAmount} ${currency === 'XRP' ? 'USD' : ''}`}</Text>
+                <Text className="font-medium text-gray-500">{`Price Per XRP: $${xrpPriceUSD}`}</Text>
+                <Text className="font-medium text-gray-500">{`Last Update: ${dayjs(lastUpdated).format('MMMM D, YYYY @ h:mm:ssa')}`}</Text>
+              </View>
+              <View>
+                <View
+                  className={`w-20 flex-row justify-center gap-1.5 rounded-bl rounded-tr py-1.5 ${isFresh ? 'bg-green-500' : secondsUntilNextUpdate <= 5 ? 'bg-red-500' : 'bg-yellow-500'}`}>
+                  <Fontisto
+                    name="spinner-refresh"
+                    size={14}
+                    color={isFresh || secondsUntilNextUpdate <= 5 ? 'white' : '#422006'}
+                  />
+                  <Text
+                    className={`w-10 text-xs font-medium text-gray-500 ${isFresh || secondsUntilNextUpdate <= 5 ? 'text-white' : 'text-yellow-950'}`}>{`in ${secondsUntilNextUpdate}s`}</Text>
+                </View>
+              </View>
+            </View>
             <View className="h-[1px] border-b border-gray-200 pt-2" />
             {/* Wallet address + currency switch */}
             <View className="mt-6 flex-row gap-4">
@@ -159,7 +177,7 @@ const WalletScreen = () => {
           {/* Recent Conversions */}
           <View className="gap-y-1">
             <View className="flex flex-row justify-between border-y border-gray-200 p-2">
-              <Text className="text-lg font-medium text-gray-600">Recent Conversions</Text>
+              <Text className="text-lg font-medium text-gray-500">Recent Conversions</Text>
 
               <TouchableOpacity
                 className="flex flex-row items-center justify-center gap-2"
