@@ -1,5 +1,3 @@
-// utils/convert.ts
-
 const convertCurrencyAmount = ({
   amount,
   fromCurrency,

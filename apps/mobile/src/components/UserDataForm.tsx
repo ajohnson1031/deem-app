@@ -95,10 +95,10 @@ const UserDataForm = ({ onComplete, onCancel }: UserDataFormProps) => {
   return (
     <View className="mt-10 flex w-full flex-1 justify-between px-6">
       <View>
-        <Text className="mb-10 text-center text-3xl font-medium text-gray-700 underline">
+        <Text className="text-center text-3xl font-medium text-gray-700">
           Create Your Deem Account
         </Text>
-
+        <View className="mb-10 mt-3 flex h-[1px] bg-gray-200" />
         {/* Avatar Picker */}
         <View className="mb-8 flex-row items-center gap-6">
           <View className="self-center rounded-full border border-gray-300 p-2">

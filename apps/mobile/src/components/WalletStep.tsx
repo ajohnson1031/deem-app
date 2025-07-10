@@ -52,10 +52,10 @@ const StepTwoWallet = ({ onComplete, onCancel }: StepTwoWalletProps) => {
   return (
     <View className="mt-10 flex w-full flex-1 justify-between px-6">
       <View>
-        <Text className="mb-8 text-center text-3xl font-medium text-gray-700 underline">
+        <Text className="text-center text-3xl font-medium text-gray-700">
           Setup Your Deem Wallet
         </Text>
-
+        <View className="mb-10 mt-3 flex h-[1px] bg-gray-200" />
         {!generated && (
           <>
             <Text className="mb-6 text-lg text-gray-600">

@@ -5,14 +5,12 @@ const MOCK_SUGGESTED: Contact[] = [
   {
     id: '1',
     name: 'Alice Monroe',
-    avatarUrl: 'https://api.dicebear.com/7.x/initials/png?seed=Alice%20Monroe',
     username: '@alicem',
     walletAddress: 'rAlice123',
   },
   {
     id: '2',
     name: 'Bob Lee',
-    avatarUrl: 'https://api.dicebear.com/7.x/initials/png?seed=Bob%20Lee',
     username: '@boblee',
     walletAddress: 'rBob456',
   },

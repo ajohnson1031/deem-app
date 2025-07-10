@@ -68,6 +68,8 @@ const SettingsScreen = () => {
           @{username}
         </Text>
 
+        <View className="my-3 flex h-[1px] bg-gray-200" />
+
         <MenuListItem
           iconType={MenuIconType.FEATHER}
           iconName="edit-2"
@@ -112,7 +114,7 @@ const SettingsScreen = () => {
             </View>
             <View>
               <Text className="text-xl font-medium">Widen your circle</Text>
-              <Text className="text-md text-gray-600">Deem your friends worthy</Text>
+              <Text className="text-md text-gray-600">Deem your friends worthy.</Text>
             </View>
           </View>
           <Feather name="chevron-right" size={16} />

@@ -126,11 +126,15 @@ const WalletScreen = () => {
                       loop
                       style={{ width: 14, height: 14 }}
                     />
-                    <Text className="ml-1 text-xs font-medium text-yellow-950">Refreshing…</Text>
+                    <Text
+                      allowFontScaling={false}
+                      className="ml-1 text-xs font-medium text-yellow-950">
+                      Refreshing…
+                    </Text>
                   </View>
                 ) : (
                   <View
-                    className={`w-20 flex-row items-center justify-center rounded-bl rounded-tr py-1.5 ${
+                    className={`min-w-20 max-w-32 flex-row items-center justify-center rounded-bl rounded-tr py-1.5 ${
                       isFresh
                         ? 'bg-green-500'
                         : secondsUntilNextUpdate <= 5
@@ -145,6 +149,7 @@ const WalletScreen = () => {
                     />
 
                     <Text
+                      allowFontScaling={false}
                       className={`w-[36px] text-center text-xs font-medium ${
                         isFresh || secondsUntilNextUpdate <= 5 ? 'text-white' : 'text-yellow-950'
                       }`}>
