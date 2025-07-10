@@ -1,4 +1,5 @@
 import Feather from '@expo/vector-icons/Feather';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Fontisto from '@expo/vector-icons/Fontisto';
 import * as ImagePicker from 'expo-image-picker';
 import { useAtom, useAtomValue } from 'jotai';
@@ -28,6 +29,9 @@ const UserDataForm = ({ onComplete, onCancel }: UserDataFormProps) => {
     countryCode: userCountryCode,
     callingCode: userCallingCode,
   } = userData;
+  const splitName = name?.split(' ') || ['', ''];
+  const [firstname, lastname] = [splitName[0], splitName[1] || ''];
+  const initials = name ? `${firstname[0]}${lastname[0] || ''}` : 'JD';
 
   const pickImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -105,8 +109,15 @@ const UserDataForm = ({ onComplete, onCancel }: UserDataFormProps) => {
                 resizeMode="cover"
               />
             ) : (
-              <View className="#0284c7 flex h-28 w-28 items-center justify-center rounded-full border-2 border-[#0284c7]">
-                <Feather name="camera" size={24} color="#0284c7" />
+              <View className="h-28">
+                <View
+                  className="h-28 w-28 items-center justify-center rounded-full"
+                  style={{ backgroundColor: '#0284c7' }}>
+                  <Text className="text-3xl font-medium text-white">{initials.toUpperCase()}</Text>
+                </View>
+                <View className="relative bottom-8 left-20 flex items-center justify-center self-start rounded-full border-2 border-white bg-gray-200 p-2">
+                  <FontAwesome name="camera" size={22} color="#4b5563" />
+                </View>
               </View>
             )}
           </View>
@@ -150,7 +161,7 @@ const UserDataForm = ({ onComplete, onCancel }: UserDataFormProps) => {
                     )}
                     {availability.available === false && (
                       <View className="flex flex-row items-center gap-1.5">
-                        <Fontisto name="close" size={14} color="#b91c1c" />
+                        <Fontisto name="close" size={14} color="#dc2626" />
                         <Text className="text-red-600">Username is taken</Text>
                       </View>
                     )}
