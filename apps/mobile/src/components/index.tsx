@@ -1,5 +1,4 @@
 export { default as ContactListItem } from './ContactListItem';
-
 export { default as Container } from './Container';
 export { default as CountdownInput } from './CountdownInput';
 export { default as CountryPickerTrigger } from './CountryPickerTrigger';
@@ -9,5 +8,6 @@ export { default as MenuListItem } from './MenuListItem';
 export { default as PasswordInput } from './PasswordInput';
 export { default as PinOrCodeInputField } from './PinOrCodeInputField';
 export { default as TxListItem } from './TxListItem';
+export { default as UserDataStep } from './UserDataStep';
 export { default as WalletDetails } from './WalletDetails';
 export { default as WalletStep } from './WalletStep';

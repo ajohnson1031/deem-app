@@ -13,7 +13,7 @@ const TxListItem = ({
   listType: TxListType;
   contact: Contact;
 }) => {
-  const { name, avatarUrl, id } = contact;
+  const { name, avatarUri, id } = contact;
 
   const split = name?.split(' ') ?? [];
   const [first = '', last = ''] = [split[0], split[split.length - 1]];
@@ -30,9 +30,9 @@ const TxListItem = ({
         'bg-[#fff]': ['DRAFT', 'PENDING'].includes(transaction.status ?? ''),
       })}>
       <View className="flex flex-row gap-4 px-4">
-        {avatarUrl ? (
+        {avatarUri ? (
           <Image
-            source={{ uri: avatarUrl }}
+            source={{ uri: avatarUri }}
             className="h-16 w-16 rounded-full"
             onError={(e: any) => console.log('Error Loading Image', e.nativeEvent)}
           />

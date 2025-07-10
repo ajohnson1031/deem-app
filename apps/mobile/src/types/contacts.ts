@@ -3,7 +3,7 @@ import { Transaction } from '~/types/transaction';
 type Contact = {
   id: string;
   name: string; // Full name
-  avatarUrl?: string;
+  avatarUri?: string;
   username: string;
   walletAddress: string;
 

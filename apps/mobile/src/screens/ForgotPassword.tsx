@@ -1,4 +1,5 @@
 import { API_BASE_URL } from '@env';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useState } from 'react';
@@ -33,9 +34,18 @@ const ForgotPasswordScreen = () => {
 
   return (
     <CoreLayout showBack>
-      <View className="flex-1 justify-center bg-white p-6">
-        <Text className="mb-4 text-4xl font-semibold">Password problems?</Text>
-        <Text className="mb-4 text-lg text-gray-600">
+      <View className="flex-1 bg-white p-6">
+        <View className="flex-row gap-3">
+          <MaterialCommunityIcons
+            name="form-textbox-password"
+            size={36}
+            color="#475569"
+            className="-mt-0.5"
+          />
+          <Text className="text-4xl text-slate-600">Password Problems?</Text>
+        </View>
+        <View className="mb-6 mt-4 flex h-[1px] bg-gray-200" />
+        <Text className="mb-6 text-lg text-gray-600">
           Enter the email address associated with your Deem account to receive a verification code.
         </Text>
         <View className="mb-3 w-full rounded-lg bg-gray-100">
@@ -59,7 +69,7 @@ const ForgotPasswordScreen = () => {
           onPress={handleSubmit}
           disabled={status === 'sending'}>
           <Text className="text-center text-xl font-medium text-white">
-            {status === 'sending' ? 'Sending...' : 'Send Password Reset Code'}
+            {status === 'sending' ? 'Sending...' : 'Get Code'}
           </Text>
         </TouchableOpacity>
       </View>

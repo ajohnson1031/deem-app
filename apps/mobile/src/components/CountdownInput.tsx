@@ -22,7 +22,8 @@ const CountdownInput = (props: TextInputProps) => {
     typeof textCounter === 'number' && textCounter <= 5 ? 'text-red-500' : 'text-gray-500';
 
   return (
-    <View className={`flex w-full flex-row items-center justify-between gap-3 rounded-lg bg-gray-100 ${className}`}>
+    <View
+      className={`flex w-full flex-row items-center justify-between gap-3 rounded-lg bg-gray-100 ${className}`}>
       <TextInput
         onChangeText={handleChangeText}
         className="w-[85%] p-3 py-4 text-lg font-medium leading-[18px]"

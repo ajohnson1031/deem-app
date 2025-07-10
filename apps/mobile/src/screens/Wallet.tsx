@@ -62,7 +62,7 @@ const WalletScreen = () => {
       : `$${formatWithCommas(formatFloatClean(usdAmount))}`;
 
   return (
-    <CoreLayout showBack showFooter showHeaderOptions>
+    <CoreLayout showFooter showHeaderOptions>
       <View className="mx-6 flex-1 items-center justify-center">
         <View className="w-full flex-1 flex-col gap-y-6">
           {/* Balance Header */}
@@ -111,15 +111,15 @@ const WalletScreen = () => {
             </View>
 
             {/* ≈ Equivalent Value */}
-            <View className="flex-row justify-between rounded-lg border border-gray-200 pb-3 pl-3">
+            <View className="relative flex-row justify-between rounded-lg border border-gray-200 pb-3 pl-3 pr-20">
               <View className="mt-3 flex gap-1">
                 <Text className="font-medium text-gray-500">{`Current Value: ${secondaryAmount} ${currency === 'XRP' ? 'USD' : ''}`}</Text>
                 <Text className="font-medium text-gray-500">{`Price Per XRP: $${xrpPriceUSD}`}</Text>
-                <Text className="font-medium text-gray-500">{`Last Updated: ${dayjs(lastUpdated).format('MMMM D, YYYY @ h:mm:ssa')}`}</Text>
+                <Text className="font-medium text-gray-500">{`Last Updated: ${dayjs(lastUpdated).format('M/D/YYYY @ h:mm:ssa')}`}</Text>
               </View>
-              <View>
+              <View className="absolute right-0 top-0">
                 {isResuming ? (
-                  <View className="w-28 flex-row items-center justify-center rounded-bl rounded-tr bg-yellow-500 py-1.5">
+                  <View className="min-w-20 max-w-32 flex-row items-center justify-center rounded-bl rounded-tr bg-yellow-500 px-2 py-1.5">
                     <LottieView
                       source={require('~/../assets/animations/loading-spinner.json')}
                       autoPlay
@@ -134,25 +134,26 @@ const WalletScreen = () => {
                   </View>
                 ) : (
                   <View
-                    className={`min-w-20 max-w-32 flex-row items-center justify-center rounded-bl rounded-tr py-1.5 ${
-                      isFresh
-                        ? 'bg-green-500'
-                        : secondsUntilNextUpdate <= 5
-                          ? 'bg-red-500'
-                          : 'bg-yellow-500'
-                    }`}>
+                    className={cn(
+                      'min-w-20 max-w-32 flex-row items-center justify-center rounded-bl rounded-tr px-2 py-1.5',
+                      {
+                        'bg-green-500': isFresh,
+                        'bg-red-500': !isFresh && secondsUntilNextUpdate <= 5,
+                        'bg-yellow-500': !isFresh && secondsUntilNextUpdate > 5,
+                      }
+                    )}>
                     <Fontisto
                       name="spinner-refresh"
                       size={14}
                       style={{ marginRight: 4 }}
                       color={isFresh || secondsUntilNextUpdate <= 5 ? 'white' : '#422006'}
                     />
-
                     <Text
                       allowFontScaling={false}
-                      className={`w-[36px] text-center text-xs font-medium ${
-                        isFresh || secondsUntilNextUpdate <= 5 ? 'text-white' : 'text-yellow-950'
-                      }`}>
+                      className={cn('w-[36px] text-center text-xs font-medium', {
+                        'text-white': isFresh || secondsUntilNextUpdate <= 5,
+                        'text-yellow-950': !isFresh && secondsUntilNextUpdate > 5,
+                      })}>
                       {`in ${secondsUntilNextUpdate}s`}
                     </Text>
                   </View>

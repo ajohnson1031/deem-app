@@ -15,7 +15,7 @@ const ContactListItem = ({
   isSuggested: boolean;
   onPress: () => void;
 }) => {
-  const { name, username, avatarUrl } = contact;
+  const { name, username, avatarUri } = contact;
   const tx = useAtomValue(currentTxAtom);
 
   const splitName = name.split(' ');
@@ -33,9 +33,9 @@ const ContactListItem = ({
         'flex-row items-center gap-4': !isSuggested,
         'bg-slate-100': isSelected && !isSuggested,
       })}>
-      {avatarUrl ? (
+      {avatarUri ? (
         <Image
-          source={{ uri: avatarUrl }}
+          source={{ uri: avatarUri }}
           className="h-16 w-16 rounded-full bg-gray-700"
           onError={(e: any) => console.log('Error Loading Image', e.nativeEvent)}
         />

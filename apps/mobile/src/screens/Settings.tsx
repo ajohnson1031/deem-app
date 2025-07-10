@@ -1,8 +1,13 @@
 import { Feather } from '@expo/vector-icons';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { randomUUID } from 'expo-crypto';
+import * as ImagePicker from 'expo-image-picker';
 import { useSetAtom } from 'jotai';
 import { Image, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
+import Toast from 'react-native-toast-message';
 
 import { currencyAtom, currentTxAtom, initialTx, walletBalanceAtom } from '~/atoms';
 import { MenuListItem } from '~/components';
@@ -10,6 +15,7 @@ import { MenuIconType } from '~/components/MenuListItem';
 import { useAuth } from '~/contexts/AuthContext';
 import { useWallet } from '~/hooks/useWallet';
 import CoreLayout from '~/layouts/CoreLayout';
+import { RootStackParamList } from '~/types';
 import { getColorIndex } from '~/utils';
 
 const SettingsScreen = () => {
@@ -18,8 +24,9 @@ const SettingsScreen = () => {
   const setCurrencyAtom = useSetAtom(currencyAtom);
   const { logout, user } = useAuth();
   const { deleteWallet } = useWallet();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   // wallet, walletAddress,
-  const { id, name, avatarUrl, username } = user || {};
+  const { id, name, avatarUri, username } = user || {};
   const splitName = name?.split(' ') || ['', ''];
   const [firstname, lastname] = [splitName[0], splitName[1] || ''];
   const backgroundColor = getColorIndex(id || randomUUID());
@@ -35,19 +42,42 @@ const SettingsScreen = () => {
     });
   };
 
+  const pickImage = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Toast.show({
+        type: 'error',
+        text1: 'Photo Access Disabled',
+        text2: 'Permission to access media library is required!',
+      });
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1], // force square crop
+      quality: 1,
+    });
+
+    if (!result.canceled && result.assets.length > 0) {
+      // setUserData((prev) => ({ ...prev, avatarUri: result.assets[0].uri }));
+    }
+  };
+
   return (
     <CoreLayout showBack>
       <View className="mx-6 flex-1">
         {/* Avatar */}
         <View className="mb-3 h-28">
-          {avatarUrl ? (
+          {avatarUri ? (
             <Image
-              source={{ uri: avatarUrl }}
+              source={{ uri: avatarUri }}
               className="h-24 w-24 rounded-full"
               resizeMode="cover"
             />
           ) : (
-            <TouchableOpacity>
+            <TouchableOpacity onPress={pickImage}>
               <View
                 className="h-24 w-24 items-center justify-center rounded-full"
                 style={{ backgroundColor }}>
@@ -70,56 +100,72 @@ const SettingsScreen = () => {
 
         <View className="my-3 flex h-[1px] bg-gray-200" />
 
-        <MenuListItem
-          iconType={MenuIconType.FEATHER}
-          iconName="edit-2"
-          labelText="Edit Basic Info"
-          helperText="You've changed. Help us stay current."
-          hasBackground
-          onPress={() => {}}
-        />
+        <View className="h-3/5">
+          <ScrollView showsVerticalScrollIndicator={false}>
+            <MenuListItem
+              iconType={MenuIconType.FEATHER}
+              iconName="edit-2"
+              labelText="Edit Basic Info"
+              helperText="You've changed. Help us stay current."
+              hasBackground
+              onPress={() => navigation.navigate('EditBasicInfo')}
+            />
 
-        <MenuListItem
-          iconType={MenuIconType.FONT_AWESOME}
-          iconName="camera"
-          labelText={avatarUrl ? 'Update your snapshot' : 'Add a picture!'}
-          helperText="Photos help friends find you quicker."
-          hasBackground
-          onPress={() => {}}
-        />
+            <MenuListItem
+              iconType={MenuIconType.FONT_AWESOME}
+              iconName="camera"
+              labelText={avatarUri ? 'Update your snapshot' : 'Add a picture!'}
+              helperText="Photos help friends find you quicker."
+              hasBackground
+              onPress={pickImage}
+            />
 
-        <MenuListItem
-          iconType={MenuIconType.FONT_AWESOME6}
-          iconName="wallet"
-          labelText="Export Wallet"
-          helperText="Store wallet details or regenerate."
-          hasBackground
-          onPress={() => {}}
-        />
+            <MenuListItem
+              iconType={MenuIconType.FONT_AWESOME6}
+              iconName="wallet"
+              labelText="Wallet Management"
+              helperText="Export wallet details, regenerate & more."
+              hasBackground
+              onPress={() => {}}
+            />
 
-        <MenuListItem
-          iconType={MenuIconType.FONT_AWESOME}
-          iconName="bank"
-          labelText="Linked Bank(s)"
-          helperText="Set where funds get sent."
-          hasBackground
-          onPress={() => {}}
-        />
+            <MenuListItem
+              iconType={MenuIconType.MATERIAL_COMM}
+              iconName="bank"
+              iconSize={22}
+              labelText="Linked Bank(s)"
+              helperText="Set where funds get sent."
+              hasBackground
+              onPress={() => {}}
+            />
 
-        {/* Invite Friends Button */}
-        <TouchableOpacity className="flex-row items-center justify-between py-3" onPress={() => {}}>
-          <View className="flex-row items-center gap-4">
-            <View className="flex h-16 w-16 items-center justify-center rounded-full bg-green-500">
-              <Feather name="plus" size={32} color="white" />
-            </View>
-            <View>
-              <Text className="text-xl font-medium">Widen your circle</Text>
-              <Text className="text-md text-gray-600">Deem your friends worthy.</Text>
-            </View>
-          </View>
-          <Feather name="chevron-right" size={16} />
-        </TouchableOpacity>
+            <MenuListItem
+              iconType={MenuIconType.MATERIAL_COMM}
+              iconName="security"
+              iconSize={24}
+              labelText="Security"
+              helperText="Manage security settings."
+              hasBackground
+              onPress={() => {}}
+            />
 
+            {/* Invite Friends Button */}
+            <TouchableOpacity
+              className="flex-row items-center justify-between py-3"
+              onPress={() => {}}>
+              <View className="flex-row items-center gap-4">
+                <View className="flex h-16 w-16 items-center justify-center rounded-full bg-green-500">
+                  <Feather name="plus" size={32} color="white" />
+                </View>
+                <View>
+                  <Text className="text-xl font-medium">Widen your circle</Text>
+                  <Text className="text-md text-gray-600">Deem your friends worthy.</Text>
+                </View>
+              </View>
+              <Feather name="chevron-right" size={16} />
+            </TouchableOpacity>
+          </ScrollView>
+        </View>
         {/* {!!walletAddress && (
           <WalletDetails
             address={walletAddress}

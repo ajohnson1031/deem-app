@@ -10,7 +10,7 @@ export type {
   TxSubmissionScreenProps,
   TxType,
 } from './transaction';
-export type { UserData, UserDataFormProps, UserDataInfo, UserDataKey } from './user';
+export type { UserData, UserDataKey, UserDataStepProps } from './user';
 export type { WalletBalanceResult } from './wallet';
 
 export { STATUS_GROUPS, TX_STATUS_LABELS } from './transaction';

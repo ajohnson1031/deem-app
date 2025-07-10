@@ -1,6 +1,7 @@
 import Feather from '@expo/vector-icons/Feather';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Fontisto from '@expo/vector-icons/Fontisto';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import * as ImagePicker from 'expo-image-picker';
 import { useAtom, useAtomValue } from 'jotai';
 import { useState } from 'react';
@@ -10,10 +11,10 @@ import { registerAtom, usernameAvailabilityAtom } from '~/atoms';
 import { CountdownInput, CountryPickerTrigger, PasswordInput } from '~/components';
 import { FIELDS } from '~/constants';
 import { useCountryPicker, useUsernameChecker } from '~/hooks';
-import { UserDataFormProps } from '~/types';
+import { UserData, UserDataStepProps } from '~/types';
 import { formatPhoneOnBlur, isValidPhoneNumber, sanitizePhone } from '~/utils';
 
-const UserDataForm = ({ onComplete, onCancel }: UserDataFormProps) => {
+const UserDataStep = ({ onComplete, onCancel }: UserDataStepProps) => {
   const [userData, setUserData] = useAtom(registerAtom);
   const availability = useAtomValue(usernameAvailabilityAtom);
   const [baseError, setBaseError] = useState<string | null>(null);
@@ -85,7 +86,17 @@ const UserDataForm = ({ onComplete, onCancel }: UserDataFormProps) => {
   };
 
   const hasValidationErrors = FIELDS.some((field) => {
-    const value = userData[field.name];
+    if (
+      ['password', 'avatarUri', 'id', 'walletAddress', 'createdAt', 'updatedAt'].includes(
+        field.name
+      )
+    )
+      return null;
+    const key = field.name as Exclude<
+      keyof UserData,
+      'password' | 'avatarUri' | 'id' | 'walletAddress' | 'createdAt' | 'updatedAt'
+    >;
+    const value = userData[key];
     if (field.name === 'phoneNumber') {
       return value ? !isValidPhoneNumber(value, countryCode) : false;
     }
@@ -95,10 +106,16 @@ const UserDataForm = ({ onComplete, onCancel }: UserDataFormProps) => {
   return (
     <View className="mt-10 flex w-full flex-1 justify-between px-6">
       <View>
-        <Text className="text-center text-3xl font-medium text-gray-700">
-          Create Your Deem Account
-        </Text>
-        <View className="mb-10 mt-3 flex h-[1px] bg-gray-200" />
+        <View className="flex-row gap-2">
+          <MaterialCommunityIcons
+            name="account-plus-outline"
+            size={36}
+            color="#475569"
+            className="-mt-0.5"
+          />
+          <Text className="text-4xl text-slate-600">Create Account</Text>
+        </View>
+        <View className="mb-10 mt-4 flex h-[1px] bg-gray-200" />
         {/* Avatar Picker */}
         <View className="mb-8 flex-row items-center gap-6">
           <View className="self-center rounded-full border border-gray-300 p-2">
@@ -137,7 +154,13 @@ const UserDataForm = ({ onComplete, onCancel }: UserDataFormProps) => {
         <View className="flex">
           {/* Input fields */}
           {FIELDS.map((field, idx) => {
-            const value = userData[field.name];
+            if (['avatarUri', 'id', 'walletAddress', 'createdAt', 'updatedAt'].includes(field.name))
+              return null;
+            const key = field.name as Exclude<
+              keyof UserData,
+              'avatarUri' | 'id' | 'walletAddress' | 'createdAt' | 'updatedAt'
+            >;
+            const value = userData[key];
             const isValid = !value || field.matches.test(value); // only validate if value is non-empty
             const showError = value && !isValid;
 
@@ -234,8 +257,8 @@ const UserDataForm = ({ onComplete, onCancel }: UserDataFormProps) => {
       <View className="mb-8 flex-row gap-4">
         <TouchableOpacity
           onPress={onCancel}
-          className="mt-4 flex-1 rounded-lg border-2 border-gray-800 py-3">
-          <Text className="text-center text-xl font-medium text-gray-800">Back to Login</Text>
+          className="mt-4 flex-1 rounded-lg border-2 border-gray-600 py-3">
+          <Text className="text-center text-xl font-medium text-gray-600">Back to Login</Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={handleNext}
@@ -251,4 +274,4 @@ const UserDataForm = ({ onComplete, onCancel }: UserDataFormProps) => {
   );
 };
 
-export default UserDataForm;
+export default UserDataStep;

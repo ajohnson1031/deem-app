@@ -13,6 +13,7 @@ import {
   ContactScreen,
   ConversionsScreen,
   Convert,
+  EditBasicInfo,
   FeePolicyScreen,
   ForgotPasswordScreen,
   HomeScreen,
@@ -110,6 +111,7 @@ export default function AppNavigator() {
                 }}
               />
               <Stack.Screen name="Conversions" component={ConversionsScreen} />
+              <Stack.Screen name="EditBasicInfo" component={EditBasicInfo} />
             </>
           )}
         </Stack.Navigator>

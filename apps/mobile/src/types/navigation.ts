@@ -19,4 +19,5 @@ export type RootStackParamList = {
   ForgotPassword: undefined;
   VerifyPasswordReset: { email: string };
   ResetPassword: { userId: string };
+  EditBasicInfo: undefined;
 };

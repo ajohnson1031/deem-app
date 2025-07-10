@@ -1,32 +1,25 @@
 import { CountryCode } from 'libphonenumber-js';
 
-interface UserDataInfo {
+type UserData = {
+  id?: string;
   name: string;
   username: string;
   email: string;
-  phoneNumber?: string;
   password: string;
   avatarUri?: string;
+  phoneNumber?: string;
   countryCode?: CountryCode;
   callingCode?: string;
-}
+  walletAddress?: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
 
-interface UserDataFormProps {
-  onComplete: (data: UserDataInfo) => void;
+interface UserDataStepProps {
+  onComplete: (data: UserData) => void;
   onCancel: () => void;
 }
 
-type UserData = {
-  name: string;
-  username: string;
-  email: string;
-  password: string;
-  avatarUri?: string;
-  phoneNumber?: string;
-  countryCode?: CountryCode;
-  callingCode?: string;
-};
-
 type UserDataKey = keyof UserData;
 
-export type { UserData, UserDataFormProps, UserDataInfo, UserDataKey };
+export type { UserData, UserDataKey, UserDataStepProps };

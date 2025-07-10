@@ -7,4 +7,5 @@ declare module '@env' {
   export const WALLET_SYNCED_FLAG: string;
   export const CLOUDINARY_CLOUD_NAME: string;
   export const AVATAR_UPLOAD_PRESET: string;
+  export const XRP_PRICE_WORKER_URL: string;
 }

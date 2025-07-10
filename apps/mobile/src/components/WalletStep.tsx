@@ -1,4 +1,4 @@
-import { Feather } from '@expo/vector-icons';
+import { Feather, FontAwesome6 } from '@expo/vector-icons';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useEffect, useState } from 'react';
 import { Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -52,10 +52,11 @@ const StepTwoWallet = ({ onComplete, onCancel }: StepTwoWalletProps) => {
   return (
     <View className="mt-10 flex w-full flex-1 justify-between px-6">
       <View>
-        <Text className="text-center text-3xl font-medium text-gray-700">
-          Setup Your Deem Wallet
-        </Text>
-        <View className="mb-10 mt-3 flex h-[1px] bg-gray-200" />
+        <View className="flex-row gap-3">
+          <FontAwesome6 name="wallet" size={30} color="#475569" />
+          <Text className="text-4xl text-slate-600">Setup Wallet</Text>
+        </View>
+        <View className="mb-10 mt-4 flex h-[1px] bg-gray-200" />
         {!generated && (
           <>
             <Text className="mb-6 text-lg text-gray-600">
@@ -169,8 +170,8 @@ const StepTwoWallet = ({ onComplete, onCancel }: StepTwoWalletProps) => {
       <View className="mb-8 flex-row gap-4">
         <TouchableOpacity
           onPress={onCancel}
-          className="mt-4 flex-1 rounded-lg border-2 border-gray-800 py-3">
-          <Text className="text-center text-xl font-medium text-gray-800">Go Back</Text>
+          className="mt-4 flex-1 rounded-lg border-2 border-gray-600 py-3">
+          <Text className="text-center text-xl font-medium text-gray-600">Go Back</Text>
         </TouchableOpacity>
 
         <TouchableOpacity

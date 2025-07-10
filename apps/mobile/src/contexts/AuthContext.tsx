@@ -4,17 +4,11 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import Toast from 'react-native-toast-message';
 
 import { useWallet } from '~/hooks'; // make sure this hook is working and imported
+import { UserData } from '~/types';
 import { deleteToken, deleteUser, emitter, getToken, getUser, saveToken, saveUser } from '~/utils';
 
-type User = {
-  id: string;
-  name: string;
-  username: string;
-  avatarUrl?: string;
-};
-
 type AuthContextType = {
-  user: User | null;
+  user: UserData | null;
   login: (identifier: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   isLoading: boolean;
@@ -24,7 +18,7 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserData | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 

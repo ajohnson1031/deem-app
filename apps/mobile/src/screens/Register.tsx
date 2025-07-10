@@ -8,8 +8,7 @@ import Toast from 'react-native-toast-message';
 import { v4 as uuidv4 } from 'uuid';
 
 import { registerAtom } from '~/atoms';
-import { WalletStep } from '~/components';
-import UserDataForm from '~/components/UserDataForm';
+import { UserDataStep, WalletStep } from '~/components';
 import CoreLayout from '~/layouts/CoreLayout';
 import { RootStackParamList } from '~/types';
 import { deriveKeyFromPassword, encryptSeed } from '~/utils';
@@ -102,11 +101,11 @@ const RegisterScreen = () => {
       const key = await deriveKeyFromPassword(password);
       const encryptedSeed = encryptSeed(seed, key);
 
-      const uploadedAvatarUrl = await handleAvatarUpload();
+      const uploadedavatarUri = await handleAvatarUpload();
 
       await api.post(`${API_BASE_URL}/auth/register`, {
         ...rest,
-        avatarUrl: uploadedAvatarUrl,
+        avatarUri: uploadedavatarUri,
         password,
         walletAddress,
         encryptedSeed,
@@ -133,7 +132,7 @@ const RegisterScreen = () => {
     <CoreLayout>
       <View className="flex-1 justify-center">
         {step === 1 && (
-          <UserDataForm onComplete={handleStepOneComplete} onCancel={handleStepOneCancel} />
+          <UserDataStep onComplete={handleStepOneComplete} onCancel={handleStepOneCancel} />
         )}
         {step === 2 && (
           <WalletStep onComplete={handleStepTwoComplete} onCancel={handleStepTwoCancel} />

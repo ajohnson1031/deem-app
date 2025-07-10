@@ -2,7 +2,7 @@ import { KeyboardTypeOptions } from 'react-native';
 
 import { UserDataKey } from '~/types';
 
-const FIELDS: {
+export type FieldType = {
   placeholder: string;
   name: UserDataKey;
   matches: RegExp;
@@ -11,7 +11,9 @@ const FIELDS: {
   errorMessage: string;
   maxLength: number;
   secure?: boolean;
-}[] = [
+};
+
+const FIELDS: FieldType[] = [
   {
     placeholder: 'Name',
     name: 'name',
