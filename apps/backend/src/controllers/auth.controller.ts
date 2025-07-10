@@ -11,7 +11,7 @@ const REFRESH_SECRET = process.env.REFRESH_SECRET || JWT_SECRET;
 const REFRESH_EXPIRES_IN = "7d";
 
 const registerHandler = async (req: Request, res: Response) => {
-  const { username, password, email, name, phoneNumber, avatarUrl, walletAddress, encryptedSeed, countryCode = "US", callingCode = "1" } = req.body;
+  const { username, password, email, name, phoneNumber, avatarUri, walletAddress, encryptedSeed, countryCode = "US", callingCode = "1" } = req.body;
 
   if (!username || !password || !walletAddress || !encryptedSeed || !name) {
     return res.status(400).json({ error: "Missing required fields." });
@@ -45,7 +45,7 @@ const registerHandler = async (req: Request, res: Response) => {
         email,
         name,
         phoneNumber,
-        avatarUrl,
+        avatarUri,
         walletAddress,
         countryCode,
         callingCode,

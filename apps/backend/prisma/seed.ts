@@ -16,7 +16,7 @@ async function main() {
       email: "john@example.com",
       phoneNumber: "1234567890",
       password: hashedPassword, // 🔐 Store the hashed password
-      avatarUrl: "https://api.dicebear.com/7.x/initials/png?seed=John%20Doe",
+      avatarUri: "https://api.dicebear.com/7.x/initials/png?seed=John%20Doe",
       walletAddress: "rrhxFGPXDH4Rbre2vrf3bqasjrHamSogs9",
       contacts: {
         create: [
@@ -24,13 +24,13 @@ async function main() {
             name: "Alice Monroe",
             username: "@alicem",
             walletAddress: "rAlice123",
-            avatarUrl: "https://api.dicebear.com/7.x/initials/png?seed=Alice%20Monroe",
+            avatarUri: "https://api.dicebear.com/7.x/initials/png?seed=Alice%20Monroe",
           },
           {
             name: "Bob Lee",
             username: "@boblee",
             walletAddress: "rBob456",
-            avatarUrl: "https://api.dicebear.com/7.x/initials/png?seed=Bob%20Lee",
+            avatarUri: "https://api.dicebear.com/7.x/initials/png?seed=Bob%20Lee",
           },
           {
             name: "Charlie Kim",

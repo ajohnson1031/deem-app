@@ -14,7 +14,7 @@ model User {
   email              String?             @unique
   phoneNumber        String?             @unique
   password           String
-  avatarUrl          String?
+  avatarUri          String?
   walletAddress      String              @unique
   countryCode        String?             @default("US")
   callingCode        String?             @default("1")
@@ -52,7 +52,7 @@ model Contact {
   userId        String
   name          String
   username      String
-  avatarUrl     String?
+  avatarUri     String?
   walletAddress String
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
