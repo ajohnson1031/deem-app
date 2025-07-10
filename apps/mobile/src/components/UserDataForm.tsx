@@ -1,4 +1,5 @@
 import Feather from '@expo/vector-icons/Feather';
+import Fontisto from '@expo/vector-icons/Fontisto';
 import * as ImagePicker from 'expo-image-picker';
 import { useAtom, useAtomValue } from 'jotai';
 import { useState } from 'react';
@@ -95,10 +96,8 @@ const UserDataForm = ({ onComplete, onCancel }: UserDataFormProps) => {
         </Text>
 
         {/* Avatar Picker */}
-        <View className="flex items-center">
-          <TouchableOpacity
-            onPress={pickImage}
-            className="mb-8 self-center rounded-full border border-gray-300 p-2">
+        <View className="mb-8 flex-row items-center gap-6">
+          <View className="self-center rounded-full border border-gray-300 p-2">
             {avatarUri ? (
               <Image
                 source={{ uri: avatarUri }}
@@ -110,7 +109,18 @@ const UserDataForm = ({ onComplete, onCancel }: UserDataFormProps) => {
                 <Feather name="camera" size={24} color="#0284c7" />
               </View>
             )}
-          </TouchableOpacity>
+          </View>
+
+          <View className="flex gap-2 self-center">
+            {!avatarUri && <Text className="text-sm text-gray-500">No photo selected.</Text>}
+            <TouchableOpacity
+              onPress={pickImage}
+              className={`rounded-lg px-3 py-2 ${!avatarUri ? 'bg-sky-600' : 'bg-red-600'}`}>
+              <Text className="font-medium text-white">
+                {!avatarUri ? 'Select Photo' : 'Remove Photo'}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View className="flex">
@@ -140,7 +150,7 @@ const UserDataForm = ({ onComplete, onCancel }: UserDataFormProps) => {
                     )}
                     {availability.available === false && (
                       <View className="flex flex-row items-center gap-1.5">
-                        <Feather name="x" size={14} color="#b91c1c" />
+                        <Fontisto name="close" size={14} color="#b91c1c" />
                         <Text className="text-red-600">Username is taken</Text>
                       </View>
                     )}
@@ -219,8 +229,11 @@ const UserDataForm = ({ onComplete, onCancel }: UserDataFormProps) => {
         <TouchableOpacity
           onPress={handleNext}
           disabled={hasValidationErrors || !!baseError}
-          className={`mt-4 flex-1 rounded-lg py-3 ${hasValidationErrors || !!baseError ? 'bg-gray-300' : 'bg-sky-600'}`}>
-          <Text className="text-center text-xl font-medium text-white">Next</Text>
+          className={`mt-4 flex-1 rounded-lg py-3 ${hasValidationErrors || !!baseError ? 'bg-gray-200' : 'bg-sky-600'}`}>
+          <Text
+            className={`text-center text-xl font-medium ${hasValidationErrors || !!baseError ? 'text-gray-400' : 'text-white'}`}>
+            Next
+          </Text>
         </TouchableOpacity>
       </View>
     </View>

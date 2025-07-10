@@ -50,7 +50,7 @@ const WalletDetails = ({
       </View>
 
       <View className="rounded bg-gray-100 p-3">
-        <Text className="text-md mb-1 text-gray-500">Private Key</Text>
+        <Text className="mb-1 text-xs text-gray-500">Private Key</Text>
         <View className="flex-row items-center justify-between">
           {seed && (
             <Text className="flex-1 font-mono">{showSeed ? seed : '•'.repeat(seed.length)}</Text>

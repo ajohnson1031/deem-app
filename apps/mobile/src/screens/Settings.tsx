@@ -28,7 +28,7 @@ const SettingsScreen = () => {
 
   return (
     <CoreLayout showBack>
-      <View className="m-6 flex-1 items-center justify-center">
+      <View className="m-6 flex-1 items-center ">
         <Text className="text-4xl font-semibold">Settings</Text>
         {!!walletAddress && (
           <WalletDetails

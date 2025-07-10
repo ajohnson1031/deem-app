@@ -4,11 +4,12 @@ import Fontisto from '@expo/vector-icons/Fontisto';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import cn from 'classnames';
+import dayjs from 'dayjs';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAtomValue } from 'jotai';
+import LottieView from 'lottie-react-native';
 import { FlatList, Text, TouchableOpacity, View } from 'react-native';
 // import { Dropdown } from 'react-native-element-dropdown'; // TODO: Integrate when ready
-import dayjs from 'dayjs';
 import ShimmerPlaceHolder from 'react-native-shimmer-placeholder';
 
 import { currencyAtom, transactionsAtom } from '~/atoms';
@@ -25,7 +26,13 @@ const WalletScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const recentTransactions = useAtomValue(transactionsAtom).slice(0, 4);
 
-  const { price: xrpPriceUSD, isFresh, lastUpdated, secondsUntilNextUpdate } = useXrpPriceMeta();
+  const {
+    price: xrpPriceUSD,
+    isFresh,
+    isResuming,
+    lastUpdated,
+    secondsUntilNextUpdate,
+  } = useXrpPriceMeta();
 
   // const [currencyOptions] = useState<Record<string, ApprovedCurrency>[]>([ // TODO: Related to currency switcher
   //   { label: 'XRP', value: 'XRP' },
@@ -104,24 +111,47 @@ const WalletScreen = () => {
             </View>
 
             {/* ≈ Equivalent Value */}
-            <View
-              className={`flex-row justify-between rounded-lg border border-gray-200 pb-3 pl-3`}>
+            <View className="flex-row justify-between rounded-lg border border-gray-200 pb-3 pl-3">
               <View className="mt-3 flex gap-1">
                 <Text className="font-medium text-gray-500">{`Current Value: ${secondaryAmount} ${currency === 'XRP' ? 'USD' : ''}`}</Text>
                 <Text className="font-medium text-gray-500">{`Price Per XRP: $${xrpPriceUSD}`}</Text>
-                <Text className="font-medium text-gray-500">{`Last Update: ${dayjs(lastUpdated).format('MMMM D, YYYY @ h:mm:ssa')}`}</Text>
+                <Text className="font-medium text-gray-500">{`Last Updated: ${dayjs(lastUpdated).format('MMMM D, YYYY @ h:mm:ssa')}`}</Text>
               </View>
               <View>
-                <View
-                  className={`w-20 flex-row justify-center gap-1.5 rounded-bl rounded-tr py-1.5 ${isFresh ? 'bg-green-500' : secondsUntilNextUpdate <= 5 ? 'bg-red-500' : 'bg-yellow-500'}`}>
-                  <Fontisto
-                    name="spinner-refresh"
-                    size={14}
-                    color={isFresh || secondsUntilNextUpdate <= 5 ? 'white' : '#422006'}
-                  />
-                  <Text
-                    className={`w-10 text-xs font-medium text-gray-500 ${isFresh || secondsUntilNextUpdate <= 5 ? 'text-white' : 'text-yellow-950'}`}>{`in ${secondsUntilNextUpdate}s`}</Text>
-                </View>
+                {isResuming ? (
+                  <View className="w-28 flex-row items-center justify-center rounded-bl rounded-tr bg-yellow-500 py-1.5">
+                    <LottieView
+                      source={require('~/../assets/animations/loading-spinner.json')}
+                      autoPlay
+                      loop
+                      style={{ width: 14, height: 14 }}
+                    />
+                    <Text className="ml-1 text-xs font-medium text-yellow-950">Refreshing…</Text>
+                  </View>
+                ) : (
+                  <View
+                    className={`w-20 flex-row items-center justify-center rounded-bl rounded-tr py-1.5 ${
+                      isFresh
+                        ? 'bg-green-500'
+                        : secondsUntilNextUpdate <= 5
+                          ? 'bg-red-500'
+                          : 'bg-yellow-500'
+                    }`}>
+                    <Fontisto
+                      name="spinner-refresh"
+                      size={14}
+                      style={{ marginRight: 4 }}
+                      color={isFresh || secondsUntilNextUpdate <= 5 ? 'white' : '#422006'}
+                    />
+
+                    <Text
+                      className={`w-[36px] text-center text-xs font-medium ${
+                        isFresh || secondsUntilNextUpdate <= 5 ? 'text-white' : 'text-yellow-950'
+                      }`}>
+                      {`in ${secondsUntilNextUpdate}s`}
+                    </Text>
+                  </View>
+                )}
               </View>
             </View>
             <View className="h-[1px] border-b border-gray-200 pt-2" />

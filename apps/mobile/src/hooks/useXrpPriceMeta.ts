@@ -4,8 +4,7 @@ import { useEffect, useState } from 'react';
 import { xrpPriceMetaAtom } from '~/atoms';
 
 export function useXrpPriceMeta() {
-  const { price, lastUpdated } = useAtomValue(xrpPriceMetaAtom);
-
+  const { price, lastUpdated, isResuming } = useAtomValue(xrpPriceMetaAtom);
   const [now, setNow] = useState(Date.now());
 
   useEffect(() => {
@@ -20,7 +19,7 @@ export function useXrpPriceMeta() {
   const secondsUntilNextUpdate = Math.max(0, 60 - elapsedSec);
   const timeSinceLastUpdate =
     elapsedSec < 60 ? `${elapsedSec}s ago` : `${Math.floor(elapsedSec / 60)}m ago`;
-  const isFresh = elapsedSec < 45;
+  const isFresh = elapsedSec < 45 && !isResuming;
 
   return {
     price,
@@ -28,5 +27,6 @@ export function useXrpPriceMeta() {
     timeSinceLastUpdate,
     secondsUntilNextUpdate,
     isFresh,
+    isResuming,
   };
 }

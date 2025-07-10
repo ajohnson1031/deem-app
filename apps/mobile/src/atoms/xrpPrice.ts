@@ -1,5 +1,16 @@
 import { atomWithObservable } from 'jotai/utils';
-import { BehaviorSubject, defer, delay, expand, from, interval, of, throwError } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  defer,
+  delay,
+  expand,
+  from,
+  interval,
+  merge,
+  of,
+  throwError,
+} from 'rxjs';
 import {
   catchError,
   filter,
@@ -14,7 +25,7 @@ import {
 import { appReadyAtom, appStateAtom } from '~/atoms/app';
 import { globalStore } from '~/state/store';
 
-const FALLBACK_PRICE: number = 2.0;
+const FALLBACK_PRICE = 2.0;
 const WORKER_URL = 'https://xrp-price-worker.deem-app.workers.dev';
 const MAX_RETRIES = 4;
 const BASE_DELAY_MS = 1000;
@@ -34,7 +45,7 @@ export const fetchXrpPrice = async (): Promise<number> => {
       throw new Error('Invalid API response');
     }
 
-    return json.price.toFixed(2);
+    return parseFloat(json.price.toFixed(2));
   } catch (err) {
     console.warn('[⚠️ XRP Fallback]', err);
     return parseFloat(FALLBACK_PRICE.toFixed(2));
@@ -52,6 +63,8 @@ export const xrpPriceMetaAtom = atomWithObservable(
     globalStore.sub(appStateAtom, () => {
       appState$.next(globalStore.get(appStateAtom));
     });
+
+    const isResuming$ = new BehaviorSubject(false);
 
     const fetchWithRetry = () => {
       console.log('⚡ Triggering fetchWithRetry...');
@@ -79,19 +92,40 @@ export const xrpPriceMetaAtom = atomWithObservable(
           console.warn('⚠️ Falling back to default price after retries:', err);
           return of(FALLBACK_PRICE);
         }),
-        tap((finalPrice) => console.log('🌟 Final price used:', finalPrice))
+        tap((finalPrice) => {
+          console.log('🌟 Final price used:', finalPrice);
+          setTimeout(() => {
+            console.log('🛑 Ending resuming state after 2s');
+            isResuming$.next(false);
+          }, 2000); // ⏱️ wait 2 seconds before clearing resuming
+        })
       );
     };
 
-    return interval(POLL_INTERVAL_MS).pipe(
-      startWith(0), // fetch immediately
+    // Handle app foregrounding
+    const resumeTrigger$ = appState$.pipe(
+      filter((state) => state === 'active'),
+      tap(() => {
+        console.log('🔄 App resumed. Setting isResuming to true');
+        isResuming$.next(true);
+      }),
+      switchMap(() => fetchWithRetry())
+    );
+
+    // Normal polling
+    const polling$ = interval(POLL_INTERVAL_MS).pipe(
+      startWith(0),
       withLatestFrom(appReady$, appState$),
-      filter(([_, ready, appState]) => ready && appState === 'active'),
-      switchMap(() => fetchWithRetry()),
-      map((price) => ({
+      filter(([_, ready, state]) => ready && state === 'active'),
+      switchMap(() => fetchWithRetry())
+    );
+
+    return combineLatest([merge(resumeTrigger$, polling$), isResuming$]).pipe(
+      map(([price, isResuming]) => ({
         price,
         lastUpdated: new Date(),
         isFresh: true,
+        isResuming,
       }))
     );
   },
@@ -100,6 +134,7 @@ export const xrpPriceMetaAtom = atomWithObservable(
       price: FALLBACK_PRICE,
       lastUpdated: new Date(),
       isFresh: false,
+      isResuming: false,
     },
   }
 );
