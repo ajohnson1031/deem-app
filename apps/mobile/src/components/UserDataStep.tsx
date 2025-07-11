@@ -2,24 +2,31 @@ import Feather from '@expo/vector-icons/Feather';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Fontisto from '@expo/vector-icons/Fontisto';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import * as ImagePicker from 'expo-image-picker';
 import { useAtom, useAtomValue } from 'jotai';
 import { useState } from 'react';
-import { Image, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, Text, TouchableOpacity, View } from 'react-native';
 
 import { registerAtom, usernameAvailabilityAtom } from '~/atoms';
-import { CountdownInput, CountryPickerTrigger, PasswordInput } from '~/components';
+import {
+  CountdownInput,
+  CountryPickerTrigger,
+  ImagePickerModal,
+  PasswordInput,
+} from '~/components';
 import { FIELDS } from '~/constants';
-import { useCountryPicker, useUsernameChecker } from '~/hooks';
+import { useCountryPicker, useImagePicker, useUsernameChecker } from '~/hooks';
 import { UserData, UserDataStepProps } from '~/types';
 import { formatPhoneOnBlur, isValidPhoneNumber, sanitizePhone } from '~/utils';
 
 const UserDataStep = ({ onComplete, onCancel }: UserDataStepProps) => {
-  const [userData, setUserData] = useAtom(registerAtom);
+  const { requestPermissions, takePhoto, pickFromLibrary } = useImagePicker();
   const availability = useAtomValue(usernameAvailabilityAtom);
-  const [baseError, setBaseError] = useState<string | null>(null);
   const usernameCheck = useUsernameChecker();
   const { countryCode, onSelect, callingCode } = useCountryPicker();
+  const [userData, setUserData] = useAtom(registerAtom);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [baseError, setBaseError] = useState<string | null>(null);
+
   const {
     name,
     username,
@@ -34,29 +41,25 @@ const UserDataStep = ({ onComplete, onCancel }: UserDataStepProps) => {
   const [firstname, lastname] = [splitName[0], splitName[1] || ''];
   const initials = name ? `${firstname[0]}${lastname[0] || ''}` : 'JD';
 
-  const pickImage = async () => {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      setBaseError('Permission to access media library is required!');
+  const openImagePicker = async () => {
+    const granted = await requestPermissions();
+    if (!granted) {
+      Alert.alert('Permission Required', 'Camera and media access are needed.');
       return;
     }
+    setModalVisible(true);
+  };
 
-    // If an avatar is already selected, deselect it
-    if (avatarUri) {
-      setUserData((prev) => ({ ...prev, avatarUri: undefined }));
-      return;
-    }
+  const handleChoosePhoto = async () => {
+    const result = await pickFromLibrary();
+    if (result) setUserData((prev) => ({ ...prev, avatarUri: result.uri }));
+    setModalVisible(false);
+  };
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1], // force square crop
-      quality: 1,
-    });
-
-    if (!result.canceled && result.assets.length > 0) {
-      setUserData((prev) => ({ ...prev, avatarUri: result.assets[0].uri }));
-    }
+  const handleTakePhoto = async () => {
+    const result = await takePhoto();
+    if (result) setUserData((prev) => ({ ...prev, avatarUri: result.uri }));
+    setModalVisible(false);
   };
 
   const handleFieldBlur = (fieldName: string) => {
@@ -116,7 +119,14 @@ const UserDataStep = ({ onComplete, onCancel }: UserDataStepProps) => {
           <Text className="text-4xl text-slate-600">Create Account</Text>
         </View>
         <View className="mb-10 mt-4 flex h-[1px] bg-gray-200" />
-        {/* Avatar Picker */}
+
+        <ImagePickerModal
+          visible={modalVisible}
+          onChoosePhoto={handleChoosePhoto}
+          onTakePhoto={handleTakePhoto}
+          onCancel={() => setModalVisible(false)}
+        />
+
         <View className="mb-8 flex-row items-center gap-6">
           <View className="self-center rounded-full border border-gray-300 p-2">
             {avatarUri ? (
@@ -141,11 +151,9 @@ const UserDataStep = ({ onComplete, onCancel }: UserDataStepProps) => {
 
           <View className="flex gap-2 self-center">
             {!avatarUri && <Text className="text-sm text-gray-500">No photo selected.</Text>}
-            <TouchableOpacity
-              onPress={pickImage}
-              className={`rounded-lg px-3 py-2 ${!avatarUri ? 'bg-sky-600' : 'bg-red-600'}`}>
+            <TouchableOpacity onPress={openImagePicker} className="rounded-lg bg-sky-600 px-3 py-2">
               <Text className="font-medium text-white">
-                {!avatarUri ? 'Select Photo' : 'Remove Photo'}
+                {!avatarUri ? 'Select Photo' : 'Change Photo'}
               </Text>
             </TouchableOpacity>
           </View>
@@ -162,7 +170,10 @@ const UserDataStep = ({ onComplete, onCancel }: UserDataStepProps) => {
             >;
             const value = userData[key];
             const isValid = !value || field.matches.test(value); // only validate if value is non-empty
-            const showError = value && !isValid;
+            const showError =
+              field.name === 'phoneNumber'
+                ? value && !isValidPhoneNumber(value, countryCode)
+                : value && !isValid;
 
             return (
               <View key={idx}>
@@ -191,17 +202,17 @@ const UserDataStep = ({ onComplete, onCancel }: UserDataStepProps) => {
                   </View>
                 )}
                 {field.name === 'phoneNumber' && (
-                  <View className="mb-2 flex-row items-center bg-gray-100 px-3 py-1">
-                    <Text className="mr-2 text-lg font-semibold text-[#777]">Country:</Text>
+                  <View className="mb-2 flex-row items-center rounded-lg bg-gray-100 px-3 py-1">
+                    <Text className="mr-2 text-xl font-medium text-[#777]">Country:</Text>
                     <CountryPickerTrigger countryCode={countryCode} onSelect={onSelect} />
-                    {countryCode === 'US' && <Text className="text-lg">(default)</Text>}
+                    {countryCode === 'US' && <Text className="text-xl font-medium">(default)</Text>}
                   </View>
                 )}
                 <View className="mb-2 flex-row gap-2">
                   {field.name === 'phoneNumber' && (
                     <View>
                       <Text
-                        className={`flex-1 rounded-lg bg-gray-100 px-3 py-4 text-lg font-semibold leading-[18px] ${!phoneNumber.length ? 'text-[#777]' : 'text-black'}`}>{`+ ${callingCode}`}</Text>
+                        className={`flex-1 rounded-lg bg-gray-100 px-3 py-4 text-xl font-semibold leading-[18px] ${!phoneNumber.length ? 'text-[#777]' : 'text-black'}`}>{`+ ${callingCode}`}</Text>
                     </View>
                   )}
                   {field.name !== 'password' ? (

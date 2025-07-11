@@ -1,22 +1,7 @@
 import { Feather, FontAwesome, FontAwesome6, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text, TouchableOpacity, View } from 'react-native';
 
-export enum MenuIconType {
-  FEATHER = 'feather',
-  FONT_AWESOME = 'fontawesome',
-  FONT_AWESOME6 = 'fontawesome6',
-  MATERIAL_COMM = 'material_community',
-}
-
-interface MenuListItemProps {
-  iconType: MenuIconType;
-  iconName: any;
-  iconSize?: number;
-  labelText: string;
-  helperText: string;
-  hasBackground?: boolean;
-  onPress: () => void;
-}
+import { MenuIconType, MenuListItemProps } from '~/types';
 
 const MenuListItem = ({
   iconType,

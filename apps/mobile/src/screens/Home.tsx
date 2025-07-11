@@ -57,7 +57,7 @@ const HomeScreen = () => {
         {/* Input: Username or Email */}
         <View className="w-full rounded-lg bg-gray-100">
           <TextInput
-            className="w-full p-3 py-4 text-lg font-medium leading-[18px]"
+            className="w-full p-3 py-4 text-xl font-medium leading-[18px]"
             value={identifier}
             placeholder="Username or Email"
             placeholderTextColor="#777"

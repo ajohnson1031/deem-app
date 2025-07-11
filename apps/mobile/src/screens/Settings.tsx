@@ -3,19 +3,17 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { randomUUID } from 'expo-crypto';
-import * as ImagePicker from 'expo-image-picker';
 import { useSetAtom } from 'jotai';
-import { Image, Text, TouchableOpacity, View } from 'react-native';
+import { useState } from 'react';
+import { Alert, Image, Text, TouchableOpacity, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import Toast from 'react-native-toast-message';
 
 import { currencyAtom, currentTxAtom, initialTx, walletBalanceAtom } from '~/atoms';
-import { MenuListItem } from '~/components';
-import { MenuIconType } from '~/components/MenuListItem';
+import { ImagePickerModal, MenuListItem } from '~/components';
 import { useAuth } from '~/contexts/AuthContext';
-import { useWallet } from '~/hooks/useWallet';
+import { useImagePicker, useWallet } from '~/hooks';
 import CoreLayout from '~/layouts/CoreLayout';
-import { RootStackParamList } from '~/types';
+import { MenuIconType, RootStackParamList } from '~/types';
 import { getColorIndex } from '~/utils';
 
 const SettingsScreen = () => {
@@ -24,12 +22,42 @@ const SettingsScreen = () => {
   const setCurrencyAtom = useSetAtom(currencyAtom);
   const { logout, user } = useAuth();
   const { deleteWallet } = useWallet();
+  const { requestPermissions, takePhoto, pickFromLibrary } = useImagePicker();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const [modalVisible, setModalVisible] = useState(false);
+
   // wallet, walletAddress,
   const { id, name, avatarUri, username } = user || {};
   const splitName = name?.split(' ') || ['', ''];
   const [firstname, lastname] = [splitName[0], splitName[1] || ''];
   const backgroundColor = getColorIndex(id || randomUUID());
+
+  const openImagePicker = async () => {
+    const granted = await requestPermissions();
+    if (!granted) {
+      Alert.alert('Permission Required', 'Camera and media access are needed.');
+      return;
+    }
+    setModalVisible(true);
+  };
+
+  const handleChoosePhoto = async () => {
+    const result = await pickFromLibrary();
+    if (result) {
+      // TODO: handle result.url
+      // setUserData((prev) => ({ ...prev, avatarUri: result.uri }));
+    }
+    setModalVisible(false);
+  };
+
+  const handleTakePhoto = async () => {
+    const result = await takePhoto();
+    if (result) {
+      // TODO: handle result.url
+      // setUserData((prev) => ({ ...prev, avatarUri: result.uri }));
+    }
+    setModalVisible(false);
+  };
 
   const handleLogout = async () => {
     await new Promise((resolve): void => {
@@ -42,31 +70,15 @@ const SettingsScreen = () => {
     });
   };
 
-  const pickImage = async () => {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      Toast.show({
-        type: 'error',
-        text1: 'Photo Access Disabled',
-        text2: 'Permission to access media library is required!',
-      });
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1], // force square crop
-      quality: 1,
-    });
-
-    if (!result.canceled && result.assets.length > 0) {
-      // setUserData((prev) => ({ ...prev, avatarUri: result.assets[0].uri }));
-    }
-  };
-
   return (
     <CoreLayout showBack>
+      <ImagePickerModal
+        visible={modalVisible}
+        onChoosePhoto={handleChoosePhoto}
+        onTakePhoto={handleTakePhoto}
+        onCancel={() => setModalVisible(false)}
+      />
+
       <View className="mx-6 flex-1">
         {/* Avatar */}
         <View className="mb-3 h-28">
@@ -77,7 +89,7 @@ const SettingsScreen = () => {
               resizeMode="cover"
             />
           ) : (
-            <TouchableOpacity onPress={pickImage}>
+            <TouchableOpacity onPress={openImagePicker}>
               <View
                 className="h-24 w-24 items-center justify-center rounded-full"
                 style={{ backgroundColor }}>
@@ -117,7 +129,7 @@ const SettingsScreen = () => {
               labelText={avatarUri ? 'Update your snapshot' : 'Add a picture!'}
               helperText="Photos help friends find you quicker."
               hasBackground
-              onPress={pickImage}
+              onPress={openImagePicker}
             />
 
             <MenuListItem
@@ -177,8 +189,8 @@ const SettingsScreen = () => {
         <View className="absolute bottom-4 flex w-full">
           <TouchableOpacity
             onPress={handleLogout}
-            className="mt-8 rounded-lg bg-gray-200 px-6 py-3">
-            <Text className="text-center text-xl font-medium text-red-700">Sign out</Text>
+            className="mt-8 rounded-lg bg-gray-200 px-6 py-4">
+            <Text className="text-center text-xl font-medium text-red-600">Sign out</Text>
           </TouchableOpacity>
         </View>
       </View>

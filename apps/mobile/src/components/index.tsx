@@ -4,6 +4,7 @@ export { default as CountdownInput } from './CountdownInput';
 export { default as CountryPickerTrigger } from './CountryPickerTrigger';
 export { default as FooterNav } from './FooterNav';
 export { default as HeaderNav } from './HeaderNav';
+export { default as ImagePickerModal } from './ImagePickerModal';
 export { default as MenuListItem } from './MenuListItem';
 export { default as PasswordInput } from './PasswordInput';
 export { default as PinOrCodeInputField } from './PinOrCodeInputField';
