@@ -1,23 +1,33 @@
 // ~/components/CountryPickerTrigger.tsx
+import { useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
 import CountryPicker, { Country, CountryCode } from 'react-native-country-picker-modal';
 
+import { CountryInfo } from '~/types';
+import { getCountryInfo } from '~/utils';
+
 interface Props {
-  country?: Country;
   countryCode: CountryCode;
   onSelect: (country: Country) => void;
   disabled?: boolean;
 }
 
-const CountryPickerTrigger = ({ country, countryCode, onSelect, disabled = false }: Props) => {
-  const countryName = country?.name || countryCode;
+const CountryPickerTrigger = ({ countryCode, onSelect, disabled = false }: Props) => {
+  const [info, setInfo] = useState<CountryInfo | null>(null);
+
+  useEffect(() => {
+    getCountryInfo(countryCode as any).then(setInfo);
+  }, [countryCode]);
 
   return (
     <View>
       {disabled ? (
-        <Text className="mr-1 py-[6.125px] text-xl font-medium text-gray-500">
-          {countryName as string}
-        </Text>
+        <View className="flex-row items-center gap-1.5">
+          <Text className="text-[30px] opacity-60">{info?.flag || countryCode}</Text>
+          <Text className="mr-1 py-[6.125px] text-[18.5px] font-medium text-gray-500">
+            {info?.name as string}
+          </Text>
+        </View>
       ) : (
         <CountryPicker
           countryCode={countryCode}

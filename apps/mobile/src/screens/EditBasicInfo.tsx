@@ -22,7 +22,7 @@ const EditBasicInfo = () => {
   const currentUserName = user?.username;
   const availability = useAtomValue(usernameAvailabilityAtom);
   const usernameCheck = useUsernameChecker();
-  const { country, countryCode, onSelect, callingCode } = useCountryPicker();
+  const { countryCode, onSelect, callingCode } = useCountryPicker();
   const [selectedCountry, setSelectedCountry] = useState<Country | undefined>(undefined);
   const [userData, setUserData] = useState<Omit<UserData, 'password' | 'avatarUri'>>({
     name: user?.name || '',
@@ -65,7 +65,9 @@ const EditBasicInfo = () => {
   };
 
   // TODO: Flesh out submit function
-  const onSubmit = () => {};
+  const onSubmit = () => {
+    console.log(JSON.stringify(userData, null, 2));
+  };
 
   return (
     <CoreLayout>
@@ -151,7 +153,6 @@ const EditBasicInfo = () => {
                       <Text className="mr-2 text-xl font-medium text-[#777]">Country:</Text>
 
                       <CountryPickerTrigger
-                        country={selectedCountry}
                         countryCode={selectedCountry?.cca2 || (userData.countryCode as any)}
                         onSelect={(country) => {
                           setSelectedCountry(country);
@@ -176,7 +177,7 @@ const EditBasicInfo = () => {
                     {field.name === 'phoneNumber' && (
                       <View>
                         <Text
-                          className={`flex-1 rounded-lg bg-gray-100 px-3 py-4 text-lg font-semibold leading-[18px] ${!userData.phoneNumber?.length ? 'text-[#777]' : 'text-black'}`}>{`+ ${userData.callingCode}`}</Text>
+                          className={`flex-1 items-center rounded-lg bg-gray-100 px-3 py-4 text-lg font-semibold leading-[18px] ${!userData.phoneNumber?.length ? 'text-[#777]' : 'text-black'}`}>{`+ ${userData.callingCode}`}</Text>
                       </View>
                     )}
 

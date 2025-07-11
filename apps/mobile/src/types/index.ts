@@ -1,4 +1,5 @@
 export type { Contact, SwipeableTransactionRowProps } from './contacts';
+export type { CountryInfo } from './country';
 export type { MenuListItemProps } from './menulist';
 export type { RootStackParamList } from './navigation';
 export type { Theme } from './theme';

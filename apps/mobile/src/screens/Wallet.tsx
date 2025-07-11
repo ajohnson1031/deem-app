@@ -206,7 +206,7 @@ const WalletScreen = () => {
             <TouchableOpacity
               className="flex-1 rounded-xl bg-sky-600 py-4"
               onPress={() => navigation.navigate('Convert')}>
-              <Text className="text-center text-xl font-medium text-white">Convert Currency</Text>
+              <Text className="text-center text-xl font-medium text-white">Convert to USD</Text>
             </TouchableOpacity>
           </View>
 

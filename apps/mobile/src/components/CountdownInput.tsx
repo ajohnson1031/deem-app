@@ -30,7 +30,7 @@ const CountdownInput = (props: CountdownInputProps) => {
       className={`flex w-full flex-row items-center justify-between gap-3 rounded-lg bg-gray-100 ${className}`}>
       <TextInput
         onChangeText={handleChangeText}
-        className={`w-[85%] p-3 py-4 text-xl font-medium leading-[18px] ${textClassName}`}
+        className={`flex w-[85%] p-3 py-4 text-xl font-medium leading-[18px] ${textClassName}`}
         {...rest}
       />
       <Text className={`mr-3 font-semibold ${textColor}`}>{textCounter}</Text>
