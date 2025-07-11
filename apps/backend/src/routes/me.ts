@@ -1,10 +1,12 @@
 // src/routes/me.ts
 import { Router } from "express";
-import { getMeHandler } from "../controllers/me.controller";
+import { getMeHandler, updateMeHandler } from "../controllers/me.controller";
 import { requireAuth } from "../middleware/auth";
 
 const router = Router();
 
-router.get("/", requireAuth, getMeHandler);
+router.use(requireAuth);
+router.get("/", getMeHandler);
+router.patch("/", updateMeHandler);
 
 export default router;

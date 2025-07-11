@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@env';
 import { Feather } from '@expo/vector-icons';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useNavigation } from '@react-navigation/native';
@@ -7,6 +8,7 @@ import { useSetAtom } from 'jotai';
 import { useState } from 'react';
 import { Alert, Image, Text, TouchableOpacity, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
+import Toast from 'react-native-toast-message';
 
 import { currencyAtom, currentTxAtom, initialTx, walletBalanceAtom } from '~/atoms';
 import { ImagePickerModal, MenuListItem } from '~/components';
@@ -14,13 +16,14 @@ import { useAuth } from '~/contexts/AuthContext';
 import { useImagePicker, useWallet } from '~/hooks';
 import CoreLayout from '~/layouts/CoreLayout';
 import { MenuIconType, RootStackParamList } from '~/types';
-import { getColorIndex } from '~/utils';
+import { deleteAvatar, getColorIndex, uploadAvatar } from '~/utils';
+import { api } from '~/utils/api';
 
 const SettingsScreen = () => {
   const setTxAtom = useSetAtom(currentTxAtom);
   const setWbAtom = useSetAtom(walletBalanceAtom);
   const setCurrencyAtom = useSetAtom(currencyAtom);
-  const { logout, user } = useAuth();
+  const { logout, user, setUser: setStoredUser } = useAuth();
   const { deleteWallet } = useWallet();
   const { requestPermissions, takePhoto, pickFromLibrary } = useImagePicker();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -44,8 +47,7 @@ const SettingsScreen = () => {
   const handleChoosePhoto = async () => {
     const result = await pickFromLibrary();
     if (result) {
-      // TODO: handle result.url
-      // setUserData((prev) => ({ ...prev, avatarUri: result.uri }));
+      handleUpdateAvatar(result);
     }
     setModalVisible(false);
   };
@@ -53,10 +55,35 @@ const SettingsScreen = () => {
   const handleTakePhoto = async () => {
     const result = await takePhoto();
     if (result) {
-      // TODO: handle result.url
-      // setUserData((prev) => ({ ...prev, avatarUri: result.uri }));
+      handleUpdateAvatar(result);
     }
     setModalVisible(false);
+  };
+
+  const handleRemovePhoto = async () => {
+    const avatarDeleted = await deleteAvatar(avatarUri!);
+
+    if (avatarDeleted) {
+      try {
+        await api.patch(`${API_BASE_URL}/me`, { avatarUri: null });
+        const { avatarUri, ...rest } = user!;
+        setStoredUser({ ...rest });
+        setModalVisible(false);
+        Toast.show({
+          type: 'success',
+          text1: 'Photo Removed',
+          text2: 'You can now upload a new one.',
+        });
+      } catch (err: any) {
+        console.error(err, '\n', err.details);
+        setModalVisible(false);
+        Toast.show({
+          type: 'error',
+          text1: 'Problem Removing Photo',
+          text2: err.error || err.message || 'Unknown error.',
+        });
+      }
+    }
   };
 
   const handleLogout = async () => {
@@ -70,24 +97,55 @@ const SettingsScreen = () => {
     });
   };
 
+  const handleUpdateAvatar = async (result: { uri: string }) => {
+    try {
+      const avatarUrl = await uploadAvatar(result.uri);
+      if (avatarUrl) {
+        const res = await api.patch(`${API_BASE_URL}/me`, { avatarUri: avatarUrl });
+        const { updatedUser } = res.data;
+        setStoredUser({ ...user, ...updatedUser });
+
+        Toast.show({
+          type: 'success',
+          text1: 'Success!',
+          text2: 'Profile photo updated.',
+        });
+      }
+    } catch (err: any) {
+      console.error(err);
+      Toast.show({
+        type: 'error',
+        text1: 'Problem updating profile photo.',
+        text2: err.error || err.message || 'Unknown error',
+      });
+    }
+  };
+
   return (
     <CoreLayout showBack>
       <ImagePickerModal
         visible={modalVisible}
+        avatarUri={avatarUri}
         onChoosePhoto={handleChoosePhoto}
         onTakePhoto={handleTakePhoto}
+        onRemovePhoto={handleRemovePhoto}
         onCancel={() => setModalVisible(false)}
       />
 
       <View className="mx-6 flex-1">
         {/* Avatar */}
-        <View className="mb-3 h-28">
+        <View className="h-1/6">
           {avatarUri ? (
-            <Image
-              source={{ uri: avatarUri }}
-              className="h-24 w-24 rounded-full"
-              resizeMode="cover"
-            />
+            <TouchableOpacity onPress={openImagePicker}>
+              <Image
+                source={{ uri: avatarUri }}
+                className="h-28 w-28 rounded-full"
+                resizeMode="cover"
+              />
+              <View className="relative bottom-10 left-20 flex items-center justify-center self-start rounded-full border-2 border-white bg-gray-200 p-2">
+                <FontAwesome name="camera" size={22} color="#4b5563" />
+              </View>
+            </TouchableOpacity>
           ) : (
             <TouchableOpacity onPress={openImagePicker}>
               <View
@@ -110,10 +168,14 @@ const SettingsScreen = () => {
           @{username}
         </Text>
 
-        <View className="my-3 flex h-[1px] bg-gray-200" />
+        <View className="mb-2 flex-row items-center justify-between">
+          <View className="my-3 flex h-[1px] w-4/12 bg-gray-200" />
+          <Text className="text-gray-400">scroll for more</Text>
+          <View className="my-3 flex h-[1px] w-4/12 bg-gray-200" />
+        </View>
 
         <View className="h-3/5">
-          <ScrollView showsVerticalScrollIndicator={false}>
+          <ScrollView showsVerticalScrollIndicator={false} className="pb-20">
             <MenuListItem
               iconType={MenuIconType.FEATHER}
               iconName="edit-2"
@@ -126,8 +188,10 @@ const SettingsScreen = () => {
             <MenuListItem
               iconType={MenuIconType.FONT_AWESOME}
               iconName="camera"
-              labelText={avatarUri ? 'Update your snapshot' : 'Add a picture!'}
-              helperText="Photos help friends find you quicker."
+              labelText={avatarUri ? 'Update Photo' : 'Add a photo!'}
+              helperText={
+                avatarUri ? 'New duckface? We wanna see!' : 'Photos help friends find you quicker.'
+              }
               hasBackground
               onPress={openImagePicker}
             />
@@ -170,12 +234,18 @@ const SettingsScreen = () => {
                   <Feather name="plus" size={32} color="white" />
                 </View>
                 <View>
-                  <Text className="text-xl font-medium">Widen your circle</Text>
+                  <Text className="text-xl font-medium">Widen Your Circle</Text>
                   <Text className="text-md text-gray-600">Deem your friends worthy.</Text>
                 </View>
               </View>
               <Feather name="chevron-right" size={16} />
             </TouchableOpacity>
+
+            <View className="mt-12 flex w-full">
+              <TouchableOpacity onPress={handleLogout} className="rounded-lg bg-gray-200 px-6 py-4">
+                <Text className="text-center text-xl font-medium text-red-600">Sign out</Text>
+              </TouchableOpacity>
+            </View>
           </ScrollView>
         </View>
         {/* {!!walletAddress && (
@@ -185,14 +255,6 @@ const SettingsScreen = () => {
             seed={wallet!.seed}
           />
         )} */}
-
-        <View className="absolute bottom-4 flex w-full">
-          <TouchableOpacity
-            onPress={handleLogout}
-            className="mt-8 rounded-lg bg-gray-200 px-6 py-4">
-            <Text className="text-center text-xl font-medium text-red-600">Sign out</Text>
-          </TouchableOpacity>
-        </View>
       </View>
     </CoreLayout>
   );

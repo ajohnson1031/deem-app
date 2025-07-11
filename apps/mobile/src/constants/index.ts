@@ -19,19 +19,19 @@ const FIELDS: FieldType[] = [
     name: 'name',
     keyboardType: 'default',
     textContentType: 'name',
-    maxLength: 50,
-    matches: /^[A-Za-z\s]+$/, // only letters and spaces
-    errorMessage: 'Name may contain letters and spaces only.',
+    maxLength: 100,
+    matches: /^[A-Za-z.\s]+$/, // only letters and spaces
+    errorMessage: 'Name may contain letters, spaces & periods only.',
   },
   {
     placeholder: 'Username',
     name: 'username',
     keyboardType: 'default',
     textContentType: 'username',
-    maxLength: 21,
-    matches: /^[a-zA-Z0-9_.]{6,21}$/,
+    maxLength: 30,
+    matches: /^[a-zA-Z0-9_.-]{6,30}$/,
     errorMessage:
-      'Username must be 6 - 21 characters in length and may contain letters, numbers, periods & underscores only.',
+      'Username must be 6 - 30 characters in length and may contain letters, numbers, hyphens, underscores & periods only.',
   },
   {
     placeholder: 'Email',
@@ -48,10 +48,10 @@ const FIELDS: FieldType[] = [
     keyboardType: 'default',
     textContentType: 'newPassword',
     secure: true,
-    maxLength: 21,
-    matches: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s@]).{8,21}$/, // strong password, excludes @
+    maxLength: 30,
+    matches: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s@]).{8,30}$/, // strong password, excludes @
     errorMessage:
-      'Password must be 8 - 21 chars and include uppercase, lowercase, number, and special character (not @).',
+      'Password must be 8 - 30 chars and include uppercase, lowercase, number, and special character (not @).',
   },
   {
     placeholder: 'Phone (optional)',

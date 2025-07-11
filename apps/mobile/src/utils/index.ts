@@ -1,4 +1,5 @@
 export { clearAuthData } from './auth';
+export { deleteAvatar, uploadAvatar } from './avatar';
 export { calculateFees } from './calculateFees';
 export { colors, getColorIndex } from './colors';
 export { convertCurrencyAmount } from './convert';
@@ -11,6 +12,7 @@ export { formatPhoneOnBlur, isValidPhoneNumber, sanitizePhone } from './phone';
 export { getStoredPin, savePin } from './securePin';
 export { deleteToken, deleteUser, getToken, getUser, saveToken, saveUser } from './secureStore';
 export { toastConfig } from './toast';
+export { getChangedFields } from './user';
 export {
   getTransactionHistory,
   getWalletBalance,

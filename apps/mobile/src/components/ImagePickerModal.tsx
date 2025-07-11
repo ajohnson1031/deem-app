@@ -3,15 +3,19 @@ import { Animated, Easing, Modal, Pressable, Text, View } from 'react-native';
 
 interface ImagePickerModalProps {
   visible: boolean;
+  avatarUri?: string;
   onTakePhoto: () => void;
   onChoosePhoto: () => void;
+  onRemovePhoto?: () => void;
   onCancel: () => void;
 }
 
 const ImagePickerModal = ({
   visible,
+  avatarUri,
   onTakePhoto,
   onChoosePhoto,
+  onRemovePhoto,
   onCancel,
 }: ImagePickerModalProps) => {
   const slideAnim = useRef(new Animated.Value(300)).current;
@@ -80,6 +84,14 @@ const ImagePickerModal = ({
         <Animated.View
           style={{ transform: [{ translateY: slideAnim }] }}
           className="w-[90%] rounded-xl bg-white px-4 py-1">
+          {avatarUri && (
+            <>
+              <Pressable className="py-4" onPress={onRemovePhoto}>
+                <Text className="text-center text-2xl text-red-500">Remove Photo</Text>
+              </Pressable>
+              <View className="my-1 h-[1px] bg-gray-200" />
+            </>
+          )}
           <Pressable className="py-4" onPress={onChoosePhoto}>
             <Text className="text-center text-2xl text-blue-500">Choose Photo</Text>
           </Pressable>
@@ -92,7 +104,7 @@ const ImagePickerModal = ({
           style={{ transform: [{ translateY: slideAnim }] }}
           className="mb-12 w-[90%] rounded-xl bg-white px-4 py-2">
           <Pressable className="py-4" onPress={onCancel}>
-            <Text className="text-center text-2xl font-medium text-red-500">Cancel</Text>
+            <Text className="text-center text-2xl font-medium text-blue-500">Cancel</Text>
           </Pressable>
         </Animated.View>
       </Animated.View>

@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@env';
 import { Feather, FontAwesome6, Fontisto, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -6,6 +7,7 @@ import { CountryCode, isValidPhoneNumber } from 'libphonenumber-js';
 import { useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { Country } from 'react-native-country-picker-modal';
+import Toast from 'react-native-toast-message';
 
 import { usernameAvailabilityAtom } from '~/atoms';
 import { CountdownInput, CountryPickerTrigger } from '~/components';
@@ -14,10 +16,11 @@ import { useAuth } from '~/contexts/AuthContext';
 import { useCountryPicker, useUsernameChecker } from '~/hooks';
 import CoreLayout from '~/layouts/CoreLayout';
 import { RootStackParamList, UserData } from '~/types';
-import { formatPhoneOnBlur, sanitizePhone } from '~/utils';
+import { formatPhoneOnBlur, getChangedFields, sanitizePhone } from '~/utils';
+import { api } from '~/utils/api';
 
 const EditBasicInfo = () => {
-  const { user } = useAuth() || {};
+  const { user, setUser: setStoredUser } = useAuth() || {};
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const currentUserName = user?.username;
   const availability = useAtomValue(usernameAvailabilityAtom);
@@ -33,9 +36,7 @@ const EditBasicInfo = () => {
     callingCode: user?.callingCode || callingCode || '1',
   });
 
-  const noChange = Object.entries(userData).every(([key, value]) => {
-    return user?.[key as keyof typeof user] === value;
-  });
+  const { changes, hasChanges } = getChangedFields(user!, userData);
 
   const [baseError, setBaseError] = useState<string | null>(null);
   const [isLocked, setIsLocked] = useState<boolean>(true);
@@ -50,7 +51,7 @@ const EditBasicInfo = () => {
     return !field.matches.test(value?.trim() || '');
   });
 
-  const shouldUpdate = !hasValidationErrors && !baseError && !isLocked && !noChange;
+  const shouldUpdate = !hasValidationErrors && !baseError && !isLocked && hasChanges;
 
   const handleFieldBlur = (fieldName: string) => {
     if (fieldName === 'phoneNumber') {
@@ -64,9 +65,30 @@ const EditBasicInfo = () => {
     navigation.goBack();
   };
 
-  // TODO: Flesh out submit function
-  const onSubmit = () => {
-    console.log(JSON.stringify(userData, null, 2));
+  const onSubmit = async () => {
+    try {
+      if (shouldUpdate) {
+        const res = await api.patch(`${API_BASE_URL}/me`, { ...(changes as Partial<UserData>) });
+        const { message, updatedUser } = res.data;
+        setStoredUser({ ...user, ...updatedUser });
+        setIsLocked(true);
+
+        Toast.show({
+          type: 'success',
+          text1: `Success!`,
+          text2: message,
+        });
+      }
+    } catch (err: any) {
+      const { error, details = undefined } = err;
+      console.error(error, '\n', details);
+
+      Toast.show({
+        type: 'error',
+        text1: 'Problem updating user.',
+        text2: error,
+      });
+    }
   };
 
   return (
@@ -177,7 +199,7 @@ const EditBasicInfo = () => {
                     {field.name === 'phoneNumber' && (
                       <View>
                         <Text
-                          className={`flex-1 items-center rounded-lg bg-gray-100 px-3 py-4 text-lg font-semibold leading-[18px] ${!userData.phoneNumber?.length ? 'text-[#777]' : 'text-black'}`}>{`+ ${userData.callingCode}`}</Text>
+                          className={`flex-1 items-center rounded-lg bg-gray-100 px-3 py-4 text-lg font-semibold leading-[18px] ${!userData.phoneNumber?.length || isLocked ? 'text-[#777]' : 'text-black'}`}>{`+ ${userData.callingCode}`}</Text>
                       </View>
                     )}
 

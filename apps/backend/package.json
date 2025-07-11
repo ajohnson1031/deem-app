@@ -30,7 +30,8 @@
     "jsonwebtoken": "^9.0.2",
     "prisma": "^6.10.1",
     "react-native-dotenv": "^3.4.11",
-    "xrpl": "^4.3.0"
+    "xrpl": "^4.3.0",
+    "zod": "^4.0.5"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",

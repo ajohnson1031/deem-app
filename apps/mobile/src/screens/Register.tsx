@@ -1,69 +1,22 @@
-import { API_BASE_URL, AVATAR_UPLOAD_PRESET, CLOUDINARY_CLOUD_NAME } from '@env';
+import { API_BASE_URL } from '@env';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAtom } from 'jotai';
 import { useState } from 'react';
 import { View } from 'react-native';
 import Toast from 'react-native-toast-message';
-import { v4 as uuidv4 } from 'uuid';
 
 import { registerAtom } from '~/atoms';
 import { UserDataStep, WalletStep } from '~/components';
 import CoreLayout from '~/layouts/CoreLayout';
 import { RootStackParamList } from '~/types';
-import { deriveKeyFromPassword, encryptSeed } from '~/utils';
+import { deriveKeyFromPassword, encryptSeed, handleAvatarUpload } from '~/utils';
 import { api } from '~/utils/api';
 
 const RegisterScreen = () => {
   const [step, setStep] = useState<1 | 2>(1);
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [userData, setUserData] = useAtom(registerAtom);
-  const CLOUDINARY_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
-
-  const handleAvatarUpload = async (): Promise<string | undefined> => {
-    if (!userData.avatarUri || userData.avatarUri.startsWith('http')) return userData.avatarUri;
-
-    const filename = `avatar_${uuidv4()}.jpg`;
-    const formData = new FormData();
-
-    formData.append('file', {
-      uri: userData.avatarUri,
-      name: filename,
-      type: 'image/jpeg',
-    } as any);
-    formData.append('upload_preset', AVATAR_UPLOAD_PRESET);
-
-    try {
-      const response = await fetch(CLOUDINARY_URL, {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-
-      const data = await response.json();
-
-      if (data.secure_url) {
-        return data.secure_url;
-      } else {
-        Toast.show({
-          type: 'error',
-          text1: 'Upload failed',
-          text2: 'Could not upload your avatar. Try again later.',
-        });
-      }
-    } catch (err) {
-      console.error('Cloudinary upload error:', err);
-      Toast.show({
-        type: 'error',
-        text1: 'Upload error',
-        text2: 'Something went wrong while uploading your avatar.',
-      });
-    }
-
-    return undefined;
-  };
 
   const handleStepOneCancel = () => {
     navigation.navigate('Home');
@@ -101,7 +54,7 @@ const RegisterScreen = () => {
       const key = await deriveKeyFromPassword(password);
       const encryptedSeed = encryptSeed(seed, key);
 
-      const uploadedavatarUri = await handleAvatarUpload();
+      const uploadedavatarUri = await handleAvatarUpload(avatarUri);
 
       await api.post(`${API_BASE_URL}/auth/register`, {
         ...rest,

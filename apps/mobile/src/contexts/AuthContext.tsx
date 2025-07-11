@@ -9,6 +9,7 @@ import { deleteToken, deleteUser, emitter, getToken, getUser, saveToken, saveUse
 
 type AuthContextType = {
   user: UserData | null;
+  setUser: React.Dispatch<React.SetStateAction<UserData | null>>;
   login: (identifier: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   isLoading: boolean;
@@ -104,6 +105,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       const { token: accessToken, user } = res.data;
       setToken(accessToken);
+      console.log('authContext => ln108 => user:', user);
       setUser(user);
       setAuthHeader(accessToken);
 
@@ -130,14 +132,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       Toast.show({
         type: 'info',
-        text1: 'Session Cleared',
+        text1: 'Session Ended',
         text2: "You've been securely logged out.",
       });
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading, token }}>
+    <AuthContext.Provider value={{ user, setUser, login, logout, isLoading, token }}>
       {children}
     </AuthContext.Provider>
   );
