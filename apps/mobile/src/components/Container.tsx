@@ -1,13 +1,7 @@
 import cn from 'classnames';
 import { SafeAreaView } from 'react-native';
 
-const Container = ({
-  children,
-  className = '',
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) => {
+const Container = ({ children, className }: { children: React.ReactNode; className?: string }) => {
   return <SafeAreaView className={cn(styles.container, className)}>{children}</SafeAreaView>;
 };
 

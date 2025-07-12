@@ -10,7 +10,7 @@ import Toast from 'react-native-toast-message';
 import { currencyAtom, currentTxAtom } from '~/atoms';
 import { useXrpPriceMeta } from '~/hooks';
 import { useWallet } from '~/hooks/useWallet';
-import CoreLayout from '~/layouts/CoreLayout';
+import { CoreLayout } from '~/layouts';
 import { RootStackParamList, TxType } from '~/types';
 import { buzzAndShake, convertCurrencyAmount, formatFloatClean, formatWithCommas } from '~/utils';
 
@@ -162,7 +162,7 @@ const SendScreen = () => {
           </View>
 
           {parsedAmount > 0 && xrpPriceUSD > 0 && (
-            <Text className="mb-8 text-lg font-medium text-gray-500">
+            <Text className="mb-8 text-lg font-medium text-slate-500">
               {currency === 'USD'
                 ? `${formatWithCommas(converted.xrpAmount.toString())} XRP`
                 : `$${formatWithCommas(converted.usdAmount.toString())}`}

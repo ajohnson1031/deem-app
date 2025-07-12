@@ -4,7 +4,7 @@ import { ScrollView, Text, View } from 'react-native';
 
 import { contactsAtom, pendingTransactionsAtom } from '~/atoms';
 import SwipeableTransactionRow from '~/components/SwipeableTransactionRow';
-import CoreLayout from '~/layouts/CoreLayout';
+import { CoreLayout } from '~/layouts';
 import { Contact } from '~/types';
 
 const PendingTransactionsScreen = () => {
@@ -25,7 +25,7 @@ const PendingTransactionsScreen = () => {
         <Text className="text-2xl font-medium text-gray-800">Pending Requests</Text>
         <Text className="text-md mb-6">Swipe right to approve; left to decline.</Text>
         {pendingTxs.length === 0 ? (
-          <Text className="mt-12 text-center text-gray-500">No pending transactions.</Text>
+          <Text className="mt-12 text-center text-slate-500">No pending transactions.</Text>
         ) : (
           <View className="gap-2">
             {pendingTxs.map((tx) => {

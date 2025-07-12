@@ -1,5 +1,4 @@
 import { FontAwesome6 } from '@expo/vector-icons';
-import Feather from '@expo/vector-icons/Feather';
 import Fontisto from '@expo/vector-icons/Fontisto';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -9,20 +8,18 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useAtomValue } from 'jotai';
 import LottieView from 'lottie-react-native';
 import { FlatList, Text, TouchableOpacity, View } from 'react-native';
-// import { Dropdown } from 'react-native-element-dropdown'; // TODO: Integrate when ready
 import ShimmerPlaceHolder from 'react-native-shimmer-placeholder';
 
 import { currencyAtom, transactionsAtom } from '~/atoms';
-import { useCopyToClipboard, useWallet, useXrpPriceMeta } from '~/hooks';
-import CoreLayout from '~/layouts/CoreLayout';
+import { LabelFieldWithCopy } from '~/components';
+import { useWallet, useXrpPriceMeta } from '~/hooks';
+import { CoreLayout } from '~/layouts';
 import { RootStackParamList } from '~/types';
 import { convertCurrencyAmount, formatFloatClean, formatWithCommas } from '~/utils';
 
 const WalletScreen = () => {
   const { walletAddress, walletBalance, refreshBalance, loading } = useWallet();
-  // const [currency, setCurrency] = useAtom(currencyAtom); // TODO: Setter related to currency switcher
   const currency = useAtomValue(currencyAtom);
-  const { copiedKey, copy } = useCopyToClipboard();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const recentTransactions = useAtomValue(transactionsAtom).slice(0, 4);
 
@@ -33,11 +30,6 @@ const WalletScreen = () => {
     lastUpdated,
     secondsUntilNextUpdate,
   } = useXrpPriceMeta();
-
-  // const [currencyOptions] = useState<Record<string, ApprovedCurrency>[]>([ // TODO: Related to currency switcher
-  //   { label: 'XRP', value: 'XRP' },
-  //   { label: 'USD', value: 'USD' },
-  // ]);
 
   const ITEM_HEIGHT = 80;
   const ITEM_SPACING = 8;
@@ -69,12 +61,11 @@ const WalletScreen = () => {
           <View className="flex flex-col gap-y-2">
             {/* Refresher */}
             <View className="mb-2 flex flex-row items-center gap-2">
-              <Text className="text-lg font-medium text-gray-500">Balance</Text>
+              <Text className="text-lg font-medium text-slate-500">Balance</Text>
               <TouchableOpacity onPress={refreshBalance}>
                 <Fontisto name="spinner-refresh" size={20} color="#0284c7" />
               </TouchableOpacity>
             </View>
-
             {/* Balance Display */}
             <View className="flex flex-row items-baseline">
               {currency === 'USD' && (
@@ -109,13 +100,12 @@ const WalletScreen = () => {
                 </ShimmerPlaceHolder>
               )}
             </View>
-
             {/* ≈ Equivalent Value */}
             <View className="relative flex-row justify-between rounded-lg border border-gray-200 pb-3 pl-3 pr-20">
               <View className="mt-3 flex gap-1">
-                <Text className="font-medium text-gray-500">{`Current Value: ${secondaryAmount} ${currency === 'XRP' ? 'USD' : ''}`}</Text>
-                <Text className="font-medium text-gray-500">{`Price Per XRP: $${xrpPriceUSD}`}</Text>
-                <Text className="font-medium text-gray-500">{`Last Updated: ${dayjs(lastUpdated).format('M/D/YYYY @ h:mm:ssa')}`}</Text>
+                <Text className="font-medium text-slate-500">{`Current Value: ${secondaryAmount} ${currency === 'XRP' ? 'USD' : ''}`}</Text>
+                <Text className="font-medium text-slate-500">{`Price Per XRP: $${xrpPriceUSD}`}</Text>
+                <Text className="font-medium text-slate-500">{`Last Updated: ${dayjs(lastUpdated).format('M/D/YYYY @ h:mm:ssa')}`}</Text>
               </View>
               <View className="absolute right-0 top-0">
                 {isResuming ? (
@@ -161,44 +151,13 @@ const WalletScreen = () => {
               </View>
             </View>
             <View className="h-[1px] border-b border-gray-200 pt-2" />
-            {/* Wallet address + currency switch */}
-            <View className="mt-6 flex-row gap-4">
-              <Text className="absolute -top-3 left-3 z-10 rounded-md bg-white px-2 pb-0.5 text-sm font-semibold text-gray-500">
-                Wallet Address
-              </Text>
-              <View className="w-full flex-row items-center justify-center gap-2 rounded-lg border border-gray-200 bg-gray-100 py-4">
-                <Text
-                  className="m-0 flex-1 px-4 py-1"
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
-                  style={{ fontWeight: 500, color: copiedKey ? '#0284c7' : '#4B5563' }}>
-                  {copiedKey ? 'Wallet Address Copied!' : walletAddress}
-                </Text>
-
-                <TouchableOpacity
-                  className="px-4"
-                  disabled={!walletAddress}
-                  onPress={() => copy(walletAddress ?? '', 'wallet')}>
-                  <Feather name="copy" size={20} color="#4B5563" />
-                </TouchableOpacity>
-              </View>
-
-              {/* // TODO: Integrate switcher when ready to custody other assets in app; For now we'll just display currency equivalencies */}
-              {/* <Dropdown
-                style={[styles.dropdown]}
-                placeholderStyle={styles.placeholderStyle}
-                selectedTextStyle={styles.selectedTextStyle}
-                inputSearchStyle={styles.inputSearchStyle}
-                iconStyle={styles.iconStyle}
-                data={currencyOptions}
-                labelField="label"
-                valueField="value"
-                value={currency}
-                onChange={(item) => {
-                  setCurrency(item.value);
-                }}
-              /> */}
-            </View>
+            <LabelFieldWithCopy
+              className="mt-6"
+              label="Wallet Address"
+              value={walletAddress ?? ''}
+              valueKey="wallet"
+              copiedMessage="Wallet Address Copied!"
+            />
           </View>
 
           {/* Convert Button */}
@@ -213,7 +172,7 @@ const WalletScreen = () => {
           {/* Recent Conversions */}
           <View className="gap-y-1">
             <View className="flex flex-row justify-between border-y border-gray-200 p-2">
-              <Text className="text-lg font-medium text-gray-500">Recent Conversions</Text>
+              <Text className="text-lg font-medium text-slate-500">Recent Conversions</Text>
 
               <TouchableOpacity
                 className="flex flex-row items-center justify-center gap-2"
@@ -242,48 +201,3 @@ const WalletScreen = () => {
 };
 
 export default WalletScreen;
-
-// const styles = StyleSheet.create({ // TODO: Related to currency switcher
-//   container: {
-//     backgroundColor: 'white',
-//     padding: 16,
-//   },
-//   dropdown: {
-//     width: '20.6666667%',
-//     backgroundColor: '#f3f4f6',
-//     borderColor: '#e5e7eb',
-//     borderWidth: 1,
-//     borderRadius: 8,
-//     paddingHorizontal: 8,
-//     paddingVertical: 16,
-//   },
-//   icon: {
-//     marginRight: 5,
-//   },
-//   label: {
-//     position: 'absolute',
-//     backgroundColor: 'white',
-//     left: 22,
-//     top: 8,
-//     zIndex: 999,
-//     paddingHorizontal: 8,
-//     fontSize: 14,
-//     color: '#4B5563',
-//   },
-//   placeholderStyle: {
-//     fontSize: 16,
-//   },
-//   selectedTextStyle: {
-//     fontSize: 16,
-//     color: '#4B5563',
-//     fontWeight: '500',
-//   },
-//   iconStyle: {
-//     width: 20,
-//     height: 20,
-//   },
-//   inputSearchStyle: {
-//     height: 40,
-//     fontSize: 16,
-//   },
-// });

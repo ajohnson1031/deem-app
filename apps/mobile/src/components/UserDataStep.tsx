@@ -150,7 +150,7 @@ const UserDataStep = ({ onComplete, onCancel }: UserDataStepProps) => {
           </View>
 
           <View className="flex gap-2 self-center">
-            {!avatarUri && <Text className="text-sm text-gray-500">No photo selected.</Text>}
+            {!avatarUri && <Text className="text-sm text-slate-500">No photo selected.</Text>}
             <TouchableOpacity onPress={openImagePicker} className="rounded-lg bg-sky-600 px-3 py-2">
               <Text className="font-medium text-white">
                 {!avatarUri ? 'Select Photo' : 'Change Photo'}
@@ -186,7 +186,7 @@ const UserDataStep = ({ onComplete, onCancel }: UserDataStepProps) => {
                           ? 'bg-green-50'
                           : 'bg-red-50'
                     }`}>
-                    {availability.checking && <Text className="text-gray-500">Checking...</Text>}
+                    {availability.checking && <Text className="text-slate-500">Checking...</Text>}
                     {availability.available === true && (
                       <View className="flex flex-row items-center gap-1.5">
                         <Feather name="check-circle" size={14} color="#15803d" />

@@ -6,6 +6,7 @@ export { default as EditBasicInfo } from './EditBasicInfo';
 export { default as FeePolicyScreen } from './FeePolicy';
 export { default as ForgotPasswordScreen } from './ForgotPassword';
 export { default as HomeScreen } from './Home';
+export { default as ManageWalletScreen } from './ManageWallet';
 export { default as PendingTransactionsScreen } from './PendingTransactions';
 export { default as PinEntryScreen } from './PinEntry';
 export { default as PinSetupScreen } from './PinSetup';

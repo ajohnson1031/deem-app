@@ -20,4 +20,5 @@ export type RootStackParamList = {
   VerifyPasswordReset: { email: string };
   ResetPassword: { userId: string };
   EditBasicInfo: undefined;
+  ManageWallet: undefined;
 };

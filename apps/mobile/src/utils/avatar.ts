@@ -6,12 +6,11 @@ import {
   CLOUDINARY_URL,
 } from '@env';
 import Toast from 'react-native-toast-message';
-import { v4 as uuidv4 } from 'uuid';
 
 const uploadAvatar = async (avatar: string | undefined): Promise<string | undefined> => {
   if (!avatar || avatar.startsWith('http')) return avatar;
 
-  const filename = `avatar_${uuidv4()}.jpg`;
+  const filename = `avatar.jpg`;
   const formData = new FormData();
 
   formData.append('file', {

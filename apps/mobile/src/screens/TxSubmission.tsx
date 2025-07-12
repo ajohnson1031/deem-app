@@ -6,7 +6,7 @@ import { Text, View } from 'react-native';
 
 import { currentTxAtom, initialTx, recipientAtom } from '~/atoms/';
 import { useSessionResetCountdown } from '~/hooks';
-import CoreLayout from '~/layouts/CoreLayout';
+import { CoreLayout } from '~/layouts';
 import { TxSubmissionScreenProps } from '~/types';
 import { formatFloatClean, formatWithCommas, submitStandardTransaction } from '~/utils';
 
@@ -75,7 +75,7 @@ const TxSubmissionScreen = ({ route, navigation }: TxSubmissionScreenProps) => {
               loop
               style={{ width: 120, height: 120 }}
             />
-            <Text className="mt-4 text-lg text-gray-500">Submitting transaction...</Text>
+            <Text className="mt-4 text-lg text-slate-500">Submitting transaction...</Text>
           </View>
         ) : (
           <View className="mx-6 mt-10">

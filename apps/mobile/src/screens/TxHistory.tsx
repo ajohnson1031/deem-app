@@ -5,7 +5,7 @@ import { SectionList, Text, TextInput, View } from 'react-native';
 
 import { contactsAtom, transactionsAtom } from '~/atoms';
 import { TxListItem } from '~/components';
-import CoreLayout from '~/layouts/CoreLayout';
+import { CoreLayout } from '~/layouts';
 import { Contact, Transaction } from '~/types';
 
 const TxHistory = ({ address }: { address: string }) => {

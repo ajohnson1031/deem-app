@@ -14,6 +14,7 @@ import AppNavigator from '~/navigation';
 import { globalStore } from '~/state/store';
 import { toastConfig } from '~/utils';
 
+import { ScreenCaptureGuard } from '~/components';
 import './global.css';
 
 verifyInstallation();
@@ -56,13 +57,13 @@ function InnerApp() {
   }
 
   return (
-    <>
+    <ScreenCaptureGuard>
       <AuthProvider>
         <AppNavigator />
         <Toast config={toastConfig} />
         <StatusBar style="auto" />
       </AuthProvider>
-    </>
+    </ScreenCaptureGuard>
   );
 }
 

@@ -1,9 +1,7 @@
 import { useState } from 'react';
-import { Text, TextInput, TextInputProps, View } from 'react-native';
+import { Text, TextInput, View } from 'react-native';
 
-interface CountdownInputProps extends TextInputProps {
-  textClassName?: string;
-}
+import { CountdownInputProps } from '~/types/inputfields';
 
 const CountdownInput = (props: CountdownInputProps) => {
   const { onChangeText, maxLength, className, textClassName, ...rest } = props;
@@ -23,7 +21,7 @@ const CountdownInput = (props: CountdownInputProps) => {
   };
 
   const textColor =
-    typeof textCounter === 'number' && textCounter <= 5 ? 'text-red-500' : 'text-gray-500';
+    typeof textCounter === 'number' && textCounter <= 5 ? 'text-red-500' : 'text-slate-500';
 
   return (
     <View

@@ -1,5 +1,5 @@
 import { API_BASE_URL } from '@env';
-import { Feather, FontAwesome6, Fontisto, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Feather, FontAwesome6, Fontisto } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAtomValue } from 'jotai';
@@ -14,7 +14,7 @@ import { CountdownInput, CountryPickerTrigger } from '~/components';
 import { FIELDS, FieldType } from '~/constants';
 import { useAuth } from '~/contexts/AuthContext';
 import { useCountryPicker, useUsernameChecker } from '~/hooks';
-import CoreLayout from '~/layouts/CoreLayout';
+import { CoreLayout } from '~/layouts';
 import { RootStackParamList, UserData } from '~/types';
 import { formatPhoneOnBlur, getChangedFields, sanitizePhone } from '~/utils';
 import { api } from '~/utils/api';
@@ -92,24 +92,12 @@ const EditBasicInfo = () => {
   };
 
   return (
-    <CoreLayout>
-      <View className="mt-10 flex w-full flex-1 justify-between px-6">
+    <CoreLayout showBack title="Edit Basic Info" onBackPress={onCancel}>
+      <View className="mt-4 flex w-full flex-1 justify-between px-6">
         <View>
-          <View className="flex-row gap-2">
-            <MaterialCommunityIcons
-              name="account-edit-outline"
-              size={36}
-              color="#475569"
-              className="-mt-0.5"
-            />
-            <Text className="text-4xl text-slate-600">Edit Basic Info</Text>
-          </View>
-
-          <View className="my-4 flex h-[1px] bg-gray-200" />
-
           <Text className="text-lg text-gray-600">
-            Feel free to update your personal identity info or change your username. Just be aware
-            that what you see here is what we keep on file for any necesary communication.
+            Feel free to update your personal details or change your username. Please note that what
+            you enter here is what will be used for any verification(s).
           </Text>
 
           <View className="my-4 flex h-[1px] bg-gray-200" />
@@ -154,7 +142,7 @@ const EditBasicInfo = () => {
                               ? 'bg-gray-100'
                               : 'bg-red-50'
                       }`}>
-                      {availability.checking && <Text className="text-gray-500">Checking...</Text>}
+                      {availability.checking && <Text className="text-slate-500">Checking...</Text>}
                       {availability.available && (
                         <View className="flex flex-row items-center gap-1.5">
                           <Feather name="check-circle" size={14} color="#15803d" />
@@ -205,7 +193,7 @@ const EditBasicInfo = () => {
 
                     <CountdownInput
                       className="flex-1"
-                      textClassName={`${isLocked && '!text-gray-500'}`}
+                      textClassName={`${isLocked && '!text-slate-500'}`}
                       placeholder={field.placeholder}
                       placeholderTextColor="#777"
                       secureTextEntry={field.secure}
@@ -238,12 +226,7 @@ const EditBasicInfo = () => {
           </View>
           {baseError && <Text className="mb-3 text-center text-red-500">{baseError}</Text>}
         </View>
-        <View className="mb-8 flex-row gap-4">
-          <TouchableOpacity
-            onPress={onCancel}
-            className="mt-4 flex-1 rounded-lg border-2 border-gray-600 py-3">
-            <Text className="text-center text-xl font-medium text-gray-600">Cancel</Text>
-          </TouchableOpacity>
+        <View className="mb-8 flex-row">
           <TouchableOpacity
             onPress={onSubmit}
             disabled={!shouldUpdate}

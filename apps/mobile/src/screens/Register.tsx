@@ -8,7 +8,7 @@ import Toast from 'react-native-toast-message';
 
 import { registerAtom } from '~/atoms';
 import { UserDataStep, WalletStep } from '~/components';
-import CoreLayout from '~/layouts/CoreLayout';
+import { CoreLayout } from '~/layouts';
 import { RootStackParamList } from '~/types';
 import { deriveKeyFromPassword, encryptSeed, handleAvatarUpload } from '~/utils';
 import { api } from '~/utils/api';

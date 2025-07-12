@@ -16,6 +16,7 @@ interface Props {
   containerClassName?: string;
   theme?: Theme;
   onBackPress?: () => void;
+  title?: string;
 }
 
 const CoreLayout = ({
@@ -30,6 +31,7 @@ const CoreLayout = ({
   containerClassName,
   theme = 'DARK',
   onBackPress,
+  title,
 }: Props) => {
   return (
     <Container className={containerClassName}>
@@ -41,6 +43,7 @@ const CoreLayout = ({
         showNotificationsOnly={showNotificationsOnly}
         onBackPress={onBackPress}
         theme={theme}
+        title={title}
       />
       <View className="flex-1 overflow-hidden">{children}</View>
       {showFooter && <FooterNav footerClassName={footerClassName} />}

@@ -3,9 +3,10 @@ import { Feather } from '@expo/vector-icons';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import cn from 'classnames';
 import { randomUUID } from 'expo-crypto';
 import { useSetAtom } from 'jotai';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Alert, Image, Text, TouchableOpacity, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import Toast from 'react-native-toast-message';
@@ -13,8 +14,8 @@ import Toast from 'react-native-toast-message';
 import { currencyAtom, currentTxAtom, initialTx, walletBalanceAtom } from '~/atoms';
 import { ImagePickerModal, MenuListItem } from '~/components';
 import { useAuth } from '~/contexts/AuthContext';
-import { useImagePicker, useWallet } from '~/hooks';
-import CoreLayout from '~/layouts/CoreLayout';
+import { useFlashScrollIndicators, useImagePicker, useWallet } from '~/hooks';
+import { CoreLayout } from '~/layouts';
 import { MenuIconType, RootStackParamList } from '~/types';
 import { deleteAvatar, getColorIndex, uploadAvatar } from '~/utils';
 import { api } from '~/utils/api';
@@ -26,11 +27,12 @@ const SettingsScreen = () => {
   const { logout, user, setUser: setStoredUser } = useAuth();
   const { deleteWallet } = useWallet();
   const { requestPermissions, takePhoto, pickFromLibrary } = useImagePicker();
+  const { scrollViewRef, flashIndicators } = useFlashScrollIndicators();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [modalVisible, setModalVisible] = useState(false);
+  const [flashCount, setFlashCount] = useState<number>(0);
+  const { id, name, avatarUri, username } = user!;
 
-  // wallet, walletAddress,
-  const { id, name, avatarUri, username } = user || {};
   const splitName = name?.split(' ') || ['', ''];
   const [firstname, lastname] = [splitName[0], splitName[1] || ''];
   const backgroundColor = getColorIndex(id || randomUUID());
@@ -103,7 +105,11 @@ const SettingsScreen = () => {
       if (avatarUrl) {
         const res = await api.patch(`${API_BASE_URL}/me`, { avatarUri: avatarUrl });
         const { updatedUser } = res.data;
-        setStoredUser({ ...user, ...updatedUser });
+
+        setStoredUser((prev) => ({
+          ...prev!,
+          avatarUri: updatedUser.avatarUri,
+        }));
 
         Toast.show({
           type: 'success',
@@ -121,8 +127,19 @@ const SettingsScreen = () => {
     }
   };
 
+  useEffect(() => {
+    const flashInterval = setInterval(() => {
+      if (flashCount < 4) {
+        flashIndicators();
+        setFlashCount(flashCount + 1);
+      }
+    }, 500);
+
+    return () => clearInterval(flashInterval);
+  }, [flashCount]);
+
   return (
-    <CoreLayout showBack>
+    <CoreLayout showBack title="Settings">
       <ImagePickerModal
         visible={modalVisible}
         avatarUri={avatarUri}
@@ -138,7 +155,7 @@ const SettingsScreen = () => {
           {avatarUri ? (
             <TouchableOpacity onPress={openImagePicker}>
               <Image
-                source={{ uri: avatarUri }}
+                source={{ uri: `${avatarUri}?${Date.now()}` }}
                 className="h-28 w-28 rounded-full"
                 resizeMode="cover"
               />
@@ -168,14 +185,14 @@ const SettingsScreen = () => {
           @{username}
         </Text>
 
-        <View className="mb-2 flex-row items-center justify-between">
-          <View className="my-3 flex h-[1px] w-4/12 bg-gray-200" />
-          <Text className="text-gray-400">scroll for more</Text>
-          <View className="my-3 flex h-[1px] w-4/12 bg-gray-200" />
-        </View>
+        <View className="my-3 flex h-[1px] bg-gray-200" />
 
         <View className="h-3/5">
-          <ScrollView showsVerticalScrollIndicator={false} className="pb-20">
+          <ScrollView
+            ref={scrollViewRef}
+            showsVerticalScrollIndicator={flashCount < 4}
+            persistentScrollbar
+            className={cn('pb-20', { 'pr-4': flashCount < 4 })}>
             <MenuListItem
               iconType={MenuIconType.FEATHER}
               iconName="edit-2"
@@ -190,7 +207,9 @@ const SettingsScreen = () => {
               iconName="camera"
               labelText={avatarUri ? 'Update Photo' : 'Add a photo!'}
               helperText={
-                avatarUri ? 'New duckface? We wanna see!' : 'Photos help friends find you quicker.'
+                avatarUri
+                  ? 'New look? Show the community.'
+                  : 'Photos help friends find you quicker.'
               }
               hasBackground
               onPress={openImagePicker}
@@ -199,10 +218,10 @@ const SettingsScreen = () => {
             <MenuListItem
               iconType={MenuIconType.FONT_AWESOME6}
               iconName="wallet"
-              labelText="Wallet Management"
-              helperText="Export wallet details, regenerate & more."
+              labelText="Manage Wallet"
+              helperText="Your wallet, your way."
               hasBackground
-              onPress={() => {}}
+              onPress={() => navigation.navigate('ManageWallet')}
             />
 
             <MenuListItem
@@ -210,7 +229,7 @@ const SettingsScreen = () => {
               iconName="bank"
               iconSize={22}
               labelText="Linked Bank(s)"
-              helperText="Set where funds get sent."
+              helperText="Partner with the institutions you trust."
               hasBackground
               onPress={() => {}}
             />
@@ -220,7 +239,7 @@ const SettingsScreen = () => {
               iconName="security"
               iconSize={24}
               labelText="Security"
-              helperText="Manage security settings."
+              helperText="Safety first, always."
               hasBackground
               onPress={() => {}}
             />

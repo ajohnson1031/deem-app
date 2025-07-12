@@ -105,7 +105,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       const { token: accessToken, user } = res.data;
       setToken(accessToken);
-      console.log('authContext => ln108 => user:', user);
       setUser(user);
       setAuthHeader(accessToken);
 

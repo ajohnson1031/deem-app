@@ -1,9 +1,11 @@
 export { useCopyToClipboard } from './useCopyToClipboard';
 export { useCountryPicker } from './useCountryPicker';
+export { useFlashScrollIndicators } from './useFlashScrollIndicators';
 export { useGetRecipient } from './useGetRecipient';
 export { useGlobalKeyboardIdleDismiss } from './useGlobalKeyboardIdleDismiss';
 export { useImagePicker } from './useImagePicker';
 export { useSessionResetCountdown } from './useSessionResetCountdown';
 export { useUsernameChecker } from './useUserNameChecker';
 export { useWallet } from './useWallet';
+export { useWalletExporter } from './useWalletExporter';
 export { useXrpPriceMeta } from './useXrpPriceMeta';

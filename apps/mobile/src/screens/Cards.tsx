@@ -1,6 +1,6 @@
 import { Text, View } from 'react-native';
 
-import CoreLayout from '~/layouts/CoreLayout';
+import { CoreLayout } from '~/layouts';
 
 const Cards = () => {
   return (

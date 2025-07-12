@@ -17,6 +17,7 @@ import {
   FeePolicyScreen,
   ForgotPasswordScreen,
   HomeScreen,
+  ManageWalletScreen,
   PendingTransactionsScreen,
   RegisterScreen,
   SendScreen,
@@ -56,7 +57,7 @@ export default function AppNavigator() {
           loop
           style={{ width: 120, height: 120 }}
         />
-        <Text className="mt-4 text-lg text-gray-500">Checking login status...</Text>
+        <Text className="mt-4 text-lg text-slate-500">Checking login status...</Text>
       </View>
     );
   }
@@ -112,6 +113,7 @@ export default function AppNavigator() {
               />
               <Stack.Screen name="Conversions" component={ConversionsScreen} />
               <Stack.Screen name="EditBasicInfo" component={EditBasicInfo} />
+              <Stack.Screen name="ManageWallet" component={ManageWalletScreen} />
             </>
           )}
         </Stack.Navigator>

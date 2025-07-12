@@ -9,7 +9,7 @@ import Toggle from 'react-native-toggle-element';
 import { currencyAtom, recipientAtom } from '~/atoms';
 import { TxListItem } from '~/components';
 import { useXrpPriceMeta } from '~/hooks';
-import CoreLayout from '~/layouts/CoreLayout';
+import { CoreLayout } from '~/layouts';
 import { Transaction } from '~/types';
 import { TxConfirmationScreenProps } from '~/types/transaction';
 import { calculateFees, capitalize, formatWithCommas } from '~/utils';
@@ -113,7 +113,7 @@ const TxConfirmationScreen = ({ route, navigation }: TxConfirmationScreenProps) 
                 </View>
 
                 {xrpPriceUSD && (
-                  <Text className="-mt-1 ml-1 text-lg font-medium text-gray-500">
+                  <Text className="-mt-1 ml-1 text-lg font-medium text-slate-500">
                     {currency === 'USD'
                       ? `${(displayAmount / xrpPriceUSD).toFixed(6)} XRP`
                       : `$${(displayAmount * xrpPriceUSD).toFixed(2)}`}
@@ -161,7 +161,7 @@ const TxConfirmationScreen = ({ route, navigation }: TxConfirmationScreenProps) 
                     Fee in XRP: {feeData.feeInXrp}
                   </Text>
                 )}
-                <Text className="text-md mt-1 italic text-gray-500">{feeData.breakdown}</Text>
+                <Text className="text-md mt-1 italic text-slate-500">{feeData.breakdown}</Text>
               </View>
             )}
           </View>

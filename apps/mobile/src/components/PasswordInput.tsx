@@ -1,10 +1,8 @@
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { useState } from 'react';
-import { Text, TextInput, TextInputProps, TouchableOpacity, View } from 'react-native';
+import { Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-interface PasswordInputProps extends TextInputProps {
-  showCountdown?: boolean;
-}
+import { PasswordInputProps } from '~/types/inputfields';
 
 const PasswordInput = (props: PasswordInputProps) => {
   const { onChangeText, maxLength, secureTextEntry, showCountdown = false, ...rest } = props;
@@ -25,12 +23,12 @@ const PasswordInput = (props: PasswordInputProps) => {
   };
 
   const textColor =
-    typeof textCounter === 'number' && textCounter <= 5 ? 'text-red-500' : 'text-gray-500';
+    typeof textCounter === 'number' && textCounter <= 5 ? 'text-red-500' : 'text-slate-500';
 
   return (
     <View className="flex w-full flex-row items-center justify-between gap-3 rounded-lg bg-gray-100">
       <TextInput
-        className={`${showCountdown ? 'w-[75%]' : 'w-[85%]'} p-3 py-4 text-xl font-medium leading-[18px]`}
+        className={`${showCountdown ? 'w-[75%]' : 'w-[85%]'} text- p-3 py-4 font-medium leading-[18px]`}
         onChangeText={handleChangeText}
         secureTextEntry={!readable}
         {...rest}

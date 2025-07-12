@@ -57,7 +57,7 @@ const ContactListItem = ({
       ) : (
         <View>
           <Text className="text-xl font-semibold text-gray-800">{name}</Text>
-          <Text className="text-md text-gray-500">{username}</Text>
+          <Text className="text-md text-slate-500">{username}</Text>
         </View>
       )}
     </TouchableOpacity>

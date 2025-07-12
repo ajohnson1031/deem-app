@@ -24,7 +24,7 @@ const CountryPickerTrigger = ({ countryCode, onSelect, disabled = false }: Props
       {disabled ? (
         <View className="flex-row items-center gap-1.5">
           <Text className="text-[30px] opacity-60">{info?.flag || countryCode}</Text>
-          <Text className="mr-1 py-[6.125px] text-[18.5px] font-medium text-gray-500">
+          <Text className="mr-1 py-[6.125px] text-[18.5px] font-medium text-slate-500">
             {info?.name as string}
           </Text>
         </View>
