@@ -55,39 +55,36 @@ const HomeScreen = () => {
 
       <View className="w-3/4 gap-3">
         {/* Input: Username or Email */}
-        <View className="w-full rounded-lg bg-gray-100">
-          <TextInput
-            className="w-full p-3 py-4 text-xl font-medium leading-[18px]"
-            value={identifier}
-            placeholder="Username or Email"
-            placeholderTextColor="#777"
-            autoCapitalize="none"
-            autoCorrect={false}
-            onFocus={cancelIdleTimer}
-            onChangeText={(val) => {
-              setIdentifier(val);
-              setLoginError(null);
-              resetIdleTimer();
-            }}
-          />
-        </View>
+
+        <TextInput
+          className="w-full rounded-lg bg-gray-100 px-3 py-4 text-xl font-medium leading-[18px]"
+          value={identifier}
+          placeholder="Username or Email"
+          placeholderTextColor="#777"
+          autoCapitalize="none"
+          autoCorrect={false}
+          onFocus={cancelIdleTimer}
+          onChangeText={(val) => {
+            setIdentifier(val);
+            setLoginError(null);
+            resetIdleTimer();
+          }}
+        />
 
         {/* Input: Password */}
-        <View className="w-full rounded-lg bg-gray-100">
-          <PasswordInput
-            value={password}
-            placeholder="Password"
-            placeholderTextColor="#777"
-            autoCapitalize="none"
-            autoCorrect={false}
-            onFocus={cancelIdleTimer}
-            onChangeText={(val) => {
-              setPassword(val);
-              setLoginError(null);
-              resetIdleTimer();
-            }}
-          />
-        </View>
+        <PasswordInput
+          value={password}
+          placeholder="Password"
+          placeholderTextColor="#777"
+          autoCapitalize="none"
+          autoCorrect={false}
+          onFocus={cancelIdleTimer}
+          onChangeText={(val) => {
+            setPassword(val);
+            setLoginError(null);
+            resetIdleTimer();
+          }}
+        />
 
         {/* Error Message */}
         {loginError && <Text className="text-md text-center text-red-500">{loginError}</Text>}

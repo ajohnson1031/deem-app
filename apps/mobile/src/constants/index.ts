@@ -13,6 +13,14 @@ export type FieldType = {
   secure?: boolean;
 };
 
+const REGEX = {
+  NAME: /^[A-Za-z.\s]+$/,
+  USERNAME: /^[a-zA-Z0-9_.-]{6,30}$/,
+  EMAIL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+  PASSWORD: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s@]).{8,30}$/,
+  PHONE_NUMBER: /.*/,
+};
+
 const FIELDS: FieldType[] = [
   {
     placeholder: 'Name',
@@ -20,7 +28,7 @@ const FIELDS: FieldType[] = [
     keyboardType: 'default',
     textContentType: 'name',
     maxLength: 100,
-    matches: /^[A-Za-z.\s]+$/, // only letters and spaces
+    matches: REGEX.NAME,
     errorMessage: 'Name may contain letters, spaces & periods only.',
   },
   {
@@ -29,7 +37,7 @@ const FIELDS: FieldType[] = [
     keyboardType: 'default',
     textContentType: 'username',
     maxLength: 30,
-    matches: /^[a-zA-Z0-9_.-]{6,30}$/,
+    matches: REGEX.USERNAME,
     errorMessage:
       'Username must be 6 - 30 characters in length and may contain letters, numbers, hyphens, underscores & periods only.',
   },
@@ -39,7 +47,7 @@ const FIELDS: FieldType[] = [
     keyboardType: 'email-address',
     textContentType: 'emailAddress',
     maxLength: 100,
-    matches: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, // simple email regex
+    matches: REGEX.EMAIL,
     errorMessage: 'Enter a valid email address.',
   },
   {
@@ -49,9 +57,9 @@ const FIELDS: FieldType[] = [
     textContentType: 'newPassword',
     secure: true,
     maxLength: 30,
-    matches: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s@]).{8,30}$/, // strong password, excludes @
+    matches: REGEX.PASSWORD, // strong password, excludes @
     errorMessage:
-      'Password must be 8 - 30 chars and include uppercase, lowercase, number, and special character (not @).',
+      'Password must be 8 - 30 chars and include one of each of the following: uppercase, lowercase, number, special character (not @).',
   },
   {
     placeholder: 'Phone (optional)',
@@ -59,9 +67,9 @@ const FIELDS: FieldType[] = [
     keyboardType: 'phone-pad',
     textContentType: 'telephoneNumber',
     maxLength: 50,
-    matches: /.*/,
+    matches: REGEX.PHONE_NUMBER,
     errorMessage: 'Enter a valid phone number.',
   },
 ];
 
-export { FIELDS };
+export { FIELDS, REGEX };

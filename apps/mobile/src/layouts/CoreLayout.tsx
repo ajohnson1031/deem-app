@@ -1,23 +1,7 @@
-import { ReactNode } from 'react';
 import { View } from 'react-native';
 
 import { Container, FooterNav, HeaderNav } from '~/components';
-import { Theme } from '~/types';
-
-interface Props {
-  showBack?: boolean;
-  showClose?: boolean;
-  showHeaderOptions?: boolean;
-  showSettingsOnly?: boolean;
-  showNotificationsOnly?: boolean;
-  showFooter?: boolean;
-  footerClassName?: string;
-  children: ReactNode;
-  containerClassName?: string;
-  theme?: Theme;
-  onBackPress?: () => void;
-  title?: string;
-}
+import { CoreLayoutProps } from '~/types';
 
 const CoreLayout = ({
   children,
@@ -26,13 +10,15 @@ const CoreLayout = ({
   showHeaderOptions,
   showSettingsOnly,
   showNotificationsOnly,
+  showLogout,
   showFooter = false,
   footerClassName,
   containerClassName,
   theme = 'DARK',
   onBackPress,
+  onLogoutPress,
   title,
-}: Props) => {
+}: CoreLayoutProps) => {
   return (
     <Container className={containerClassName}>
       <HeaderNav
@@ -41,7 +27,9 @@ const CoreLayout = ({
         showHeaderOptions={showHeaderOptions}
         showSettingsOnly={showSettingsOnly}
         showNotificationsOnly={showNotificationsOnly}
+        showLogout={showLogout}
         onBackPress={onBackPress}
+        onLogoutPress={onLogoutPress}
         theme={theme}
         title={title}
       />

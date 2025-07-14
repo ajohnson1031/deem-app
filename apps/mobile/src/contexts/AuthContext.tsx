@@ -129,11 +129,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       await deleteToken();
       await deleteUser();
 
-      Toast.show({
-        type: 'info',
-        text1: 'Session Ended',
-        text2: "You've been securely logged out.",
-      });
+      setTimeout(() => {
+        Toast.show({
+          type: 'info',
+          text1: 'Session Ended',
+          text2: "You've been securely logged out.",
+        });
+      }, 750);
     }
   };
 

@@ -1,11 +1,12 @@
-import { Feather } from '@expo/vector-icons';
+import { Feather, Fontisto } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Text, TouchableOpacity, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 
 import LabelFieldWithCopy from '~/components/LabelFieldWithCopy';
+import PassphrasePromptModal from '~/components/PassphrasePromptModal';
 import { useFlashScrollIndicators } from '~/hooks';
-import { LabelFieldWithCopyVariant } from '~/types';
+import { FieldVariant } from '~/types';
 
 const WalletDetails = ({
   address,
@@ -18,6 +19,7 @@ const WalletDetails = ({
 }) => {
   const { scrollViewRef, flashIndicators } = useFlashScrollIndicators();
   const [flashCount, setFlashCount] = useState<number>(0);
+  const [showPassModal, setShowPassModal] = useState(false);
 
   useEffect(() => {
     const flashInterval = setInterval(() => {
@@ -92,13 +94,30 @@ const WalletDetails = ({
           value={seed ?? ''}
           valueKey="seed"
           copiedMessage="Seed Copied!"
-          variant={LabelFieldWithCopyVariant.MASKED}
+          variant={FieldVariant.MASKED}
         />
 
-        <TouchableOpacity className="mt-2 flex-row items-center justify-center gap-2 rounded-lg bg-sky-600 py-4">
-          <Text className="text-center text-xl font-medium text-white">Export Wallet</Text>
-          <Feather name="download" color="white" size={20} />
-        </TouchableOpacity>
+        <PassphrasePromptModal
+          visible={showPassModal}
+          onConfirm={() => {}}
+          onCancel={() => setShowPassModal(false)}
+          mode="export" // or "import"
+        />
+
+        <View className="flex-row gap-4">
+          <TouchableOpacity
+            className="mt-2 flex-1 flex-row items-center justify-center gap-3 rounded-lg bg-cyan-600 py-4"
+            onPress={() => Alert.alert('TODO: Add Regenerate Wallet Function')}>
+            <Text className="text-center text-xl font-medium text-white">Regenerate Wallet</Text>
+            <Fontisto name="spinner-refresh" size={20} color="white" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            className="mt-2 w-1/3 flex-row items-center justify-center gap-3 rounded-lg bg-sky-600 py-4"
+            onPress={() => setShowPassModal(true)}>
+            <Text className="text-center text-xl font-medium text-white">Export</Text>
+            <Feather name="download" color="white" size={20} />
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </View>
   );

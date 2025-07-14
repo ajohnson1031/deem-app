@@ -7,39 +7,22 @@ import { View } from 'react-native';
 import Toast from 'react-native-toast-message';
 
 import { registerAtom } from '~/atoms';
-import { UserDataStep, WalletStep } from '~/components';
+import { BasicInfoStep, WalletStep } from '~/components';
 import { CoreLayout } from '~/layouts';
 import { RootStackParamList } from '~/types';
-import { deriveKeyFromPassword, encryptSeed, handleAvatarUpload } from '~/utils';
+import { deriveKeyFromPassword, encryptSeed, uploadAvatar } from '~/utils';
 import { api } from '~/utils/api';
 
 const RegisterScreen = () => {
   const [step, setStep] = useState<1 | 2>(1);
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [userData, setUserData] = useAtom(registerAtom);
-
-  const handleStepOneCancel = () => {
-    navigation.navigate('Home');
-    setTimeout(() => {
-      setUserData({
-        name: '',
-        username: '',
-        email: '',
-        phoneNumber: '',
-        password: '',
-        avatarUri: undefined,
-        countryCode: 'US',
-        callingCode: '1',
-      });
-    }, 300);
-  };
+  const title = step === 1 ? 'Basic Details' : 'Wallet Details';
 
   const handleStepOneComplete = (data: any) => {
     setUserData(data);
     setStep(2);
   };
-
-  const handleStepTwoCancel = () => setStep(1);
 
   const handleStepTwoComplete = async ({
     walletAddress,
@@ -54,7 +37,7 @@ const RegisterScreen = () => {
       const key = await deriveKeyFromPassword(password);
       const encryptedSeed = encryptSeed(seed, key);
 
-      const uploadedavatarUri = await handleAvatarUpload(avatarUri);
+      const uploadedavatarUri = await uploadAvatar(avatarUri);
 
       await api.post(`${API_BASE_URL}/auth/register`, {
         ...rest,
@@ -81,15 +64,31 @@ const RegisterScreen = () => {
     }
   };
 
+  const handleBackPress = () => {
+    if (step === 1) {
+      navigation.navigate('Home');
+      setTimeout(() => {
+        setUserData({
+          name: '',
+          username: '',
+          email: '',
+          phoneNumber: '',
+          password: '',
+          avatarUri: undefined,
+          countryCode: 'US',
+          callingCode: '1',
+        });
+      }, 300);
+    } else {
+      setStep(1);
+    }
+  };
+
   return (
-    <CoreLayout>
-      <View className="flex-1 justify-center">
-        {step === 1 && (
-          <UserDataStep onComplete={handleStepOneComplete} onCancel={handleStepOneCancel} />
-        )}
-        {step === 2 && (
-          <WalletStep onComplete={handleStepTwoComplete} onCancel={handleStepTwoCancel} />
-        )}
+    <CoreLayout showBack onBackPress={handleBackPress} title={title}>
+      <View className="flex-1">
+        {step === 1 && <BasicInfoStep onComplete={handleStepOneComplete} />}
+        {step === 2 && <WalletStep onComplete={handleStepTwoComplete} />}
       </View>
     </CoreLayout>
   );

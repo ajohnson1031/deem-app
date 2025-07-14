@@ -1,8 +1,10 @@
 export type { Contact, SwipeableTransactionRowProps } from './contacts';
 export type { CountryInfo } from './country';
 export type { LabelFieldWithCopyProps } from './inputfields';
+export type { CoreLayoutProps } from './layout';
 export type { MenuListItemProps } from './menulist';
-export type { RootStackParamList } from './navigation';
+export type { BaseModalProps, PassphrasePromptModalProps } from './modals';
+export type { HeaderNavProps, RootStackParamList } from './navigation';
 export type { Theme } from './theme';
 export type {
   ApprovedCurrency,
@@ -13,9 +15,9 @@ export type {
   TxSubmissionScreenProps,
   TxType,
 } from './transaction';
-export type { UserData, UserDataKey, UserDataStepProps } from './user';
+export type { BasicInfoStepProps, StepTwoWalletProps, UserData, UserDataKey } from './user';
 export type { WalletBalanceResult } from './wallet';
 
-export { LabelFieldWithCopyVariant } from './inputfields';
+export { FieldVariant } from './inputfields';
 export { MenuIconType } from './menulist';
 export { STATUS_GROUPS, TX_STATUS_LABELS } from './transaction';

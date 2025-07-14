@@ -1,6 +1,6 @@
-import { Contact, Transaction } from '~/types';
+import { Contact, Theme, Transaction } from '~/types';
 
-export type RootStackParamList = {
+type RootStackParamList = {
   Home: undefined;
   Register: undefined;
   Pin: undefined;
@@ -22,3 +22,18 @@ export type RootStackParamList = {
   EditBasicInfo: undefined;
   ManageWallet: undefined;
 };
+
+interface HeaderNavProps {
+  showBack?: boolean;
+  showClose?: boolean;
+  showHeaderOptions?: boolean;
+  showSettingsOnly?: boolean;
+  showNotificationsOnly?: boolean;
+  showLogout?: boolean;
+  theme?: Theme;
+  title?: string;
+  onBackPress?: () => void;
+  onLogoutPress?: () => void;
+}
+
+export type { HeaderNavProps, RootStackParamList };

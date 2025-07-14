@@ -97,7 +97,7 @@ const EditBasicInfo = () => {
         <View>
           <Text className="text-lg text-gray-600">
             Feel free to update your personal details or change your username. Please note that what
-            you enter here is what will be used for any verification(s).
+            you enter here is what will be used for app-related communications.
           </Text>
 
           <View className="my-4 flex h-[1px] bg-gray-200" />

@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { TextInputProps } from 'react-native';
 
-enum LabelFieldWithCopyVariant {
+enum FieldVariant {
   STANDARD = 'standard',
   MASKED = 'masked',
 }
@@ -12,17 +12,18 @@ interface LabelFieldWithCopyProps {
   valueKey: string;
   copiedMessage: string;
   className?: string;
-  variant?: LabelFieldWithCopyVariant;
+  variant?: FieldVariant;
   onToggle?: () => void;
 }
 
 interface CountdownInputProps extends TextInputProps {
   textClassName?: string;
+  variant?: FieldVariant;
 }
 
 interface PasswordInputProps extends TextInputProps {
   showCountdown?: boolean;
 }
 
-export { LabelFieldWithCopyVariant };
+export { FieldVariant };
 export type { CountdownInputProps, LabelFieldWithCopyProps, PasswordInputProps };

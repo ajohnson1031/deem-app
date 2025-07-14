@@ -1,3 +1,5 @@
+export { default as BasicInfoStep } from './BasicInfoStep';
+export { default as ConfirmLogoutModal } from './ConfirmLogoutModal';
 export { default as ContactListItem } from './ContactListItem';
 export { default as Container } from './Container';
 export { default as CountdownInput } from './CountdownInput';
@@ -7,10 +9,10 @@ export { default as HeaderNav } from './HeaderNav';
 export { default as ImagePickerModal } from './ImagePickerModal';
 export { default as LabelFieldWithCopy } from './LabelFieldWithCopy';
 export { default as MenuListItem } from './MenuListItem';
+export { default as PassphrasePromptModal } from './PassphrasePromptModal';
 export { default as PasswordInput } from './PasswordInput';
 export { default as PinOrCodeInputField } from './PinOrCodeInputField';
 export { default as ScreenCaptureGuard } from './ScreenCaptureGuard';
 export { default as TxListItem } from './TxListItem';
-export { default as UserDataStep } from './UserDataStep';
 export { default as WalletDetails } from './WalletDetails';
 export { default as WalletStep } from './WalletStep';

@@ -15,11 +15,14 @@ type UserData = {
   updatedAt?: string;
 };
 
-interface UserDataStepProps {
+interface BasicInfoStepProps {
   onComplete: (data: UserData) => void;
-  onCancel: () => void;
+}
+
+interface StepTwoWalletProps {
+  onComplete: (wallet: { walletAddress: string; seed: string }) => void;
 }
 
 type UserDataKey = keyof UserData;
 
-export type { UserData, UserDataKey, UserDataStepProps };
+export type { BasicInfoStepProps, StepTwoWalletProps, UserData, UserDataKey };

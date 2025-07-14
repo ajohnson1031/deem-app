@@ -3,18 +3,17 @@ import { Feather } from '@expo/vector-icons';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import cn from 'classnames';
 import { randomUUID } from 'expo-crypto';
 import { useSetAtom } from 'jotai';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Alert, Image, Text, TouchableOpacity, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import Toast from 'react-native-toast-message';
 
 import { currencyAtom, currentTxAtom, initialTx, walletBalanceAtom } from '~/atoms';
-import { ImagePickerModal, MenuListItem } from '~/components';
+import { ConfirmLogoutModal, ImagePickerModal, MenuListItem } from '~/components';
 import { useAuth } from '~/contexts/AuthContext';
-import { useFlashScrollIndicators, useImagePicker, useWallet } from '~/hooks';
+import { useImagePicker, useWallet } from '~/hooks';
 import { CoreLayout } from '~/layouts';
 import { MenuIconType, RootStackParamList } from '~/types';
 import { deleteAvatar, getColorIndex, uploadAvatar } from '~/utils';
@@ -27,10 +26,10 @@ const SettingsScreen = () => {
   const { logout, user, setUser: setStoredUser } = useAuth();
   const { deleteWallet } = useWallet();
   const { requestPermissions, takePhoto, pickFromLibrary } = useImagePicker();
-  const { scrollViewRef, flashIndicators } = useFlashScrollIndicators();
+
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const [modalVisible, setModalVisible] = useState(false);
-  const [flashCount, setFlashCount] = useState<number>(0);
+  const [imageModalVisible, setImageModalVisible] = useState(false);
+  const [logoutModalVisible, setLogoutModalVisible] = useState(false);
   const { id, name, avatarUri, username } = user!;
 
   const splitName = name?.split(' ') || ['', ''];
@@ -43,7 +42,7 @@ const SettingsScreen = () => {
       Alert.alert('Permission Required', 'Camera and media access are needed.');
       return;
     }
-    setModalVisible(true);
+    setImageModalVisible(true);
   };
 
   const handleChoosePhoto = async () => {
@@ -51,7 +50,7 @@ const SettingsScreen = () => {
     if (result) {
       handleUpdateAvatar(result);
     }
-    setModalVisible(false);
+    setImageModalVisible(false);
   };
 
   const handleTakePhoto = async () => {
@@ -59,7 +58,7 @@ const SettingsScreen = () => {
     if (result) {
       handleUpdateAvatar(result);
     }
-    setModalVisible(false);
+    setImageModalVisible(false);
   };
 
   const handleRemovePhoto = async () => {
@@ -70,7 +69,7 @@ const SettingsScreen = () => {
         await api.patch(`${API_BASE_URL}/me`, { avatarUri: null });
         const { avatarUri, ...rest } = user!;
         setStoredUser({ ...rest });
-        setModalVisible(false);
+        setImageModalVisible(false);
         Toast.show({
           type: 'success',
           text1: 'Photo Removed',
@@ -78,7 +77,7 @@ const SettingsScreen = () => {
         });
       } catch (err: any) {
         console.error(err, '\n', err.details);
-        setModalVisible(false);
+        setImageModalVisible(false);
         Toast.show({
           type: 'error',
           text1: 'Problem Removing Photo',
@@ -127,26 +126,25 @@ const SettingsScreen = () => {
     }
   };
 
-  useEffect(() => {
-    const flashInterval = setInterval(() => {
-      if (flashCount < 4) {
-        flashIndicators();
-        setFlashCount(flashCount + 1);
-      }
-    }, 500);
-
-    return () => clearInterval(flashInterval);
-  }, [flashCount]);
-
   return (
-    <CoreLayout showBack title="Settings">
+    <CoreLayout
+      showBack
+      showLogout
+      onLogoutPress={() => setLogoutModalVisible(true)}
+      title="Settings">
       <ImagePickerModal
-        visible={modalVisible}
+        visible={imageModalVisible}
         avatarUri={avatarUri}
         onChoosePhoto={handleChoosePhoto}
         onTakePhoto={handleTakePhoto}
         onRemovePhoto={handleRemovePhoto}
-        onCancel={() => setModalVisible(false)}
+        onCancel={() => setImageModalVisible(false)}
+      />
+
+      <ConfirmLogoutModal
+        visible={logoutModalVisible}
+        onCancel={() => setLogoutModalVisible(false)}
+        onConfirm={handleLogout}
       />
 
       <View className="mx-6 flex-1">
@@ -188,11 +186,7 @@ const SettingsScreen = () => {
         <View className="my-3 flex h-[1px] bg-gray-200" />
 
         <View className="h-3/5">
-          <ScrollView
-            ref={scrollViewRef}
-            showsVerticalScrollIndicator={flashCount < 4}
-            persistentScrollbar
-            className={cn('pb-20', { 'pr-4': flashCount < 4 })}>
+          <ScrollView persistentScrollbar className="pb-20">
             <MenuListItem
               iconType={MenuIconType.FEATHER}
               iconName="edit-2"
@@ -259,21 +253,8 @@ const SettingsScreen = () => {
               </View>
               <Feather name="chevron-right" size={16} />
             </TouchableOpacity>
-
-            <View className="mt-12 flex w-full">
-              <TouchableOpacity onPress={handleLogout} className="rounded-lg bg-gray-200 px-6 py-4">
-                <Text className="text-center text-xl font-medium text-red-600">Sign out</Text>
-              </TouchableOpacity>
-            </View>
           </ScrollView>
         </View>
-        {/* {!!walletAddress && (
-          <WalletDetails
-            address={walletAddress}
-            publicKey={wallet!.publicKey}
-            seed={wallet!.seed}
-          />
-        )} */}
       </View>
     </CoreLayout>
   );

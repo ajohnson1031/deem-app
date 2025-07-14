@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 
 import { useCopyToClipboard } from '~/hooks';
-import { LabelFieldWithCopyProps, LabelFieldWithCopyVariant } from '~/types';
+import { FieldVariant, LabelFieldWithCopyProps } from '~/types';
 
 const LabelFieldWithCopy = ({
   label,
@@ -11,7 +11,7 @@ const LabelFieldWithCopy = ({
   valueKey,
   copiedMessage,
   className,
-  variant = LabelFieldWithCopyVariant.STANDARD,
+  variant = FieldVariant.STANDARD,
   onToggle,
 }: LabelFieldWithCopyProps) => {
   const { copy, copiedKey } = useCopyToClipboard();
@@ -24,30 +24,29 @@ const LabelFieldWithCopy = ({
       </Text>
       <View className="w-full flex-row items-center justify-center gap-2 rounded-lg border border-gray-200 bg-gray-100 py-4">
         <Text
-          className="m-0 flex-1 px-4 py-1"
+          className="m-0 flex-1 px-4 py-1 text-lg"
           numberOfLines={1}
           ellipsizeMode="tail"
           style={{ fontWeight: 500, color: copiedKey ? '#0284c7' : '#4B5563' }}>
           {copiedKey
             ? copiedMessage
-            : variant === LabelFieldWithCopyVariant.STANDARD
+            : variant === FieldVariant.STANDARD
               ? value
               : readable
                 ? value
                 : '•'.repeat(value.length)}
         </Text>
 
-        {(variant === LabelFieldWithCopyVariant.STANDARD ||
-          (variant === LabelFieldWithCopyVariant.MASKED && readable)) && (
+        {(variant === FieldVariant.STANDARD || (variant === FieldVariant.MASKED && readable)) && (
           <TouchableOpacity
-            className={variant === LabelFieldWithCopyVariant.STANDARD ? 'pr-4' : 'pr-1.5'}
+            className={variant === FieldVariant.STANDARD ? 'pr-4' : 'pr-1.5'}
             disabled={!value}
             onPress={() => copy(value ?? '', valueKey)}>
             <Feather name="copy" size={20} color="#4B5563" />
           </TouchableOpacity>
         )}
 
-        {variant === LabelFieldWithCopyVariant.MASKED && (
+        {variant === FieldVariant.MASKED && (
           <TouchableOpacity className={`${'mr-3'}`} onPress={() => setReadable(!readable)}>
             <FontAwesome6
               name={readable ? 'eye' : 'eye-slash'}

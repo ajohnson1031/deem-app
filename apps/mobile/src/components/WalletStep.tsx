@@ -1,17 +1,13 @@
-import { Feather, FontAwesome6 } from '@expo/vector-icons';
+import { Feather } from '@expo/vector-icons';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useEffect, useState } from 'react';
 import { Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Wallet, isValidClassicAddress } from 'xrpl';
 
 import { useCopyToClipboard } from '~/hooks';
+import { StepTwoWalletProps } from '~/types';
 
-interface StepTwoWalletProps {
-  onComplete: (wallet: { walletAddress: string; seed: string }) => void;
-  onCancel: () => void;
-}
-
-const StepTwoWallet = ({ onComplete, onCancel }: StepTwoWalletProps) => {
+const StepTwoWallet = ({ onComplete }: StepTwoWalletProps) => {
   const [walletAddress, setWalletAddress] = useState<string | undefined>();
   const [seed, setSeed] = useState<string | undefined>();
   const [generated, setGenerated] = useState(false);
@@ -52,11 +48,6 @@ const StepTwoWallet = ({ onComplete, onCancel }: StepTwoWalletProps) => {
   return (
     <View className="mt-10 flex w-full flex-1 justify-between px-6">
       <View>
-        <View className="flex-row gap-3">
-          <FontAwesome6 name="wallet" size={30} color="#475569" />
-          <Text className="text-4xl text-slate-600">Setup Wallet</Text>
-        </View>
-        <View className="mb-10 mt-4 flex h-[1px] bg-gray-200" />
         {!generated && (
           <>
             <Text className="mb-6 text-lg text-gray-600">
@@ -64,7 +55,7 @@ const StepTwoWallet = ({ onComplete, onCancel }: StepTwoWalletProps) => {
             </Text>
             <TouchableOpacity
               onPress={handleGenerate}
-              className={`rounded-lg py-3 ${isUsingOwnWallet ? 'bg-gray-300' : 'bg-emerald-600'}`}
+              className={`rounded-lg py-4 ${isUsingOwnWallet ? 'bg-gray-300' : 'bg-emerald-600'}`}
               disabled={isUsingOwnWallet}>
               <Text
                 className={`text-center text-xl font-medium ${!isUsingOwnWallet ? 'text-white' : 'text-gray-400'}`}>
@@ -169,14 +160,8 @@ const StepTwoWallet = ({ onComplete, onCancel }: StepTwoWalletProps) => {
       </View>
       <View className="mb-8 flex-row gap-4">
         <TouchableOpacity
-          onPress={onCancel}
-          className="mt-4 flex-1 rounded-lg border-2 border-gray-600 py-3">
-          <Text className="text-center text-xl font-medium text-gray-600">Go Back</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
           onPress={handleSubmit}
-          className={`mt-4 flex-1 rounded-lg py-3 ${isFormValid ? 'bg-sky-600' : 'bg-gray-300'}`}
+          className={`mt-4 flex-1 rounded-lg py-4 ${isFormValid ? 'bg-sky-600' : 'bg-gray-300'}`}
           disabled={isUsingOwnWallet ? !isFormValid : false}>
           <Text
             className={`text-center text-xl font-medium ${isFormValid ? 'text-white' : 'text-gray-400'}`}>
