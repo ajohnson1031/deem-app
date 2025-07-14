@@ -62,7 +62,7 @@ const ForgotPasswordScreen = () => {
           />
         </View>
 
-        {error && <Text className="mb-3 text-red-500">{error}</Text>}
+        {error && <Text className="mb-3 text-red-600">{error}</Text>}
 
         <TouchableOpacity
           className="rounded-lg bg-sky-600 p-3"

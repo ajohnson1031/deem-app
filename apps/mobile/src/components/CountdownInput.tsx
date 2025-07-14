@@ -8,7 +8,6 @@ const CountdownInput = (props: CountdownInputProps) => {
   const { onChangeText, maxLength, className, textClassName, variant, secureTextEntry, ...rest } =
     props;
   const [masked, setMasked] = useState<boolean>(variant === FieldVariant.MASKED);
-  console.log(variant, masked);
   const [textCounter, setTextCounter] = useState<number | null>(null);
 
   const handleChangeText = (text: string) => {
@@ -25,7 +24,7 @@ const CountdownInput = (props: CountdownInputProps) => {
   };
 
   const textColor =
-    typeof textCounter === 'number' && textCounter <= 5 ? 'text-red-500' : 'text-slate-500';
+    typeof textCounter === 'number' && textCounter <= 5 ? 'text-red-600' : 'text-slate-500';
 
   return (
     <View

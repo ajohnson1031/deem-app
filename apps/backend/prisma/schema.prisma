@@ -25,6 +25,8 @@ model User {
   transactions       Transaction[]       @relation("UserTransactions")
   refreshTokens      RefreshToken[]      @relation("UserRefreshTokens")
   passwordResetCodes PasswordResetCode[] @relation("UserPasswordResets")
+  twoFactorEnabled   Boolean             @default(false)
+  twoFactorSecret    String?
 }
 
 model PasswordResetCode {

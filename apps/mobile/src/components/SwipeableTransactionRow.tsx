@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
   },
   denyText: {
     right: 16,
-    color: '#E7000B', // red-500
+    color: '#E7000B', // red-600
   },
 });
 

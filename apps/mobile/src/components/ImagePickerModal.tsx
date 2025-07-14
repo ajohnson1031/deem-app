@@ -87,7 +87,7 @@ const ImagePickerModal = ({
           {avatarUri && (
             <>
               <Pressable className="py-4" onPress={onRemovePhoto}>
-                <Text className="text-center text-2xl text-red-500">Remove Photo</Text>
+                <Text className="text-center text-2xl text-red-600">Remove Photo</Text>
               </Pressable>
               <View className="my-1 h-[1px] bg-gray-200" />
             </>

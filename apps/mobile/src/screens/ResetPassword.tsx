@@ -91,7 +91,7 @@ const ResetPasswordScreen = ({ route }: { route: { params: { userId: string } } 
         secureTextEntry
       />
 
-      {error && <Text className="text-red-500">{error}</Text>}
+      {error && <Text className="text-red-600">{error}</Text>}
       {successMessage && (
         <Text className="text-center text-green-600">
           {successMessage} {countdown}s...

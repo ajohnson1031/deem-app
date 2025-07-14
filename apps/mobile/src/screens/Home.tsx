@@ -87,7 +87,7 @@ const HomeScreen = () => {
         />
 
         {/* Error Message */}
-        {loginError && <Text className="text-md text-center text-red-500">{loginError}</Text>}
+        {loginError && <Text className="text-md text-center text-red-600">{loginError}</Text>}
 
         {/* Login Button */}
         <TouchableOpacity className="w-full rounded-lg bg-sky-600 py-3" onPress={handleLogin}>

@@ -9,17 +9,17 @@ import Toast from 'react-native-toast-message';
 import { registerAtom } from '~/atoms';
 import { BasicInfoStep, WalletStep } from '~/components';
 import { CoreLayout } from '~/layouts';
-import { RootStackParamList } from '~/types';
+import { RootStackParamList, UserData } from '~/types';
 import { deriveKeyFromPassword, encryptSeed, uploadAvatar } from '~/utils';
 import { api } from '~/utils/api';
 
 const RegisterScreen = () => {
-  const [step, setStep] = useState<1 | 2>(1);
+  const [step, setStep] = useState<1 | 2>(2);
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [userData, setUserData] = useAtom(registerAtom);
   const title = step === 1 ? 'Basic Details' : 'Wallet Details';
 
-  const handleStepOneComplete = (data: any) => {
+  const handleStepOneComplete = (data: UserData) => {
     setUserData(data);
     setStep(2);
   };
@@ -27,9 +27,11 @@ const RegisterScreen = () => {
   const handleStepTwoComplete = async ({
     walletAddress,
     seed,
+    twoFactorEnabled,
   }: {
     walletAddress: string;
     seed: string;
+    twoFactorEnabled: boolean;
   }) => {
     try {
       const { password, avatarUri, ...rest } = userData;

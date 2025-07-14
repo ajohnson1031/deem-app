@@ -1,3 +1,4 @@
+export { checkTwoFactorStatus } from './2fa';
 export { clearAuthData } from './auth';
 export { deleteAvatar, uploadAvatar } from './avatar';
 export { calculateFees } from './calculateFees';

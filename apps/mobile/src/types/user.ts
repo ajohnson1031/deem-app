@@ -11,6 +11,7 @@ type UserData = {
   countryCode?: CountryCode;
   callingCode?: string;
   walletAddress?: string;
+  twoFactorEnabled?: boolean;
   createdAt?: string;
   updatedAt?: string;
 };
@@ -20,7 +21,7 @@ interface BasicInfoStepProps {
 }
 
 interface StepTwoWalletProps {
-  onComplete: (wallet: { walletAddress: string; seed: string }) => void;
+  onComplete: (wallet: { walletAddress: string; seed: string; twoFactorEnabled: boolean }) => void;
 }
 
 type UserDataKey = keyof UserData;

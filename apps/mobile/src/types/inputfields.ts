@@ -11,6 +11,7 @@ interface LabelFieldWithCopyProps {
   value: string;
   valueKey: string;
   copiedMessage: string;
+  requires2fa?: boolean;
   className?: string;
   variant?: FieldVariant;
   onToggle?: () => void;

@@ -20,4 +20,5 @@ export type { WalletBalanceResult } from './wallet';
 
 export { FieldVariant } from './inputfields';
 export { MenuIconType } from './menulist';
+export { ModalMode } from './modals';
 export { STATUS_GROUPS, TX_STATUS_LABELS } from './transaction';

@@ -1,16 +1,6 @@
 import { atom } from 'jotai';
-import { CountryCode } from 'libphonenumber-js';
 
-interface UserData {
-  name: string;
-  username: string;
-  email: string;
-  phoneNumber: string;
-  password: string;
-  avatarUri?: string;
-  countryCode?: CountryCode;
-  callingCode?: string;
-}
+import { UserData } from '~/types';
 
 export const registerAtom = atom<UserData>({
   name: '',
@@ -21,6 +11,7 @@ export const registerAtom = atom<UserData>({
   avatarUri: undefined,
   countryCode: 'US',
   callingCode: '1',
+  twoFactorEnabled: false,
 });
 
 export const usernameAvailabilityAtom = atom<{

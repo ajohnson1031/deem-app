@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 import { z, ZodError } from "zod";
 import prisma from "../prisma/client";
 
-export const getMeHandler = async (req: Request, res: Response) => {
+const getMeHandler = async (req: Request, res: Response) => {
   const user = req.user;
   console.log("me is being called with", user);
   if (!user?.id) {
@@ -12,6 +12,18 @@ export const getMeHandler = async (req: Request, res: Response) => {
 
   // Optionally fetch user details from DB if needed
   return res.json({ user });
+};
+
+const getMy2faStatusHandler = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) return res.status(401).json({ error: "Unauthorized Request." });
+    return res.json({ twoFactorEnabled: user.twoFactorEnabled });
+  } catch (err) {
+    console.error("Could not get 2FA status:", err);
+    return res.status(500).json({ error: "Internal server error." });
+  }
 };
 
 const updateUserSchema = z.object({
@@ -24,7 +36,7 @@ const updateUserSchema = z.object({
   avatarUri: z.url().nullable().optional(),
 });
 
-export const updateMeHandler = async (req: Request, res: Response) => {
+const updateMeHandler = async (req: Request, res: Response) => {
   const userId = req.user?.id;
 
   if (!userId) {
@@ -78,3 +90,5 @@ export const updateMeHandler = async (req: Request, res: Response) => {
     return res.status(500).json({ error: "Internal server error." });
   }
 };
+
+export { getMeHandler, getMy2faStatusHandler, updateMeHandler };

@@ -46,9 +46,9 @@ const EditBasicInfo = () => {
     const key = field.name as Exclude<keyof UserData, 'password' | 'avatarUri'>;
     const value = userData[key];
     if (field.name === 'phoneNumber') {
-      return value ? !isValidPhoneNumber(value, countryCode) : false;
+      return value ? !isValidPhoneNumber(value.toString(), countryCode) : false;
     }
-    return !field.matches.test(value?.trim() || '');
+    return !field.matches.test(value?.toString().trim() || '');
   });
 
   const shouldUpdate = !hasValidationErrors && !baseError && !isLocked && hasChanges;
@@ -123,41 +123,45 @@ const EditBasicInfo = () => {
               if (field.name === 'password') return null; // should never happen due to filter
               const key = field.name as Exclude<keyof UserData, 'password' | 'avatarUri'>;
               const value = userData[key];
-              const isValid = !value || field.matches.test(value); // only validate if value is non-empty
+              const isValid = !value || field.matches.test(value.toString()); // only validate if value is non-empty
               const showError =
                 field.name === 'phoneNumber'
-                  ? value && !isValidPhoneNumber(value, countryCode)
+                  ? value && !isValidPhoneNumber(value.toString(), countryCode)
                   : value && !isValid;
 
               return (
                 <View key={idx}>
-                  {field.name === 'username' && value!.length >= 6 && currentUserName !== value && (
-                    <View
-                      className={`mb-1 self-start rounded-lg px-2 py-1 text-sm ${
-                        availability.checking
-                          ? 'bg-gray-50'
-                          : availability.available
-                            ? 'bg-green-50'
-                            : !availability.available && currentUserName === value
-                              ? 'bg-gray-100'
-                              : 'bg-red-50'
-                      }`}>
-                      {availability.checking && <Text className="text-slate-500">Checking...</Text>}
-                      {availability.available && (
-                        <View className="flex flex-row items-center gap-1.5">
-                          <Feather name="check-circle" size={14} color="#15803d" />
-                          <Text className="text-green-600">Username is available</Text>
-                        </View>
-                      )}
+                  {field.name === 'username' &&
+                    value!.toString().length >= 6 &&
+                    currentUserName !== value && (
+                      <View
+                        className={`mb-1 self-start rounded-lg px-2 py-1 text-sm ${
+                          availability.checking
+                            ? 'bg-gray-50'
+                            : availability.available
+                              ? 'bg-green-50'
+                              : !availability.available && currentUserName === value
+                                ? 'bg-gray-100'
+                                : 'bg-red-50'
+                        }`}>
+                        {availability.checking && (
+                          <Text className="text-slate-500">Checking...</Text>
+                        )}
+                        {availability.available && (
+                          <View className="flex flex-row items-center gap-1.5">
+                            <Feather name="check-circle" size={14} color="#15803d" />
+                            <Text className="text-green-600">Username is available</Text>
+                          </View>
+                        )}
 
-                      {currentUserName !== value && !availability.available && (
-                        <View className="flex flex-row items-center gap-1.5">
-                          <Fontisto name="close" size={14} color="#dc2626" />
-                          <Text className="text-red-600">Username is taken</Text>
-                        </View>
-                      )}
-                    </View>
-                  )}
+                        {currentUserName !== value && !availability.available && (
+                          <View className="flex flex-row items-center gap-1.5">
+                            <Fontisto name="close" size={14} color="#dc2626" />
+                            <Text className="text-red-600">Username is taken</Text>
+                          </View>
+                        )}
+                      </View>
+                    )}
                   {field.name === 'phoneNumber' && (
                     <View className="mb-2 flex-row items-center rounded-lg bg-gray-100 px-3 py-1">
                       <Text className="mr-2 text-xl font-medium text-[#777]">Country:</Text>
@@ -202,7 +206,7 @@ const EditBasicInfo = () => {
                       returnKeyType="done"
                       autoCapitalize="none"
                       editable={!isLocked}
-                      value={value}
+                      value={value?.toString()}
                       onChangeText={(val) => {
                         setBaseError(null);
                         const formattedVal =
@@ -218,13 +222,13 @@ const EditBasicInfo = () => {
                     />
                   </View>
                   {showError && (
-                    <Text className="mb-2 text-sm text-red-500">{field.errorMessage}</Text>
+                    <Text className="mb-2 text-sm text-red-600">{field.errorMessage}</Text>
                   )}
                 </View>
               );
             })}
           </View>
-          {baseError && <Text className="mb-3 text-center text-red-500">{baseError}</Text>}
+          {baseError && <Text className="mb-3 text-center text-red-600">{baseError}</Text>}
         </View>
         <View className="mb-8 flex-row">
           <TouchableOpacity

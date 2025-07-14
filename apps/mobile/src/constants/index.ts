@@ -51,6 +51,15 @@ const FIELDS: FieldType[] = [
     errorMessage: 'Enter a valid email address.',
   },
   {
+    placeholder: 'Phone (optional)',
+    name: 'phoneNumber',
+    keyboardType: 'phone-pad',
+    textContentType: 'telephoneNumber',
+    maxLength: 50,
+    matches: REGEX.PHONE_NUMBER,
+    errorMessage: 'Enter a valid phone number.',
+  },
+  {
     placeholder: 'Password',
     name: 'password',
     keyboardType: 'default',
@@ -60,15 +69,6 @@ const FIELDS: FieldType[] = [
     matches: REGEX.PASSWORD, // strong password, excludes @
     errorMessage:
       'Password must be 8 - 30 chars and include one of each of the following: uppercase, lowercase, number, special character (not @).',
-  },
-  {
-    placeholder: 'Phone (optional)',
-    name: 'phoneNumber',
-    keyboardType: 'phone-pad',
-    textContentType: 'telephoneNumber',
-    maxLength: 50,
-    matches: REGEX.PHONE_NUMBER,
-    errorMessage: 'Enter a valid phone number.',
   },
 ];
 

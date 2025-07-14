@@ -128,7 +128,7 @@ const WalletScreen = () => {
                       'min-w-20 max-w-32 flex-row items-center justify-center rounded-bl rounded-tr px-2 py-1.5',
                       {
                         'bg-green-500': isFresh,
-                        'bg-red-500': !isFresh && secondsUntilNextUpdate <= 5,
+                        'bg-red-600': !isFresh && secondsUntilNextUpdate <= 5,
                         'bg-yellow-500': !isFresh && secondsUntilNextUpdate > 5,
                       }
                     )}>
