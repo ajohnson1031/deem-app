@@ -2,36 +2,34 @@ import { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Modal, Text, TouchableOpacity, View } from 'react-native';
 
 import CountdownInput from '~/components/CountdownInput';
-import { REGEX } from '~/constants';
-import { EncryptionModalMode, FieldVariant, PassphrasePromptModalProps } from '~/types';
+import { FieldVariant } from '~/types';
 
-const PassphrasePromptModal = ({
-  visible,
-  onConfirm,
-  onCancel,
-  mode = EncryptionModalMode.EXPORT,
-}: PassphrasePromptModalProps) => {
-  const [passphrase, setPassphrase] = useState('');
-  const [error, setError] = useState('');
+interface TwoFAPromptModalProps {
+  visible: boolean;
+  onConfirm: (otp: string) => void;
+  onCancel: () => void;
+}
 
+const TwoFAPromptModal = ({ visible, onConfirm, onCancel }: TwoFAPromptModalProps) => {
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
 
+  const [otp, setOtp] = useState('');
+  const [error, setError] = useState('');
+
   const handleConfirm = () => {
-    if (!REGEX.PASSWORD.test(passphrase)) {
-      setError(
-        'Passphrase must be 8 - 30 chars and include one of each of the following: uppercase, lowercase, number, special character (not @).'
-      );
+    if (!otp || otp.length !== 6) {
+      setError('OTP must be 6 digits');
       return;
     }
 
     setError('');
-    onConfirm(passphrase);
-    setPassphrase('');
+    onConfirm(otp);
+    setOtp('');
   };
 
   const handleCancel = () => {
-    setPassphrase('');
+    setOtp('');
     setError('');
     onCancel();
   };
@@ -65,34 +63,24 @@ const PassphrasePromptModal = ({
             transform: [{ scale: scaleAnim }],
             opacity: opacityAnim,
           }}
-          className="w-11/12 gap-2 rounded-3xl bg-white p-6 shadow-lg">
-          <View className="flex gap-2">
-            <Text className="text-xl font-semibold text-slate-800">
-              {mode === 'export'
-                ? 'Protect Your Backup with Encryption'
-                : 'Enter Encrypted Passphrase'}
-            </Text>
-            <Text className="text-lg leading-snug text-slate-600">
-              {mode === 'export'
-                ? 'For your safety, Deem requires a strong passphrase to encrypt your wallet export.'
-                : 'Enter the passphrase you used during export.'}
-            </Text>
-          </View>
+          className="flex w-11/12 gap-2 rounded-3xl bg-white p-6 shadow-lg">
+          <Text className="text-xl font-semibold text-slate-800">Enter Your 2FA Code</Text>
+          <Text className="text-lg leading-snug text-slate-600">
+            Please enter the 6-digit code from your authenticator app.
+          </Text>
 
           <View className="my-2 h-[1px] bg-gray-200" />
 
-          <View>
-            <CountdownInput
-              variant={FieldVariant.MASKED}
-              placeholder="Enter passphrase"
-              placeholderTextColor="#777"
-              value={passphrase}
-              maxLength={30}
-              onChangeText={setPassphrase}
-            />
+          <CountdownInput
+            variant={FieldVariant.MASKED}
+            keyboardType="numeric"
+            maxLength={6}
+            placeholder="e.g., 123456"
+            value={otp}
+            onChangeText={setOtp}
+          />
 
-            {error && <Text className="mt-1.5 text-sm text-red-600">{error}</Text>}
-          </View>
+          {error && <Text className="mb-2 text-sm text-red-600">{error}</Text>}
 
           <View className="mt-4 flex-row justify-end gap-3">
             <TouchableOpacity
@@ -110,4 +98,4 @@ const PassphrasePromptModal = ({
   );
 };
 
-export default PassphrasePromptModal;
+export default TwoFAPromptModal;

@@ -4,17 +4,8 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import Toast from 'react-native-toast-message';
 
 import { useWallet } from '~/hooks'; // make sure this hook is working and imported
-import { UserData } from '~/types';
+import { AuthContextType, UserData } from '~/types';
 import { deleteToken, deleteUser, emitter, getToken, getUser, saveToken, saveUser } from '~/utils';
-
-type AuthContextType = {
-  user: UserData | null;
-  setUser: React.Dispatch<React.SetStateAction<UserData | null>>;
-  login: (identifier: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
-  isLoading: boolean;
-  token: string | null;
-};
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -103,15 +94,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         { withCredentials: true }
       );
 
-      const { token: accessToken, user } = res.data;
+      const { token: accessToken, user, requires2FA, tempUserId } = res.data;
+
+      if (requires2FA) {
+        // 2FA required; stop here and let UI handle modal
+        return { success: false, requires2FA: true, tempUserId };
+      }
+
+      // Normal flow
       setToken(accessToken);
       setUser(user);
       setAuthHeader(accessToken);
 
       await saveToken(accessToken);
       await saveUser(user);
+      await loadWallet(password);
 
-      await loadWallet(password); // 🧠 decrypt + store seed on login
+      return { success: true };
     } catch (err) {
       throw err;
     }
@@ -139,8 +138,42 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const verify2FA = async (tempUserId: string, token: string, password: string) => {
+    try {
+      const res = await axios.post(`${API_BASE_URL}/auth/2fa/verify`, {
+        userId: tempUserId,
+        token,
+      });
+
+      const { user, accessToken } = res.data;
+
+      setToken(accessToken);
+      setUser(user);
+      setAuthHeader(accessToken);
+
+      await saveToken(accessToken);
+      await saveUser(user);
+      await loadWallet(password);
+
+      return { success: true };
+    } catch (err) {
+      throw err;
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, setUser, login, logout, isLoading, token }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        setUser,
+        login,
+        logout,
+        isLoading,
+        token,
+        verify2FA,
+        setToken,
+        setAuthHeader,
+      }}>
       {children}
     </AuthContext.Provider>
   );

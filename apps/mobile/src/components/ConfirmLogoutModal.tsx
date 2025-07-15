@@ -38,7 +38,7 @@ const ConfirmLogoutModal = ({ visible, onConfirm, onCancel }: BaseModalProps) =>
           }}
           className="flex w-11/12 gap-2 rounded-3xl bg-white p-6 shadow-lg">
           <View className="flex items-center gap-2">
-            <Text className="text-xl font-semibold">Logging Out. Are you sure?</Text>
+            <Text className="text-xl font-semibold">You're logging out. Are you sure?</Text>
           </View>
 
           <View className="my-2 h-[1px] bg-gray-200" />

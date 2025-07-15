@@ -29,6 +29,7 @@ const PasswordInput = (props: PasswordInputProps) => {
     <View className="flex w-full flex-row items-center justify-between gap-3 rounded-lg bg-gray-100">
       <TextInput
         className={`${showCountdown ? 'w-[75%]' : 'w-[85%]'} px-3 py-4 text-xl font-medium leading-[20px]`}
+        textContentType="newPassword"
         onChangeText={handleChangeText}
         secureTextEntry={!readable}
         {...rest}

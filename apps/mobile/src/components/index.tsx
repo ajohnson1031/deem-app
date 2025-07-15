@@ -1,3 +1,4 @@
+export { default as AvatarPicker } from './AvatarPicker';
 export { default as BasicInfoStep } from './BasicInfoStep';
 export { default as ConfirmLogoutModal } from './ConfirmLogoutModal';
 export { default as ContactListItem } from './ContactListItem';
@@ -13,6 +14,7 @@ export { default as PassphrasePromptModal } from './PassphrasePromptModal';
 export { default as PasswordInput } from './PasswordInput';
 export { default as PinOrCodeInputField } from './PinOrCodeInputField';
 export { default as ScreenCaptureGuard } from './ScreenCaptureGuard';
+export { default as TwoFAPromptModal } from './TwoFAPromptModal';
 export { default as TxListItem } from './TxListItem';
 export { default as WalletDetails } from './WalletDetails';
 export { default as WalletStep } from './WalletStep';

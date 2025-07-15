@@ -1,22 +1,20 @@
 import { API_BASE_URL } from '@env';
 import { Feather } from '@expo/vector-icons';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { randomUUID } from 'expo-crypto';
 import { useSetAtom } from 'jotai';
 import { useState } from 'react';
-import { Alert, Image, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Text, TouchableOpacity, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import Toast from 'react-native-toast-message';
 
 import { currencyAtom, currentTxAtom, initialTx, walletBalanceAtom } from '~/atoms';
-import { ConfirmLogoutModal, ImagePickerModal, MenuListItem } from '~/components';
+import { AvatarPicker, ConfirmLogoutModal, ImagePickerModal, MenuListItem } from '~/components';
 import { useAuth } from '~/contexts/AuthContext';
 import { useImagePicker, useWallet } from '~/hooks';
 import { CoreLayout } from '~/layouts';
 import { MenuIconType, RootStackParamList } from '~/types';
-import { deleteAvatar, getColorIndex, uploadAvatar } from '~/utils';
+import { deleteAvatar, uploadAvatar } from '~/utils';
 import { api } from '~/utils/api';
 
 const SettingsScreen = () => {
@@ -33,8 +31,8 @@ const SettingsScreen = () => {
   const { id, name, avatarUri, username } = user!;
 
   const splitName = name?.split(' ') || ['', ''];
-  const [firstname, lastname] = [splitName[0], splitName[1] || ''];
-  const backgroundColor = getColorIndex(id || randomUUID());
+  const [firstname, lastname] = [splitName[0], splitName[splitName.length - 1] || ''];
+  const initials = `${firstname[0]}${lastname[0] || ''}`;
 
   const openImagePicker = async () => {
     const granted = await requestPermissions();
@@ -149,34 +147,13 @@ const SettingsScreen = () => {
 
       <View className="mx-6 flex-1">
         {/* Avatar */}
-        <View className="h-1/6">
-          {avatarUri ? (
-            <TouchableOpacity onPress={openImagePicker}>
-              <Image
-                source={{ uri: `${avatarUri}?${Date.now()}` }}
-                className="h-28 w-28 rounded-full"
-                resizeMode="cover"
-              />
-              <View className="relative bottom-10 left-20 flex items-center justify-center self-start rounded-full border-2 border-white bg-gray-200 p-2">
-                <FontAwesome name="camera" size={22} color="#4b5563" />
-              </View>
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity onPress={openImagePicker}>
-              <View
-                className="h-24 w-24 items-center justify-center rounded-full"
-                style={{ backgroundColor }}>
-                <Text className="text-3xl font-medium text-white">
-                  {firstname[0]}
-                  {lastname[0] || ''}
-                </Text>
-              </View>
-              <View className="relative bottom-9 left-16 flex items-center justify-center self-start rounded-full border-2 border-white bg-gray-200 p-2">
-                <FontAwesome name="camera" size={22} color="#4b5563" />
-              </View>
-            </TouchableOpacity>
-          )}
-        </View>
+        <AvatarPicker
+          id={id}
+          avatarUri={avatarUri}
+          initials={initials}
+          isLoggedIn
+          onPress={openImagePicker}
+        />
 
         <Text className="text-5xl font-semibold">{firstname}</Text>
         <Text className="my-3 w-fit self-start rounded-full bg-gray-200 px-4 py-1 text-lg font-medium">

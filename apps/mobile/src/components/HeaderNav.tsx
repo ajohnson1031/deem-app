@@ -100,7 +100,7 @@ const HeaderNav = ({
             className={cn('w-[91px] flex-row justify-end gap-2 p-3 pr-2')}
             onPress={onLogoutPress}
             disabled={showNotificationsOnly}>
-            <Feather name="log-out" size={24} />
+            <Feather name="log-out" size={24} color="#c10007" />
           </TouchableOpacity>
         )}
       </View>

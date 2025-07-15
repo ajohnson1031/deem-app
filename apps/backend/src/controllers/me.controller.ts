@@ -14,18 +14,6 @@ const getMeHandler = async (req: Request, res: Response) => {
   return res.json({ user });
 };
 
-const getMy2faStatusHandler = async (req: Request, res: Response) => {
-  try {
-    const userId = req.user?.id;
-    const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (!user) return res.status(401).json({ error: "Unauthorized Request." });
-    return res.json({ twoFactorEnabled: user.twoFactorEnabled });
-  } catch (err) {
-    console.error("Could not get 2FA status:", err);
-    return res.status(500).json({ error: "Internal server error." });
-  }
-};
-
 const updateUserSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   username: z.string().min(6).max(30).optional(),
@@ -34,6 +22,7 @@ const updateUserSchema = z.object({
   countryCode: z.string().length(2).optional(),
   callingCode: z.string().min(1).max(5).optional(),
   avatarUri: z.url().nullable().optional(),
+  twoFactorEnabled: z.boolean().optional(),
 });
 
 const updateMeHandler = async (req: Request, res: Response) => {
@@ -91,4 +80,4 @@ const updateMeHandler = async (req: Request, res: Response) => {
   }
 };
 
-export { getMeHandler, getMy2faStatusHandler, updateMeHandler };
+export { getMeHandler, updateMeHandler };

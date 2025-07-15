@@ -4,14 +4,14 @@ interface BaseModalProps {
   onCancel: () => void;
 }
 
-enum ModalMode {
+enum EncryptionModalMode {
   IMPORT = 'import',
   EXPORT = 'export',
 }
 
 interface PassphrasePromptModalProps extends BaseModalProps {
-  mode?: ModalMode;
+  mode?: EncryptionModalMode;
 }
 
-export { ModalMode };
+export { EncryptionModalMode };
 export type { BaseModalProps, PassphrasePromptModalProps };

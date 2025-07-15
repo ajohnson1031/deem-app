@@ -2,6 +2,8 @@ import bcrypt from "bcrypt";
 import dayjs from "dayjs";
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
+import qrcode from "qrcode";
+import speakeasy from "speakeasy";
 import prisma from "../prisma/client";
 import { decryptSeed, deriveKey, encryptSeed } from "../utils/crypto";
 
@@ -11,7 +13,7 @@ const REFRESH_SECRET = process.env.REFRESH_SECRET || JWT_SECRET;
 const REFRESH_EXPIRES_IN = "7d";
 
 const registerHandler = async (req: Request, res: Response) => {
-  const { username, password, email, name, phoneNumber, avatarUri, walletAddress, encryptedSeed, countryCode = "US", callingCode = "1" } = req.body;
+  const { username, password, email, name, phoneNumber, avatarUri, walletAddress, encryptedSeed, countryCode = "US", callingCode = "1", twoFactorEnabled = false } = req.body;
 
   if (!username || !password || !walletAddress || !encryptedSeed || !name) {
     return res.status(400).json({ error: "Missing required fields." });
@@ -38,6 +40,15 @@ const registerHandler = async (req: Request, res: Response) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    let twoFactorSecret: string | undefined;
+
+    if (twoFactorEnabled) {
+      const secret = speakeasy.generateSecret({
+        name: `Deem (${username})`,
+      });
+      twoFactorSecret = secret.base32;
+    }
+
     const user = await prisma.user.create({
       data: {
         username,
@@ -49,6 +60,8 @@ const registerHandler = async (req: Request, res: Response) => {
         walletAddress,
         countryCode,
         callingCode,
+        twoFactorEnabled,
+        twoFactorSecret,
         wallet: {
           create: {
             encryptedSeed,
@@ -60,7 +73,7 @@ const registerHandler = async (req: Request, res: Response) => {
       },
     });
 
-    const { password: _pw, wallet: _wallet, ...userData } = user;
+    const { password: _pw, wallet: _wallet, twoFactorSecret: _2faSecret, ...userData } = user;
 
     return res.status(201).json({ user: userData });
   } catch (err) {
@@ -87,12 +100,19 @@ const loginHandler = async (req: Request, res: Response) => {
       return res.status(401).json({ error: "Invalid credentials." });
     }
 
-    const payload = { userId: user.id };
+    // If 2FA is enabled, return a partial response
+    if (user.twoFactorEnabled) {
+      return res.status(200).json({
+        requires2FA: true,
+        tempUserId: user.id,
+      });
+    }
 
+    // Normal login flow
+    const payload = { userId: user.id };
     const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
     const refreshToken = jwt.sign(payload, REFRESH_SECRET, { expiresIn: REFRESH_EXPIRES_IN });
 
-    // Store refresh token in DB
     await prisma.refreshToken.create({
       data: {
         token: refreshToken,
@@ -108,7 +128,7 @@ const loginHandler = async (req: Request, res: Response) => {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
-        maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+        maxAge: 1000 * 60 * 60 * 24 * 7,
       })
       .json({ user: userData, token: accessToken });
   } catch (err) {
@@ -325,14 +345,117 @@ const checkUsernameAvailability = async (req: Request, res: Response) => {
   return res.status(200).json({ available: !existing });
 };
 
+const generate2FASecret = async (req: Request, res: Response) => {
+  const user = req.user;
+
+  if (!user) {
+    return res.status(401).json({ error: "Unauthorized Request" });
+  }
+
+  const secret = speakeasy.generateSecret({
+    name: `Deem (${user.id})`,
+  });
+
+  if (!secret.otpauth_url) {
+    throw new Error("OTP Auth URL is missing from secret.");
+  }
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      twoFactorSecret: secret.base32,
+    },
+  });
+
+  const qrCode = await qrcode.toDataURL(secret.otpauth_url);
+
+  res.json({
+    qrCode, // Data URI
+    secret: secret.base32, // Optional, for debug only
+  });
+};
+
+const getMy2faStatusHandler = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) return res.status(401).json({ error: "Unauthorized Request." });
+    return res.json({ twoFactorEnabled: user.twoFactorEnabled });
+  } catch (err) {
+    console.error("Could not get 2FA status:", err);
+    return res.status(500).json({ error: "Internal server error." });
+  }
+};
+
+const verify2FAHandler = async (req: Request, res: Response) => {
+  const { tempUserId, token: otpToken } = req.body;
+
+  if (!tempUserId || !otpToken) {
+    return res.status(400).json({ error: "Missing 2FA verification input." });
+  }
+
+  try {
+    const user = await prisma.user.findUnique({ where: { id: tempUserId } });
+
+    if (!user || !user.twoFactorSecret) {
+      return res.status(400).json({ error: "Invalid user or 2FA not setup." });
+    }
+
+    const valid = speakeasy.totp.verify({
+      secret: user.twoFactorSecret,
+      encoding: "base32",
+      token: otpToken,
+      window: 1,
+    });
+
+    if (!valid) {
+      return res.status(401).json({ error: "Invalid 2FA token." });
+    }
+
+    const JWT_SECRET = process.env.JWT_SECRET!;
+    const JWT_EXPIRES_IN = "15m";
+    const REFRESH_SECRET = process.env.REFRESH_SECRET || JWT_SECRET;
+    const REFRESH_EXPIRES_IN = "7d";
+
+    const payload = { userId: user.id };
+    const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+    const refreshToken = jwt.sign(payload, REFRESH_SECRET, { expiresIn: REFRESH_EXPIRES_IN });
+
+    await prisma.refreshToken.create({
+      data: {
+        token: refreshToken,
+        userId: user.id,
+        expiresAt: dayjs().add(7, "day").toDate(),
+      },
+    });
+
+    const { password: _pw, ...userData } = user;
+
+    return res
+      .cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 1000 * 60 * 60 * 24 * 7,
+      })
+      .json({ user: userData, token: accessToken });
+  } catch (err) {
+    console.error("2FA verification error:", err);
+    return res.status(500).json({ error: "Internal server error." });
+  }
+};
+
 export {
   changePasswordHandler,
   checkUsernameAvailability,
+  generate2FASecret,
+  getMy2faStatusHandler,
   loginHandler,
   logoutHandler,
   refreshTokenHandler,
   registerHandler,
   requestPasswordReset,
   resetPassword,
+  verify2FAHandler,
   verifyPasswordResetCode,
 };

@@ -9,7 +9,7 @@ import { Wallet, isValidClassicAddress } from 'xrpl';
 import { registerAtom } from '~/atoms';
 import LabelFieldWithCopy from '~/components/LabelFieldWithCopy';
 import PassphrasePromptModal from '~/components/PassphrasePromptModal';
-import { FieldVariant, ModalMode, StepTwoWalletProps } from '~/types';
+import { EncryptionModalMode, FieldVariant, StepTwoWalletProps } from '~/types';
 
 const WalletStep = ({ onComplete }: StepTwoWalletProps) => {
   const [userData, setUserData] = useAtom(registerAtom);
@@ -185,7 +185,7 @@ const WalletStep = ({ onComplete }: StepTwoWalletProps) => {
         onCancel={() => {
           setShowPassModal(false);
         }}
-        mode={ModalMode.IMPORT}
+        mode={EncryptionModalMode.IMPORT}
       />
       <View className="flex">
         <Text className="text-lg text-gray-600">

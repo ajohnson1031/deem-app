@@ -4,7 +4,7 @@ import { Text, TouchableOpacity, View } from 'react-native';
 
 import LabelFieldWithCopy from '~/components/LabelFieldWithCopy';
 import PassphrasePromptModal from '~/components/PassphrasePromptModal';
-import { FieldVariant, ModalMode } from '~/types';
+import { EncryptionModalMode, FieldVariant } from '~/types';
 
 const WalletDetails = ({
   address,
@@ -16,7 +16,7 @@ const WalletDetails = ({
   seed?: string;
 }) => {
   const [showPassModal, setShowPassModal] = useState(false);
-  const [currentMode, setCurrentMode] = useState<ModalMode>();
+  const [currentMode, setCurrentMode] = useState<EncryptionModalMode>();
 
   return (
     <View className="flex w-full gap-y-4">
@@ -65,7 +65,7 @@ const WalletDetails = ({
         <TouchableOpacity
           className="mt-2 flex-1 flex-row items-center justify-center gap-3 rounded-lg bg-sky-600 py-4"
           onPress={() => {
-            setCurrentMode(ModalMode.IMPORT);
+            setCurrentMode(EncryptionModalMode.IMPORT);
             setShowPassModal(true);
           }}>
           <Text className="text-center text-xl font-medium text-white">Import</Text>
@@ -75,7 +75,7 @@ const WalletDetails = ({
         <TouchableOpacity
           className="mt-2 flex-1 flex-row items-center justify-center gap-3 rounded-lg bg-slate-600 py-4"
           onPress={() => {
-            setCurrentMode(ModalMode.EXPORT);
+            setCurrentMode(EncryptionModalMode.EXPORT);
             setShowPassModal(true);
           }}>
           <Text className="text-center text-xl font-medium text-white">Export</Text>

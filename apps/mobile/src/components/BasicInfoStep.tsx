@@ -1,11 +1,11 @@
 import Feather from '@expo/vector-icons/Feather';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Fontisto from '@expo/vector-icons/Fontisto';
 import { useAtom, useAtomValue } from 'jotai';
 import { useState } from 'react';
-import { Alert, Image, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Text, TouchableOpacity, View } from 'react-native';
 
 import { registerAtom, usernameAvailabilityAtom } from '~/atoms';
+import AvatarPicker from '~/components/AvatarPicker';
 import CountdownInput from '~/components/CountdownInput';
 import CountryPickerTrigger from '~/components/CountryPickerTrigger';
 import ImagePickerModal from '~/components/ImagePickerModal';
@@ -36,7 +36,7 @@ const BasicInfoStep = ({ onComplete }: BasicInfoStepProps) => {
     callingCode: userCallingCode,
   } = userData;
   const splitName = name?.split(' ') || ['', ''];
-  const [firstname, lastname] = [splitName[0], splitName[1] || ''];
+  const [firstname, lastname] = [splitName[0], splitName[splitName.length - 1] || ''];
   const initials = name ? `${firstname[0]}${lastname[0] || ''}` : 'JD';
 
   const openImagePicker = async () => {
@@ -153,38 +153,12 @@ const BasicInfoStep = ({ onComplete }: BasicInfoStepProps) => {
           onCancel={() => setModalVisible(false)}
         />
 
-        <View className="mb-8 flex-row items-center gap-10">
-          <TouchableOpacity onPress={openImagePicker} className="flex justify-center">
-            <View className="mb-2 self-center rounded-full">
-              {avatarUri ? (
-                <Image
-                  source={{ uri: avatarUri }}
-                  className="h-28 w-28 rounded-full"
-                  resizeMode="cover"
-                />
-              ) : (
-                <View className="h-28">
-                  <View
-                    className="h-28 w-28 items-center justify-center rounded-full"
-                    style={{ backgroundColor: '#0284c7' }}>
-                    <Text className="text-3xl font-medium text-white">
-                      {initials.toUpperCase()}
-                    </Text>
-                  </View>
-                  <View className="relative bottom-9 left-20 flex items-center justify-center self-start rounded-full border-2 border-white bg-gray-200 p-2">
-                    <FontAwesome name="camera" size={22} color="#4b5563" />
-                  </View>
-                </View>
-              )}
-            </View>
-          </TouchableOpacity>
-
-          <View className="flex gap-2 self-center">
-            {!avatarUri && (
-              <Text className="text-md text-slate-500">{`No photo selected.\nInitials will be used.`}</Text>
-            )}
-          </View>
-        </View>
+        <AvatarPicker
+          avatarUri={avatarUri}
+          initials={initials}
+          noPhotoMessage={`No photo selected.\nInitials will be used.`}
+          onPress={openImagePicker}
+        />
 
         <View className="flex">
           {/* Input fields */}

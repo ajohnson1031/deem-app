@@ -18,12 +18,14 @@ const LabelFieldWithCopy = ({
 }: LabelFieldWithCopyProps) => {
   const { copy, copiedKey } = useCopyToClipboard();
   const [readable, setReadable] = useState<boolean>(false);
+  const [toggleIsDisabled, setToggleIsDisabled] = useState<boolean>(false);
   const [twoFaError, setTwoFaError] = useState<string | null>(null);
 
   const handleMaskedToggle = async () => {
     if (requires2fa) {
-      const twoFaEnabled = await checkTwoFactorStatus();
-      if (twoFaEnabled) {
+      setToggleIsDisabled(true);
+      const twoFactorEnabled = await checkTwoFactorStatus();
+      if (twoFactorEnabled) {
         setReadable(!readable);
         onToggle();
       } else {
@@ -31,6 +33,7 @@ const LabelFieldWithCopy = ({
           `Two-factor authentication is required to see the contents of this field. Please update your security settings.`
         );
       }
+      setToggleIsDisabled(false);
     } else {
       setReadable(!readable);
       onToggle();
@@ -75,7 +78,10 @@ const LabelFieldWithCopy = ({
 
           {variant === FieldVariant.MASKED && (
             <View className="flex gap-2">
-              <TouchableOpacity className={`${'mr-3'}`} onPress={handleMaskedToggle}>
+              <TouchableOpacity
+                className={`${'mr-3'}`}
+                onPress={handleMaskedToggle}
+                disabled={toggleIsDisabled}>
                 <FontAwesome6
                   name={readable ? 'eye' : 'eye-slash'}
                   size={20}

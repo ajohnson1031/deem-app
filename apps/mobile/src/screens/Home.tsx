@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useState } from 'react';
 import { Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-import { PasswordInput } from '~/components';
+import { PasswordInput, TwoFAPromptModal } from '~/components';
 import { useAuth } from '~/contexts/AuthContext';
 import { useGlobalKeyboardIdleDismiss, useWallet } from '~/hooks';
 import { RootStackParamList } from '~/types';
@@ -15,30 +15,45 @@ const HomeScreen = () => {
   const [identifier, setIdentifier] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [loginError, setLoginError] = useState<string | null>(null);
+  const [twoFAModalVisible, setTwoFAModalVisible] = useState<boolean>(false);
+  const [tempUserId, setTempUserId] = useState<string | null>(null);
 
-  const { login } = useAuth();
+  const { login, verify2FA } = useAuth();
   const { loadWallet } = useWallet();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { resetIdleTimer, cancelIdleTimer } = useGlobalKeyboardIdleDismiss(3500);
 
+  const handleLoginError = (err: any) => {
+    if (axios.isAxiosError(err)) {
+      if (err.response?.status === 401) {
+        setLoginError('Incorrect username or password.\nPlease try again.');
+      } else if (err.response?.status === 400) {
+        setLoginError('Please provide both username/email and password to continue.');
+      } else {
+        setLoginError('Something went wrong. Please try again later.');
+      }
+    } else {
+      setLoginError('Unexpected error. Please try again.');
+    }
+  };
+
   const handleLogin = async () => {
-    setLoginError(null); // Reset any prior error
+    setLoginError(null);
 
     try {
-      await login(identifier, password);
-      await loadWallet(password);
-    } catch (err: any) {
-      if (axios.isAxiosError(err)) {
-        if (err.response?.status === 401) {
-          setLoginError('Incorrect username or password.\nPlease try again.');
-        } else if (err.response?.status === 400) {
-          setLoginError('Please provide both username/email and password to continue.');
-        } else {
-          setLoginError('Something went wrong. Please try again later.');
-        }
-      } else {
-        setLoginError('Unexpected error. Please try again.');
+      const result = await login(identifier, password);
+
+      if (result.success) {
+        await loadWallet(password);
+        return;
       }
+
+      if (result.requires2FA) {
+        setTempUserId(result.tempUserId!); // ✅ Store tempUserId
+        setTwoFAModalVisible(true);
+      }
+    } catch (err: any) {
+      handleLoginError(err);
     }
   };
 
@@ -50,12 +65,32 @@ const HomeScreen = () => {
 
   return (
     <View className="flex-1 items-center justify-center bg-white px-6">
+      <TwoFAPromptModal
+        visible={twoFAModalVisible}
+        onConfirm={async (token) => {
+          try {
+            if (!tempUserId) return;
+
+            await verify2FA(tempUserId, token, password);
+            setTwoFAModalVisible(false); // ✅ Hide modal
+            setTempUserId(null); // ✅ Clear temp user ID
+            await loadWallet(password); // 🔓 Load wallet after 2FA
+          } catch (err) {
+            console.error('2FA verification failed:', err);
+            setLoginError('Invalid 2FA code. Please try again.');
+          }
+        }}
+        onCancel={() => {
+          setTwoFAModalVisible(false);
+          setTempUserId(null); // Also clear on cancel
+        }}
+      />
+
       <Text className="text-7xl font-extrabold text-black">Deem</Text>
       <Text className="mb-8 text-lg">Every penny counts.</Text>
 
       <View className="w-3/4 gap-3">
         {/* Input: Username or Email */}
-
         <TextInput
           className="w-full rounded-lg bg-gray-100 px-3 py-4 text-xl font-medium leading-[18px]"
           value={identifier}
