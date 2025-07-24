@@ -23,22 +23,8 @@ model User {
   updatedAt          DateTime            @updatedAt
   contacts           Contact[]           @relation("UserContacts")
   transactions       Transaction[]       @relation("UserTransactions")
-  refreshTokens      RefreshToken[]      @relation("UserRefreshTokens")
-  passwordResetCodes PasswordResetCode[] @relation("UserPasswordResets")
   twoFactorEnabled   Boolean             @default(false)
   twoFactorSecret    String?
-}
-
-model PasswordResetCode {
-  id        String   @id @default(cuid())
-  userId    String
-  code      String
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-
-  user User @relation("UserPasswordResets", fields: [userId], references: [id])
-
-  @@index([userId])
 }
 
 model Wallet {
@@ -90,13 +76,3 @@ model Transaction {
   user User @relation("UserTransactions", fields: [userId], references: [id])
 }
 
-model RefreshToken {
-  id        String   @id @default(cuid())
-  token     String   @unique
-  userId    String
-  user      User     @relation("UserRefreshTokens", fields: [userId], references: [id])
-  createdAt DateTime @default(now())
-  expiresAt DateTime
-
-  @@index([userId])
-}

@@ -1,37 +1,54 @@
+import { API_BASE_URL } from '@env';
 import { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Modal, Text, TouchableOpacity, View } from 'react-native';
 
 import CountdownInput from '~/components/CountdownInput';
 import { REGEX } from '~/constants';
-import { EncryptionModalMode, FieldVariant, PassphrasePromptModalProps } from '~/types';
+import { useAuth } from '~/contexts/AuthContext';
+import { BaseModalProps, FieldVariant } from '~/types';
+import { api } from '~/utils/api';
 
-const PassphrasePromptModal = ({
-  visible,
-  onConfirm,
-  onCancel,
-  mode = EncryptionModalMode.EXPORT,
-}: PassphrasePromptModalProps) => {
-  const [passphrase, setPassphrase] = useState('');
+const PasswordVerificationPromptModal = ({ visible, onConfirm, onCancel }: BaseModalProps) => {
+  const { user } = useAuth();
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
 
-  const handleConfirm = () => {
-    if (!REGEX.PASSWORD.test(passphrase)) {
-      setError(
-        'Passphrase must be 8 - 30 chars and include one of each of the following: uppercase, lowercase, number, special character (not @).'
-      );
+  const passwordError =
+    'Password not in expected format (8 - 30 chars and include one of each of the following: uppercase, lowercase, number, special character (not @)).';
+
+  const handleConfirm = async () => {
+    if (!REGEX.PASSWORD.test(password)) {
+      setError(passwordError);
       return;
     }
 
-    setError('');
-    onConfirm(passphrase);
-    setPassphrase('');
+    try {
+      const res = await api.post(`${API_BASE_URL}/auth/verify-password`, {
+        password,
+        id: user?.id,
+      });
+
+      if (res.status === 200) {
+        setError('');
+        onConfirm({ password });
+        setPassword('');
+      }
+    } catch (error: any) {
+      const {
+        response: {
+          data: { message },
+        },
+      } = error || "Password didn't match.";
+      setError(message);
+      // setError(error);
+    }
   };
 
   const handleCancel = () => {
-    setPassphrase('');
+    setPassword('');
     setError('');
     onCancel();
   };
@@ -67,15 +84,9 @@ const PassphrasePromptModal = ({
           }}
           className="w-11/12 gap-2 rounded-3xl bg-white p-6 shadow-lg">
           <View className="flex gap-2">
-            <Text className="text-xl font-semibold text-slate-800">
-              {mode === 'export'
-                ? 'Protect Your Backup with Encryption'
-                : 'Enter Encrypted Passphrase'}
-            </Text>
+            <Text className="text-xl font-semibold text-slate-800">Verify Your Password</Text>
             <Text className="text-lg leading-snug text-slate-600">
-              {mode === 'export'
-                ? 'For your safety, Deem requires a strong passphrase to encrypt your wallet export.'
-                : 'Enter the passphrase you used during export.'}
+              Please verify your password to proceed with wallet regeneration.
             </Text>
           </View>
 
@@ -84,12 +95,12 @@ const PassphrasePromptModal = ({
           <View>
             <CountdownInput
               variant={FieldVariant.MASKED}
-              placeholder="Enter passphrase"
+              placeholder="Enter password"
               placeholderTextColor="#777"
-              value={passphrase}
+              value={password}
               maxLength={30}
               onChangeText={(text: string) => {
-                setPassphrase(text);
+                setPassword(text);
                 setError('');
               }}
             />
@@ -113,4 +124,4 @@ const PassphrasePromptModal = ({
   );
 };
 
-export default PassphrasePromptModal;
+export default PasswordVerificationPromptModal;

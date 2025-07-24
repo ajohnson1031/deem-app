@@ -5,7 +5,14 @@ import { Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { PasswordInputProps } from '~/types/inputfields';
 
 const PasswordInput = (props: PasswordInputProps) => {
-  const { onChangeText, maxLength, secureTextEntry, showCountdown = false, ...rest } = props;
+  const {
+    onChangeText,
+    maxLength,
+    secureTextEntry,
+    showCountdown = false,
+    textContentType = 'none',
+    ...rest
+  } = props;
   const [readable, setReadable] = useState<boolean>(false);
   const [textCounter, setTextCounter] = useState<number | null>(null);
 
@@ -29,9 +36,10 @@ const PasswordInput = (props: PasswordInputProps) => {
     <View className="flex w-full flex-row items-center justify-between gap-3 rounded-lg bg-gray-100">
       <TextInput
         className={`${showCountdown ? 'w-[75%]' : 'w-[85%]'} px-3 py-4 text-xl font-medium leading-[20px]`}
-        textContentType="newPassword"
         onChangeText={handleChangeText}
         secureTextEntry={!readable}
+        textContentType={textContentType}
+        importantForAutofill="no"
         {...rest}
       />
       {showCountdown && maxLength && (

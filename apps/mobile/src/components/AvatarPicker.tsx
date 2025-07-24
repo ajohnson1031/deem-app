@@ -2,17 +2,8 @@ import { FontAwesome } from '@expo/vector-icons';
 import cn from 'classnames';
 import { Image, Text, TouchableOpacity, View } from 'react-native';
 
+import { AvatarPickerProps } from '~/types';
 import { getColorIndex } from '~/utils';
-
-interface AvatarPickerProps {
-  id?: string;
-  className?: string;
-  avatarUri?: string;
-  initials: string;
-  isLoggedIn?: boolean;
-  noPhotoMessage?: string;
-  onPress: () => void;
-}
 
 const AvatarPicker = ({
   id,

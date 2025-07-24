@@ -1,15 +1,79 @@
 import Feather from '@expo/vector-icons/Feather';
+import { randomUUID } from 'expo-crypto';
 import { ReactNode, useEffect, useState } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import Toast from 'react-native-toast-message';
+import { isValidClassicAddress, Wallet } from 'xrpl';
 
-import { WalletDetails } from '~/components';
+import { ManualWalletEntry, PasswordVerificationPromptModal, WalletDetails } from '~/components';
+import { useAuth } from '~/contexts/AuthContext';
 import { useFlashScrollIndicators, useWallet } from '~/hooks';
 import { CoreLayout } from '~/layouts';
+import { deriveKeyFromPassword, encryptSeed } from '~/utils';
+import { api } from '~/utils/api';
 
 const ManageWalletScreen = () => {
-  const { wallet, walletAddress } = useWallet();
+  const { wallet, walletAddress, setWallet } = useWallet();
+
   const { scrollViewRef, flashIndicators } = useFlashScrollIndicators();
   const [flashCount, setFlashCount] = useState<number>(0);
+  const [newWalletAddress, setNewWalletAddress] = useState<string | undefined>();
+  const [newSeed, setNewSeed] = useState<string | undefined>();
+  const [verifyPasswordModalIsVisible, setVerifyPasswordModalIsVisible] = useState<boolean>(false);
+  const { user } = useAuth();
+  const { twoFactorEnabled } = user || { twoFactorEnabled: false };
+
+  const isValidNewWalletAddress = walletAddress
+    ? isValidClassicAddress(walletAddress.trim())
+    : false;
+  const isValidNewSeed = (() => {
+    try {
+      Wallet.fromSeed(newSeed!.trim());
+      return true;
+    } catch {
+      return false;
+    }
+  })();
+
+  const handleGenerate = async ({ password }: { password: string }) => {
+    setVerifyPasswordModalIsVisible(false);
+
+    if (twoFactorEnabled) {
+      // TODO: Await prompt for 2FA auth, then
+      doGenerate(randomUUID());
+    } else {
+      doGenerate(password);
+    }
+  };
+
+  const doGenerate = async (password: string) => {
+    const newWallet = Wallet.generate();
+    const key = await deriveKeyFromPassword(password);
+
+    try {
+      const encryptedSeed = encryptSeed(newWallet.seed!, key);
+      await api.patch('/wallet', {
+        wallet: newWallet,
+        walletAddress: newWallet.address,
+        encryptedSeed,
+      });
+      setWallet(newWallet);
+      Toast.show({
+        type: 'success',
+        text1: 'Success!',
+        text2: 'Wallet has been regenerated.',
+      });
+    } catch (error: any) {
+      console.error(error);
+      Toast.show({
+        type: 'error',
+        text1: 'Could not regenerate wallet.',
+        text2: error.message ?? error,
+      });
+    }
+  };
+
+  const isFormValid = isValidNewWalletAddress && isValidNewSeed;
 
   const VIEWS: Record<string, string | ReactNode>[] = [
     {
@@ -33,32 +97,36 @@ const ManageWalletScreen = () => {
         </View>
       ),
     },
-    {
-      headerText: 'Update Wallet Manually',
-      component: (
-        <View>
-          {!!walletAddress && (
-            <WalletDetails
-              address={walletAddress}
-              publicKey={wallet!.publicKey}
-              seed={wallet!.seed}
-            />
-          )}
-        </View>
-      ),
-    },
+
     {
       headerText: 'Regenerate Wallet',
       component: (
         <View>
-          {!!walletAddress && (
-            <WalletDetails
-              address={walletAddress}
-              publicKey={wallet!.publicKey}
-              seed={wallet!.seed}
-            />
-          )}
+          <Text className="mb-6 text-lg text-gray-600">
+            Regenerating your wallet will automatically overwrite your current wallet details. Be
+            sure to capture and store them safely if you still need them as otherwise they will be
+            unrecoverable.
+          </Text>
+
+          <TouchableOpacity
+            onPress={() => setVerifyPasswordModalIsVisible(true)} // Always verify password
+            className="rounded-lg bg-emerald-600 py-4">
+            <Text className="text-center text-xl font-medium text-white">Regenerate Wallet</Text>
+          </TouchableOpacity>
         </View>
+      ),
+    },
+    {
+      headerText: 'Update Wallet Manually',
+      component: (
+        <ManualWalletEntry
+          walletAddress={newWalletAddress}
+          seed={newSeed}
+          isValidWalletAddress={isValidNewWalletAddress}
+          isValidSeed={isValidNewSeed}
+          onChangeWallet={(text: string) => setNewWalletAddress(text.trim())}
+          onChangeSeed={(text: string) => setNewSeed(text.trim())}
+        />
       ),
     },
   ];
@@ -78,6 +146,14 @@ const ManageWalletScreen = () => {
 
   return (
     <CoreLayout showBack title="Manage Wallet">
+      <PasswordVerificationPromptModal
+        visible={verifyPasswordModalIsVisible}
+        onConfirm={handleGenerate}
+        onCancel={() => {
+          setVerifyPasswordModalIsVisible(false);
+        }}
+      />
+
       <View className="mx-6">
         <View className="flex">
           <Text className="text-2xl font-semibold text-red-600">Important Note</Text>
@@ -110,7 +186,7 @@ const ManageWalletScreen = () => {
           </Text>
           <Text className="mt-3 text-lg text-slate-600">
             You are responsible for safeguarding your wallet's seed. Deem does not claim any
-            responsibility if it leaks due to actions on your part.
+            responsibility if it leaks or is unrecoverable due to actions on your part.
           </Text>
         </ScrollView>
       </View>
@@ -141,8 +217,22 @@ const ManageWalletScreen = () => {
           </View>
         </View>
       </View>
-      <View className="mx-6 flex flex-1 justify-between">
+      <View className="mx-6">
         <View>{VIEWS[currentViewIndex].component}</View>
+
+        {currentViewIndex === 2 && (
+          <View className="mb-8 flex-row gap-4">
+            <TouchableOpacity
+              onPress={() => {}} // TODO: Add a function call here
+              className={`mt-4 flex-1 rounded-lg py-4 ${isFormValid ? 'bg-sky-600' : 'bg-gray-300'}`}
+              disabled={!isFormValid}>
+              <Text
+                className={`text-center text-xl font-medium ${isFormValid ? 'text-white' : 'text-gray-400'}`}>
+                Update Wallet
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
     </CoreLayout>
   );

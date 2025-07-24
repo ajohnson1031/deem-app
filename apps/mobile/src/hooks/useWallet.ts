@@ -152,6 +152,7 @@ export function useWallet() {
     createWallet,
     saveWallet,
     regenerateWallet,
+    setWallet,
     reEncryptSeed,
     deleteWallet,
     refreshBalance,

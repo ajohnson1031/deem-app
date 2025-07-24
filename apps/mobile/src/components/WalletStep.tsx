@@ -1,18 +1,18 @@
 import { Feather } from '@expo/vector-icons';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { useAtom } from 'jotai';
+import { useAtomValue } from 'jotai';
 import { ReactNode, useEffect, useState } from 'react';
-import { Text, TextInput, TouchableOpacity, View } from 'react-native';
-import Toggle from 'react-native-toggle-element';
+import { Text, TouchableOpacity, View } from 'react-native';
 import { Wallet, isValidClassicAddress } from 'xrpl';
 
 import { registerAtom } from '~/atoms';
 import LabelFieldWithCopy from '~/components/LabelFieldWithCopy';
+import ManualWalletEntry from '~/components/ManualWalletEntry';
 import PassphrasePromptModal from '~/components/PassphrasePromptModal';
 import { EncryptionModalMode, FieldVariant, StepTwoWalletProps } from '~/types';
 
 const WalletStep = ({ onComplete }: StepTwoWalletProps) => {
-  const [userData, setUserData] = useAtom(registerAtom);
+  const userData = useAtomValue(registerAtom);
   const [walletAddress, setWalletAddress] = useState<string | undefined>();
   const [seed, setSeed] = useState<string | undefined>();
   const [generated, setGenerated] = useState(false);
@@ -94,7 +94,7 @@ const WalletStep = ({ onComplete }: StepTwoWalletProps) => {
               <View className="flex flex-row items-start gap-2">
                 <FontAwesome name="warning" size={24} color="orangered" className="mt-1.5" />
                 <Text className="w-11/12 text-lg font-semibold text-slate-600">
-                  Write down and store your seed securely.{`\n`}You are responsible for keeping it
+                  Capture and store your seed securely.{`\n`}You are responsible for keeping it
                   safe.{`\n`}A compromised seed can result in loss of control over the wallet and
                   all funds in it.
                 </Text>
@@ -127,48 +127,14 @@ const WalletStep = ({ onComplete }: StepTwoWalletProps) => {
     {
       headerText: 'Enter Wallet Manually',
       component: (
-        <View>
-          <Text className="mb-6 text-lg text-gray-600">
-            Manually enter details for any valid XRP wallet. This is the least secure option, but
-            allows use of wallets created in other apps (i.e., XUMM, etc.). The seed you provide
-            will be encrypted to maximize safety.&nbsp;
-            <Text className="font-semibold text-red-600">
-              Raw seeds are never stored or sent to our servers.
-            </Text>
-          </Text>
-
-          <View className="mb-2 w-full rounded-lg bg-gray-100">
-            <TextInput
-              className="w-full p-3 py-4 text-lg font-medium leading-[18px]"
-              placeholder="Wallet Address"
-              placeholderTextColor="#777"
-              autoCapitalize="none"
-              value={walletAddress}
-              onChangeText={(val) => setWalletAddress(val.trim())}
-              editable={!generated}
-            />
-          </View>
-          {!isValidWalletAddress && walletAddress && walletAddress.length > 0 && (
-            <Text className="mb-2 text-sm text-red-600">Invalid wallet address.</Text>
-          )}
-          <View className="mb-2 w-full rounded-lg bg-gray-100">
-            <TextInput
-              className="w-full p-3 py-4 text-lg font-medium leading-[18px]"
-              placeholder="Wallet Seed"
-              placeholderTextColor="#777"
-              autoCapitalize="none"
-              secureTextEntry={!generated}
-              value={seed}
-              onChangeText={(val) => {
-                setSeed(val);
-              }}
-              editable={!generated}
-            />
-          </View>
-          {!isValidSeed && seed && seed.length > 0 && (
-            <Text className="mb-2 text-sm text-red-600">Invalid wallet seed.</Text>
-          )}
-        </View>
+        <ManualWalletEntry
+          walletAddress={walletAddress}
+          seed={seed}
+          isValidWalletAddress={isValidWalletAddress}
+          isValidSeed={isValidSeed}
+          onChangeWallet={(text: string) => setWalletAddress(text.trim())}
+          onChangeSeed={(text: string) => setSeed(text.trim())}
+        />
       ),
     },
   ];
@@ -221,41 +187,6 @@ const WalletStep = ({ onComplete }: StepTwoWalletProps) => {
         </View>
 
         <View className="mb-6">{VIEWS[currentViewIndex].component}</View>
-
-        <View className="mb-3 flex-row items-center justify-end gap-3">
-          <View className="flex items-end justify-center">
-            <Text className="-mt-1 text-lg font-medium text-slate-600">
-              Enable Two-Factor Authentication?
-            </Text>
-            <Text className="-mt-1 text-sm text-slate-600">(Recommended)</Text>
-          </View>
-          <Toggle
-            value={twoFactorEnabled!}
-            onPress={() =>
-              setUserData({
-                ...userData,
-                twoFactorEnabled: !twoFactorEnabled,
-              })
-            }
-            trackBar={{
-              activeBackgroundColor: '#16a34a',
-              inActiveBackgroundColor: '#6b7280',
-              borderActiveColor: '#16a34a',
-              borderInActiveColor: '#6b7280',
-              borderWidth: 3,
-              width: 80,
-              height: 35,
-            }}
-            trackBarStyle={{ zIndex: -1, width: 65 }}
-            thumbStyle={{ height: 29, width: 29, backgroundColor: 'white' }}
-          />
-        </View>
-        <View className="mb-2 h-[1px] bg-gray-200" />
-        <Text className="text-base text-slate-600">
-          <Text className="font-semibold text-red-600 ">*</Text>
-          <Text className="font-semibold">NOTE</Text>: Two-factor authentication is required to
-          access seed in-app. 2FA can always be enabled at a later time in security Settings.
-        </Text>
       </View>
 
       <View className="mb-8 flex-row gap-4">

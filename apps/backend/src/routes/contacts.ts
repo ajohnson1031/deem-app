@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { getContactsHandler } from "../controllers/contacts.controller";
+import { getContacts } from "../controllers/contacts.controller";
 import { requireAuth } from "../middleware/auth";
 
 const router = Router();
 
-router.get("/", requireAuth, getContactsHandler);
+router.get("/", requireAuth, getContacts);
 
 export default router;

@@ -1,28 +1,33 @@
 import { Router } from "express";
 import {
-  changePasswordHandler,
-  checkUsernameAvailability,
-  getMy2faStatusHandler,
-  loginHandler,
-  logoutHandler,
-  refreshTokenHandler,
-  registerHandler,
+  changePassword,
+  checkUsernameAvailable,
+  getMy2FAStatus,
+  login,
+  logout,
+  refreshToken,
+  register,
   requestPasswordReset,
-  verify2FAHandler,
+  verify2FA,
+  verifyPassword,
   verifyPasswordResetCode,
 } from "../controllers/auth.controller";
 
+import { requireAuth } from "../middleware/auth";
+
 const router = Router();
 
-router.get("/check-username", checkUsernameAvailability);
-router.get("/2fa-status", getMy2faStatusHandler);
-router.post("/login", loginHandler);
-router.post("/refresh", refreshTokenHandler);
-router.post("/logout", logoutHandler);
-router.post("/register", registerHandler);
+router.post("/verify-password", requireAuth, verifyPassword);
+router.get("/2fa-status", requireAuth, getMy2FAStatus);
+router.post("/refresh", requireAuth, refreshToken);
+router.post("/verify-2fa", requireAuth, verify2FA);
+router.get("/check-username", checkUsernameAvailable);
+router.post("/logout", requireAuth, logout);
+
+router.post("/login", login);
+router.post("/register", register);
 router.post("/request-password-reset", requestPasswordReset);
 router.post("/verify-reset-code", verifyPasswordResetCode);
-router.post("/verify-2fa", verify2FAHandler)
-router.patch("/password", changePasswordHandler);
+router.patch("/password", changePassword);
 
 export default router;

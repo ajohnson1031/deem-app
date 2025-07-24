@@ -13,5 +13,15 @@ interface PassphrasePromptModalProps extends BaseModalProps {
   mode?: EncryptionModalMode;
 }
 
+interface AvatarPickerProps {
+  id?: string;
+  className?: string;
+  avatarUri?: string;
+  initials: string;
+  isLoggedIn?: boolean;
+  noPhotoMessage?: string;
+  onPress: () => void;
+}
+
 export { EncryptionModalMode };
-export type { BaseModalProps, PassphrasePromptModalProps };
+export type { AvatarPickerProps, BaseModalProps, PassphrasePromptModalProps };

@@ -36,8 +36,11 @@ const BasicInfoStep = ({ onComplete }: BasicInfoStepProps) => {
     callingCode: userCallingCode,
   } = userData;
   const splitName = name?.split(' ') || ['', ''];
-  const [firstname, lastname] = [splitName[0], splitName[splitName.length - 1] || ''];
-  const initials = name ? `${firstname[0]}${lastname[0] || ''}` : 'JD';
+  const [firstname, lastname] = [
+    splitName[0],
+    splitName.length > 1 ? splitName[splitName.length - 1] || '' : '',
+  ];
+  const initials = name ? `${firstname[0]}${lastname[0] || ''}`.toUpperCase() : 'JD';
 
   const openImagePicker = async () => {
     const granted = await requestPermissions();

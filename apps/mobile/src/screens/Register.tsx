@@ -14,7 +14,7 @@ import { deriveKeyFromPassword, encryptSeed, uploadAvatar } from '~/utils';
 import { api } from '~/utils/api';
 
 const RegisterScreen = () => {
-  const [step, setStep] = useState<1 | 2>(1);
+  const [step, setStep] = useState<1 | 2>(2);
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [userData, setUserData] = useAtom(registerAtom);
   const title = step === 1 ? 'Basic Details' : 'Wallet Details';
@@ -27,11 +27,9 @@ const RegisterScreen = () => {
   const handleStepTwoComplete = async ({
     walletAddress,
     seed,
-    twoFactorEnabled,
   }: {
     walletAddress: string;
     seed: string;
-    twoFactorEnabled: boolean;
   }) => {
     try {
       const { password, avatarUri, ...rest } = userData;
@@ -47,7 +45,6 @@ const RegisterScreen = () => {
         password,
         walletAddress,
         encryptedSeed,
-        twoFactorEnabled,
       });
 
       navigation.navigate('Home');

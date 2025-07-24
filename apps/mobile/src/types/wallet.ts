@@ -4,4 +4,13 @@ type WalletBalanceResult = {
   error?: string;
 };
 
-export type { WalletBalanceResult };
+interface ManualWalletEntryProps {
+  walletAddress?: string;
+  seed?: string;
+  isValidWalletAddress: boolean;
+  isValidSeed: boolean;
+  onChangeWallet?: (text: string) => void;
+  onChangeSeed?: (text: string) => void;
+}
+
+export type { ManualWalletEntryProps, WalletBalanceResult };

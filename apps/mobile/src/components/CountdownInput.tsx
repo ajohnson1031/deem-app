@@ -42,9 +42,9 @@ const CountdownInput = (props: CountdownInputProps) => {
       {variant === FieldVariant.MASKED && (
         <TouchableOpacity className={`${'mr-3'}`} onPress={() => setMasked(!masked)}>
           <FontAwesome6
-            name={masked ? 'eye' : 'eye-slash'}
+            name={!masked ? 'eye' : 'eye-slash'}
             size={20}
-            color={masked ? '#374151' : '#9ca3af'}
+            color={!masked ? '#374151' : '#9ca3af'}
           />
         </TouchableOpacity>
       )}
