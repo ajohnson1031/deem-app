@@ -92,7 +92,7 @@ const verifyPassword = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "User not found." });
     }
 
-    const { password: _pw, twoFactorEnabled } = user;
+    const { password: _pw } = user;
 
     const passwordVerified = await bcrypt.compare(password, _pw);
 
@@ -100,7 +100,7 @@ const verifyPassword = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Password not verified." });
     }
 
-    return res.status(200).json({ message: "Password is veriried." });
+    return res.status(200).json({ message: "Password is verified." });
   } catch (error) {
     return res.status(500).json({ message: "Internal server error." });
   }

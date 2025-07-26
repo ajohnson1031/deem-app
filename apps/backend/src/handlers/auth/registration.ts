@@ -1,6 +1,5 @@
 import bcrypt from "bcrypt";
 import { Request, Response } from "express";
-import speakeasy from "speakeasy";
 import prisma from "../../prisma/client";
 
 const register = async (req: Request, res: Response) => {
@@ -31,8 +30,6 @@ const register = async (req: Request, res: Response) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    let twoFactorSecret: string | undefined;
-
     const user = await prisma.user.create({
       data: {
         username,
@@ -45,7 +42,6 @@ const register = async (req: Request, res: Response) => {
         countryCode,
         callingCode,
         twoFactorEnabled: false,
-        twoFactorSecret,
         wallet: {
           create: {
             encryptedSeed,

@@ -68,7 +68,7 @@ const verify2FA = async (req: Request, res: Response) => {
     }
 
     if (attempts > 5) {
-      return res.status(429).json({ error: "Too many 2FA attempts. Try again in 5 minutes." });
+      return res.status(429).json({ error: "Too many invalid 2FA attempts. Try again in 5 minutes." });
     }
   } catch (err) {
     console.error("Redis rate limiting failed:", err);
