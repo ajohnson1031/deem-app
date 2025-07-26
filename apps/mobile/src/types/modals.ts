@@ -10,6 +10,7 @@ enum EncryptionModalMode {
 }
 
 interface PassphrasePromptModalProps extends BaseModalProps {
+  isProcessing?: boolean;
   mode?: EncryptionModalMode;
 }
 

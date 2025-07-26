@@ -1,3 +1,4 @@
+import LottieView from 'lottie-react-native';
 import { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Modal, Text, TouchableOpacity, View } from 'react-native';
 
@@ -7,6 +8,7 @@ import { EncryptionModalMode, FieldVariant, PassphrasePromptModalProps } from '~
 
 const PassphrasePromptModal = ({
   visible,
+  isProcessing,
   onConfirm,
   onCancel,
   mode = EncryptionModalMode.EXPORT,
@@ -27,7 +29,6 @@ const PassphrasePromptModal = ({
 
     setError('');
     onConfirm(passphrase);
-    setPassphrase('');
   };
 
   const handleCancel = () => {
@@ -100,11 +101,30 @@ const PassphrasePromptModal = ({
           <View className="mt-4 flex-row justify-end gap-3">
             <TouchableOpacity
               onPress={handleCancel}
-              className="rounded-lg border border-slate-600 px-4 py-2">
-              <Text className="text-lg font-medium text-slate-600">Cancel</Text>
+              className="rounded-lg border border-slate-600 px-4 py-2 disabled:border-gray-300"
+              disabled={isProcessing}>
+              <Text
+                className={`text-lg font-medium text-slate-600 ${isProcessing ? 'text-gray-300' : 'text-slate-600'}`}>
+                Cancel
+              </Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleConfirm} className="rounded-lg bg-sky-600 px-4 py-2">
-              <Text className="text-lg font-medium text-white">Confirm</Text>
+            <TouchableOpacity
+              onPress={handleConfirm}
+              className="rounded-lg bg-sky-600 px-4 py-2 disabled:bg-gray-400"
+              disabled={isProcessing}>
+              {isProcessing ? (
+                <View className="flex-row items-center gap-1">
+                  <Text className="text-lg font-medium text-white">Processing...</Text>
+                  <LottieView
+                    source={require('~/../assets/animations/loading-spinner-white.json')}
+                    autoPlay
+                    loop
+                    style={{ width: 24, height: 24 }}
+                  />
+                </View>
+              ) : (
+                <Text className="text-lg font-medium text-white">Confirm</Text>
+              )}
             </TouchableOpacity>
           </View>
         </Animated.View>

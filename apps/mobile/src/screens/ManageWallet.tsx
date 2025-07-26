@@ -1,5 +1,4 @@
 import Feather from '@expo/vector-icons/Feather';
-import { randomUUID } from 'expo-crypto';
 import { ReactNode, useEffect, useState } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import Toast from 'react-native-toast-message';
@@ -38,9 +37,8 @@ const ManageWalletScreen = () => {
   const handleGenerate = async ({ password }: { password: string }) => {
     setVerifyPasswordModalIsVisible(false);
 
-    if (twoFactorEnabled) {
-      // TODO: Await prompt for 2FA auth, then
-      doGenerate(randomUUID());
+    if (!twoFactorEnabled) {
+      // TODO: Handle error messaging. 2FA must be enabled for this feature.
     } else {
       doGenerate(password);
     }
