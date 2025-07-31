@@ -11,7 +11,7 @@ export { default as ImagePickerModal } from './ImagePickerModal';
 export { default as LabelFieldWithCopy } from './LabelFieldWithCopy';
 export { default as ManualWalletEntry } from './ManualWalletEntry';
 export { default as MenuListItem } from './MenuListItem';
-export { default as PassphrasePromptModal } from './PassphrasePromptModal';
+export { default as ModalPrompt } from './ModalPrompt';
 export { default as PasswordInput } from './PasswordInput';
 export { default as PasswordVerificationPromptModal } from './PasswordVerificationPromptModal';
 export { default as PinOrCodeInputField } from './PinOrCodeInputField';

@@ -9,11 +9,6 @@ enum EncryptionModalMode {
   EXPORT = 'export',
 }
 
-interface PassphrasePromptModalProps extends BaseModalProps {
-  isProcessing?: boolean;
-  mode?: EncryptionModalMode;
-}
-
 interface AvatarPickerProps {
   id?: string;
   className?: string;
@@ -24,5 +19,22 @@ interface AvatarPickerProps {
   onPress: () => void;
 }
 
-export { EncryptionModalMode };
-export type { AvatarPickerProps, BaseModalProps, PassphrasePromptModalProps };
+enum ModalPromptVariant {
+  PASSPHRASE = 'passphrase',
+  PASSWORD = 'password',
+  TWO_FACTOR = '2fa',
+}
+
+interface ModalPromptProps extends BaseModalProps {
+  variant: ModalPromptVariant;
+  title?: string;
+  description?: string;
+  value: string;
+  onChangeValue: (val: string) => void;
+  isProcessing?: boolean; // Only for passphrase/password
+  error?: string;
+  mode?: EncryptionModalMode;
+}
+
+export { EncryptionModalMode, ModalPromptVariant };
+export type { AvatarPickerProps, BaseModalProps, ModalPromptProps };

@@ -8,17 +8,23 @@ import { Wallet, isValidClassicAddress } from 'xrpl';
 import { registerAtom } from '~/atoms';
 import LabelFieldWithCopy from '~/components/LabelFieldWithCopy';
 import ManualWalletEntry from '~/components/ManualWalletEntry';
-import PassphrasePromptModal from '~/components/PassphrasePromptModal';
-import { EncryptionModalMode, FieldVariant, StepTwoWalletProps } from '~/types';
+import ModalPrompt from '~/components/ModalPrompt';
+import { EncryptionModalMode, FieldVariant, ModalPromptVariant, StepTwoWalletProps } from '~/types';
+import { handleFilePicker, useHandleImport } from '~/utils';
 
 const WalletStep = ({ onComplete }: StepTwoWalletProps) => {
   const userData = useAtomValue(registerAtom);
+  const handleImport = useHandleImport();
   const [walletAddress, setWalletAddress] = useState<string | undefined>();
   const [seed, setSeed] = useState<string | undefined>();
   const [generated, setGenerated] = useState(false);
   const [currentViewIndex, setCurrentViewIndex] = useState<number>(0);
   const [isUsingOwnWallet, setIsUsingOwnWallet] = useState<boolean>(false);
   const [showPassModal, setShowPassModal] = useState<boolean>(false);
+  const [importFile, setImportFile] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [passphrase, setPassphrase] = useState('');
+  const [error, setError] = useState('');
   const { twoFactorEnabled = false } = userData;
   const isValidWalletAddress = walletAddress ? isValidClassicAddress(walletAddress.trim()) : false;
   const isValidSeed = (() => {
@@ -38,6 +44,20 @@ const WalletStep = ({ onComplete }: StepTwoWalletProps) => {
     setSeed(wallet.seed!);
     setGenerated(true);
     setIsUsingOwnWallet(false);
+  };
+
+  const onImportPress = async () => {
+    const fileContents = await handleFilePicker();
+    if (fileContents) {
+      setImportFile(fileContents);
+      setShowPassModal(true);
+    }
+  };
+
+  const closePassModal = () => {
+    setPassphrase('');
+    setShowPassModal(false);
+    setIsProcessing(false);
   };
 
   const handleSubmit = () => {
@@ -115,9 +135,7 @@ const WalletStep = ({ onComplete }: StepTwoWalletProps) => {
           </Text>
           <TouchableOpacity
             className="mt-2 flex-row items-center justify-center gap-3 rounded-lg bg-sky-600 py-4"
-            onPress={() => {
-              setShowPassModal(true);
-            }}>
+            onPress={onImportPress}>
             <Text className="text-center text-xl font-medium text-white">Import Wallet</Text>
             <Feather name="upload" color="white" size={20} />
           </TouchableOpacity>
@@ -145,12 +163,28 @@ const WalletStep = ({ onComplete }: StepTwoWalletProps) => {
 
   return (
     <View className="flex w-full flex-1 justify-between px-6">
-      <PassphrasePromptModal
-        visible={showPassModal}
-        onConfirm={() => {}} // TODO: Flesh out what happens on confirm
-        onCancel={() => {
-          setShowPassModal(false);
+      <ModalPrompt
+        value={passphrase}
+        onChangeValue={(text: string) => {
+          setPassphrase(text);
+          setError('');
         }}
+        variant={ModalPromptVariant.PASSPHRASE}
+        visible={showPassModal}
+        isProcessing={isProcessing}
+        onCancel={closePassModal}
+        onConfirm={async () => {
+          setIsProcessing(true);
+          setTimeout(async () => {
+            // Heavy work here!
+            try {
+              await handleImport(importFile!, passphrase);
+            } finally {
+              closePassModal();
+            }
+          }, 50);
+        }}
+        error={error}
         mode={EncryptionModalMode.IMPORT}
       />
       <View className="flex">

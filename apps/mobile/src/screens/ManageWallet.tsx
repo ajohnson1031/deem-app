@@ -4,21 +4,47 @@ import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { isValidClassicAddress, Wallet } from 'xrpl';
 
-import { ManualWalletEntry, PasswordVerificationPromptModal, WalletDetails } from '~/components';
+import {
+  ManualWalletEntry,
+  ModalPrompt,
+  // PasswordVerificationPromptModal,
+  WalletDetails,
+} from '~/components';
+import { REGEX } from '~/constants';
 import { useAuth } from '~/contexts/AuthContext';
 import { useFlashScrollIndicators, useWallet } from '~/hooks';
 import { CoreLayout } from '~/layouts';
-import { deriveKeyFromPassword, encryptSeed } from '~/utils';
+import { EncryptionModalMode, ModalPromptVariant } from '~/types';
+import {
+  deriveKeyFromPassword,
+  encryptSeed,
+  handleExport,
+  handleFilePicker,
+  useHandleImport,
+} from '~/utils';
 import { api } from '~/utils/api';
 
-const ManageWalletScreen = () => {
-  const { wallet, walletAddress, setWallet } = useWallet();
+const passError =
+  'Password not in expected format (8 - 30 chars and include one of each of the following: uppercase, lowercase, number, special character (not @)).';
 
+const ManageWalletScreen = () => {
+  const handleImport = useHandleImport();
+  const { wallet, walletAddress, setWallet } = useWallet();
   const { scrollViewRef, flashIndicators } = useFlashScrollIndicators();
   const [flashCount, setFlashCount] = useState<number>(0);
   const [newWalletAddress, setNewWalletAddress] = useState<string | undefined>();
   const [newSeed, setNewSeed] = useState<string | undefined>();
+  const [password, setPassword] = useState<string>('');
+  const [error, setError] = useState<string>('');
+  const [currentMode, setCurrentMode] = useState<EncryptionModalMode | undefined>(undefined);
+  const [passphrase, setPassphrase] = useState('');
+  const [importFile, setImportFile] = useState<string | null>(null);
+
+  const [showPassphraseModal, setShowPassphraseModal] = useState(false);
+  const [twoFactorErrorIsVisible, setTwoFactorErrorIsVisible] = useState<boolean>(false);
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [verifyPasswordModalIsVisible, setVerifyPasswordModalIsVisible] = useState<boolean>(false);
+  const [currentViewIndex, setCurrentViewIndex] = useState<number>(0);
   const { user } = useAuth();
   const { twoFactorEnabled } = user || { twoFactorEnabled: false };
 
@@ -34,16 +60,93 @@ const ManageWalletScreen = () => {
     }
   })();
 
-  const handleGenerate = async ({ password }: { password: string }) => {
-    setVerifyPasswordModalIsVisible(false);
-
+  const handlePreCheck = () => {
+    let hasTwoFA;
     if (!twoFactorEnabled) {
-      // TODO: Handle error messaging. 2FA must be enabled for this feature.
-    } else {
-      doGenerate(password);
+      hasTwoFA = false;
+      setTwoFactorErrorIsVisible(true);
+    } else hasTwoFA = true;
+    return hasTwoFA;
+  };
+
+  const handleGenerate = async () => {
+    if (!REGEX.PASSWORD.test(password as string)) {
+      setError(passError);
+      return;
+    }
+
+    try {
+      setIsProcessing(true);
+      await doGenerate(password);
+    } finally {
+      setIsProcessing(false);
+      setVerifyPasswordModalIsVisible(false);
     }
   };
 
+  // Import/Export Wallet Fns
+  const onImportPress = async () => {
+    const has2FA = handlePreCheck();
+    if (!has2FA) return;
+    setVerifyPasswordModalIsVisible(true);
+    //TODO: Handle 2FA
+    setCurrentMode(EncryptionModalMode.IMPORT);
+    const fileContents = await handleFilePicker();
+    if (fileContents) {
+      setImportFile(fileContents);
+      setShowPassphraseModal(true);
+    }
+  };
+
+  const onExportPress = () => {
+    const has2FA = handlePreCheck();
+    if (!has2FA) return;
+    setVerifyPasswordModalIsVisible(true);
+    //TODO: Handle 2FA
+    setCurrentMode(EncryptionModalMode.EXPORT);
+    setShowPassphraseModal(true);
+  };
+
+  const onChangePassphrase = (text: string) => {
+    setPassphrase(text);
+    setError('');
+  };
+
+  const onClosePassphraseModal = () => {
+    setPassphrase('');
+    setShowPassphraseModal(false);
+    setIsProcessing(false);
+  };
+
+  const onImportOrExportConfirm = async () => {
+    if (!REGEX.PASSWORD.test(passphrase as string)) {
+      setError(passError);
+      return;
+    }
+
+    setIsProcessing(true);
+    setTimeout(async () => {
+      try {
+        if (currentMode === EncryptionModalMode.EXPORT) {
+          if (!wallet!.seed) {
+            Toast.show({
+              type: 'error',
+              text1: 'Problem Exporting Wallet',
+              text2: 'Wallet seed could not be found.',
+            });
+            return;
+          }
+          await handleExport(passphrase, wallet!.seed);
+        } else if (currentMode === EncryptionModalMode.IMPORT) {
+          await handleImport(importFile!, passphrase);
+        }
+      } finally {
+        onClosePassphraseModal();
+      }
+    }, 50);
+  };
+
+  // Regenerate Wallet Fn
   const doGenerate = async (password: string) => {
     const newWallet = Wallet.generate();
     const key = await deriveKeyFromPassword(password);
@@ -62,7 +165,6 @@ const ManageWalletScreen = () => {
         text2: 'Wallet has been regenerated.',
       });
     } catch (error: any) {
-      console.error(error);
       Toast.show({
         type: 'error',
         text1: 'Could not regenerate wallet.',
@@ -71,7 +173,16 @@ const ManageWalletScreen = () => {
     }
   };
 
-  const isFormValid = isValidNewWalletAddress && isValidNewSeed;
+  // Manual Wallet Entry Fn
+  const handleUpdate = () => {
+    const has2FA = handlePreCheck();
+    if (!has2FA) return;
+    setVerifyPasswordModalIsVisible(true);
+    //TODO: Handle 2FA
+    return null;
+  };
+
+  const handle2FA = async () => {};
 
   const VIEWS: Record<string, string | ReactNode>[] = [
     {
@@ -89,6 +200,16 @@ const ManageWalletScreen = () => {
                 address={walletAddress}
                 publicKey={wallet!.publicKey}
                 seed={wallet!.seed}
+                mode={currentMode}
+                passphrase={passphrase}
+                passphraseModalVisible={showPassphraseModal}
+                isProcessing={isProcessing}
+                onImportPress={onImportPress}
+                onExportPress={onExportPress}
+                onChangePassphrase={onChangePassphrase}
+                onClosePassphraseModal={onClosePassphraseModal}
+                onConfirm={onImportOrExportConfirm}
+                error={error}
               />
             </View>
           )}
@@ -107,7 +228,7 @@ const ManageWalletScreen = () => {
           </Text>
 
           <TouchableOpacity
-            onPress={() => setVerifyPasswordModalIsVisible(true)} // Always verify password
+            onPress={handlePreCheck} // Always verify password
             className="rounded-lg bg-emerald-600 py-4">
             <Text className="text-center text-xl font-medium text-white">Regenerate Wallet</Text>
           </TouchableOpacity>
@@ -124,12 +245,11 @@ const ManageWalletScreen = () => {
           isValidSeed={isValidNewSeed}
           onChangeWallet={(text: string) => setNewWalletAddress(text.trim())}
           onChangeSeed={(text: string) => setNewSeed(text.trim())}
+          onConfirm={handleUpdate}
         />
       ),
     },
   ];
-
-  const [currentViewIndex, setCurrentViewIndex] = useState<number>(0);
 
   useEffect(() => {
     const flashInterval = setInterval(() => {
@@ -142,14 +262,30 @@ const ManageWalletScreen = () => {
     return () => clearInterval(flashInterval);
   }, [flashCount]);
 
+  useEffect(() => {
+    const errTimeout = setTimeout(() => setTwoFactorErrorIsVisible(false), 3000);
+    return () => clearTimeout(errTimeout);
+  }, [twoFactorErrorIsVisible]);
+
   return (
     <CoreLayout showBack title="Manage Wallet">
-      <PasswordVerificationPromptModal
+      <ModalPrompt
+        value={password}
+        onChangeValue={(text: string) => {
+          setPassword(text);
+          setError('');
+        }}
+        variant={ModalPromptVariant.PASSWORD}
         visible={verifyPasswordModalIsVisible}
-        onConfirm={handleGenerate}
+        isProcessing={isProcessing}
+        onConfirm={() => {
+          // TODO: Set up password verification and what happens after based on current view
+        }}
         onCancel={() => {
+          setPassword('');
           setVerifyPasswordModalIsVisible(false);
         }}
+        error={error}
       />
 
       <View className="mx-6">
@@ -202,13 +338,19 @@ const ManageWalletScreen = () => {
           <View className="w-16 flex-row items-center justify-between gap-2">
             <TouchableOpacity
               className="rounded-lg bg-gray-100 p-1.5"
-              onPress={() => setCurrentViewIndex(currentViewIndex - 1)}
+              onPress={() => {
+                setError('');
+                setCurrentViewIndex(currentViewIndex - 1);
+              }}
               disabled={currentViewIndex < 1}>
               <Feather name="chevron-left" size={16} color="#475569" />
             </TouchableOpacity>
             <TouchableOpacity
               className="rounded-lg bg-gray-100 p-1.5"
-              onPress={() => setCurrentViewIndex(currentViewIndex + 1)}
+              onPress={() => {
+                setError('');
+                setCurrentViewIndex(currentViewIndex + 1);
+              }}
               disabled={currentViewIndex >= VIEWS.length - 1}>
               <Feather name="chevron-right" size={16} color="#475569" />
             </TouchableOpacity>
@@ -217,20 +359,14 @@ const ManageWalletScreen = () => {
       </View>
       <View className="mx-6">
         <View>{VIEWS[currentViewIndex].component}</View>
-
-        {currentViewIndex === 2 && (
-          <View className="mb-8 flex-row gap-4">
-            <TouchableOpacity
-              onPress={() => {}} // TODO: Add a function call here
-              className={`mt-4 flex-1 rounded-lg py-4 ${isFormValid ? 'bg-sky-600' : 'bg-gray-300'}`}
-              disabled={!isFormValid}>
-              <Text
-                className={`text-center text-xl font-medium ${isFormValid ? 'text-white' : 'text-gray-400'}`}>
-                Update Wallet
-              </Text>
-            </TouchableOpacity>
-          </View>
+        {!!twoFactorErrorIsVisible && (
+          <Text className="mt-2 text-center text-sm text-red-600">
+            2FA Must be enabled to update wallet details.
+          </Text>
         )}
+        {/* {currentViewIndex === 2 && (
+          
+        )} */}
       </View>
     </CoreLayout>
   );

@@ -11,6 +11,7 @@ interface ManualWalletEntryProps {
   isValidSeed: boolean;
   onChangeWallet?: (text: string) => void;
   onChangeSeed?: (text: string) => void;
+  onConfirm: () => void;
 }
 
 export type { ManualWalletEntryProps, WalletBalanceResult };

@@ -14,6 +14,7 @@ export { getStoredPin, savePin } from './securePin';
 export { deleteToken, deleteUser, getToken, getUser, saveToken, saveUser } from './secureStore';
 export { toastConfig } from './toast';
 export { getChangedFields } from './user';
+export { handleExport, handleFilePicker, useHandleImport } from './wallet';
 export {
   getTransactionHistory,
   getWalletBalance,

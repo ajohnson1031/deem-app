@@ -1,4 +1,11 @@
-import { KeyboardAvoidingView, Platform, Text, TextInput, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 import { ManualWalletEntryProps } from '~/types';
 
@@ -9,7 +16,10 @@ const ManualWalletEntry = ({
   isValidSeed,
   onChangeWallet,
   onChangeSeed,
+  onConfirm,
 }: ManualWalletEntryProps) => {
+  const isFormValid = isValidWalletAddress && isValidSeed;
+
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'position' : 'height'}>
       <Text className="mb-6 text-lg text-gray-600">
@@ -44,6 +54,18 @@ const ManualWalletEntry = ({
           value={seed}
           onChangeText={onChangeSeed}
         />
+      </View>
+
+      <View className="flex-row gap-4">
+        <TouchableOpacity
+          onPress={onConfirm}
+          className={`mt-4 flex-1 rounded-lg py-4 ${isFormValid ? 'bg-sky-600' : 'bg-gray-300'}`}
+          disabled={!isFormValid}>
+          <Text
+            className={`text-center text-xl font-medium ${isFormValid ? 'text-white' : 'text-gray-400'}`}>
+            Update Wallet
+          </Text>
+        </TouchableOpacity>
       </View>
       {!isValidSeed && seed && seed.length > 0 && (
         <Text className="mb-2 text-sm text-red-600">Invalid seed.</Text>

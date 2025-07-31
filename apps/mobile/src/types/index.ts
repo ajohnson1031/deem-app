@@ -4,7 +4,7 @@ export type { CountryInfo } from './country';
 export type { LabelFieldWithCopyProps } from './inputfields';
 export type { CoreLayoutProps } from './layout';
 export type { MenuListItemProps } from './menulist';
-export type { AvatarPickerProps, BaseModalProps, PassphrasePromptModalProps } from './modals';
+export type { AvatarPickerProps, BaseModalProps, ModalPromptProps } from './modals';
 export type { HeaderNavProps, RootStackParamList } from './navigation';
 export type { Theme } from './theme';
 export type {
@@ -21,5 +21,5 @@ export type { ManualWalletEntryProps, WalletBalanceResult } from './wallet';
 
 export { FieldVariant } from './inputfields';
 export { MenuIconType } from './menulist';
-export { EncryptionModalMode } from './modals';
+export { EncryptionModalMode, ModalPromptVariant } from './modals';
 export { STATUS_GROUPS, TX_STATUS_LABELS } from './transaction';
