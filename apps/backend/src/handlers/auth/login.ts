@@ -52,7 +52,7 @@ export const login = async (req: Request, res: Response) => {
         sameSite: "strict",
         maxAge: 1000 * 60 * 60 * 24 * 7,
       })
-      .json({ user: userData, token: accessToken });
+      .json({ user: userData, token: accessToken, refreshToken });
   } catch (err) {
     console.error("Login error:", err);
     return res.status(500).json({ error: "Internal server error." });

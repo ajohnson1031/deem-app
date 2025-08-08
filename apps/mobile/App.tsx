@@ -9,7 +9,6 @@ import 'react-native-get-random-values';
 import Toast from 'react-native-toast-message';
 
 import { appReadyAtom, appStateAtom } from '~/atoms';
-import { ScreenCaptureGuard } from '~/components';
 import { AuthProvider } from '~/contexts/AuthContext';
 import AppNavigator from '~/navigation';
 import { globalStore } from '~/state/store';
@@ -66,10 +65,8 @@ function InnerApp() {
 
 export default function App() {
   return (
-    <ScreenCaptureGuard>
-      <JotaiProvider store={globalStore}>
-        <InnerApp />
-      </JotaiProvider>
-    </ScreenCaptureGuard>
+    <JotaiProvider store={globalStore}>
+      <InnerApp />
+    </JotaiProvider>
   );
 }

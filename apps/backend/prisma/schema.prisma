@@ -8,23 +8,24 @@ datasource db {
 }
 
 model User {
-  id                 String              @id @default(cuid())
-  username           String              @unique
-  name               String
-  email              String?             @unique
-  phoneNumber        String?             @unique
-  password           String
-  avatarUri          String?
-  walletAddress      String              @unique
-  countryCode        String?             @default("US")
-  callingCode        String?             @default("1")
-  wallet             Wallet?             @relation("UserToWallet")
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
-  contacts           Contact[]           @relation("UserContacts")
-  transactions       Transaction[]       @relation("UserTransactions")
-  twoFactorEnabled   Boolean             @default(false)
-  twoFactorSecret    String?
+  id                  String        @id @default(cuid())
+  username            String        @unique
+  name                String
+  email               String?       @unique
+  phoneNumber         String?       @unique
+  password            String
+  avatarUri           String?
+  walletAddress       String        @unique
+  countryCode         String?       @default("US")
+  callingCode         String?       @default("1")
+  wallet              Wallet?       @relation("UserToWallet")
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  contacts            Contact[]     @relation("UserContacts")
+  transactions        Transaction[] @relation("UserTransactions")
+  twoFactorEnabled    Boolean       @default(false)
+  twoFactorSecret     String?
+  tempTwoFactorSecret String?
 }
 
 model Wallet {
@@ -75,4 +76,3 @@ model Transaction {
   // 👇 Match relation name here
   user User @relation("UserTransactions", fields: [userId], references: [id])
 }
-

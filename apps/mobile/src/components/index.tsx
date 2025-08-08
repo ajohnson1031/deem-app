@@ -15,7 +15,6 @@ export { default as ModalPrompt } from './ModalPrompt';
 export { default as PasswordInput } from './PasswordInput';
 export { default as PasswordVerificationPromptModal } from './PasswordVerificationPromptModal';
 export { default as PinOrCodeInputField } from './PinOrCodeInputField';
-export { default as ScreenCaptureGuard } from './ScreenCaptureGuard';
 export { default as TwoFAPromptModal } from './TwoFAPromptModal';
 export { default as TxListItem } from './TxListItem';
 export { default as WalletDetails } from './WalletDetails';

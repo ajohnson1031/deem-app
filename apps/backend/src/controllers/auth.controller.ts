@@ -1,4 +1,4 @@
-import { generate2FASecret, getMy2FAStatus, verify2FA } from "../handlers/auth/2FA";
+import { disable2FA, generate2FASecret, getMy2FAStatus, verify2FA, verifyAndEnable2FA } from "../handlers/auth/2FA";
 import { login } from "../handlers/auth/login";
 import { logout } from "../handlers/auth/logout";
 import { changePassword, requestPasswordReset, resetPassword, verifyPassword, verifyPasswordResetCode } from "../handlers/auth/password";
@@ -8,6 +8,7 @@ import { refreshToken } from "../handlers/auth/token";
 export {
   changePassword,
   checkUsernameAvailable,
+  disable2FA,
   generate2FASecret,
   getMy2FAStatus,
   login,
@@ -17,6 +18,7 @@ export {
   requestPasswordReset,
   resetPassword,
   verify2FA,
+  verifyAndEnable2FA,
   verifyPassword,
   verifyPasswordResetCode,
 };

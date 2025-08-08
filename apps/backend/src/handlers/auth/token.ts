@@ -5,7 +5,7 @@ import { RedisFuncType, safeRedis } from "../redis";
 
 export const refreshToken = async (req: Request, res: Response) => {
   console.log("🔥 /auth/refresh called");
-  const token = req.cookies.refreshToken;
+  const token = req.cookies.refreshToken || req.body.refreshToken;
   console.log("Token in cookie:", token);
 
   if (!token) {
@@ -26,11 +26,11 @@ export const refreshToken = async (req: Request, res: Response) => {
       return res.status(403).json({ error: "Token mismatch." });
     }
 
-    const newAccessToken = jwt.sign({ userId: payload.userId }, JWT_SECRET, {
+    const newAccessToken = jwt.sign({ userId }, JWT_SECRET, {
       expiresIn: JWT_EXPIRES_IN,
     });
 
-    return res.json({ token: newAccessToken });
+    return res.json({ token: newAccessToken, refreshToken: token });
   } catch (err) {
     console.error("Refresh error:", err);
     return res.status(403).json({ error: "Invalid or expired refresh token." });

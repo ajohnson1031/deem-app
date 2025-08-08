@@ -11,7 +11,17 @@ export { capitalize, formatFloatClean, formatWithCommas } from './format';
 export { getCountryInfo } from './getCountryInfo';
 export { formatPhoneOnBlur, isValidPhoneNumber, sanitizePhone } from './phone';
 export { getStoredPin, savePin } from './securePin';
-export { deleteToken, deleteUser, getToken, getUser, saveToken, saveUser } from './secureStore';
+export {
+  deleteRefreshToken,
+  deleteToken,
+  deleteUser,
+  getRefreshToken,
+  getToken,
+  getUser,
+  saveRefreshToken,
+  saveToken,
+  saveUser,
+} from './secureStore';
 export { toastConfig } from './toast';
 export { getChangedFields } from './user';
 export { handleExport, handleFilePicker, useHandleImport } from './wallet';
