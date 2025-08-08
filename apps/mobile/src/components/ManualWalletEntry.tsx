@@ -10,6 +10,7 @@ import {
 import { ManualWalletEntryProps } from '~/types';
 
 const ManualWalletEntry = ({
+  disabled,
   walletAddress,
   seed,
   isValidWalletAddress,
@@ -18,11 +19,11 @@ const ManualWalletEntry = ({
   onChangeSeed,
   onConfirm,
 }: ManualWalletEntryProps) => {
-  const isFormValid = isValidWalletAddress && isValidSeed;
+  const isFormValid = isValidWalletAddress && isValidSeed && !disabled;
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'position' : 'height'}>
-      <Text className="mb-6 text-lg text-gray-600">
+      <Text className="mb-6 text-lg leading-snug text-gray-600">
         Manually enter details for any valid XRP wallet. This option allows for the use of wallets
         created in other apps (i.e., XUMM, etc.). The seed you provide will be encrypted to maximize
         safety.&nbsp;

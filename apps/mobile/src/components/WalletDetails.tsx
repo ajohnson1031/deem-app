@@ -3,9 +3,11 @@ import { Text, TouchableOpacity, View } from 'react-native';
 
 import LabelFieldWithCopy from '~/components/LabelFieldWithCopy';
 import ModalPrompt from '~/components/ModalPrompt';
-import { EncryptionModalMode, FieldVariant, ModalPromptVariant } from '~/types';
+import { FieldVariant, ModalPromptVariant } from '~/types';
+import { WalletDetailsProps } from '~/types/wallet';
 
 const WalletDetails = ({
+  disabled,
   address,
   publicKey,
   seed,
@@ -19,21 +21,7 @@ const WalletDetails = ({
   onClosePassphraseModal,
   onConfirm,
   error,
-}: {
-  address: string;
-  publicKey: string;
-  seed?: string;
-  mode?: EncryptionModalMode;
-  passphrase: string;
-  passphraseModalVisible: boolean;
-  isProcessing: boolean;
-  onImportPress: () => Promise<void>;
-  onExportPress: () => void;
-  onChangePassphrase: (text: string) => void;
-  onClosePassphraseModal: () => void;
-  onConfirm: () => Promise<void>;
-  error: string;
-}) => {
+}: WalletDetailsProps) => {
   return (
     <View className="flex w-full gap-y-4">
       <View className="flex gap-3">
@@ -78,19 +66,27 @@ const WalletDetails = ({
         mode={mode}
       />
 
-      <View className="mt-1 flex-row gap-4">
+      <View className="w-full flex-row gap-4">
         <TouchableOpacity
-          className="mt-2 flex-1 flex-row items-center justify-center gap-3 rounded-lg bg-sky-600 py-4"
-          onPress={onImportPress}>
-          <Text className="text-center text-xl font-medium text-white">Import</Text>
-          <Feather name="upload" color="white" size={20} />
+          className="mb-2 flex-1 flex-row items-center justify-center gap-3 rounded-lg bg-sky-600 py-4 disabled:bg-gray-300"
+          onPress={onImportPress}
+          disabled={disabled}>
+          <Text
+            className={`text-center text-xl font-medium ${disabled ? 'text-gray-400' : 'text-white'}`}>
+            Import
+          </Text>
+          <Feather name="upload" color={disabled ? '#9ca3af' : 'white'} size={20} />
         </TouchableOpacity>
 
         <TouchableOpacity
-          className="mt-2 flex-1 flex-row items-center justify-center gap-3 rounded-lg bg-slate-600 py-4"
-          onPress={onExportPress}>
-          <Text className="text-center text-xl font-medium text-white">Export</Text>
-          <Feather name="download" color="white" size={20} />
+          className="mb-2 flex-1 flex-row items-center justify-center gap-3 rounded-lg bg-slate-600 py-4 disabled:bg-gray-300"
+          onPress={onExportPress}
+          disabled={disabled}>
+          <Text
+            className={`text-center text-xl font-medium ${disabled ? 'text-gray-400' : 'text-white'}`}>
+            Export
+          </Text>
+          <Feather name="download" color={disabled ? '#9ca3af' : 'white'} size={20} />
         </TouchableOpacity>
       </View>
     </View>

@@ -4,7 +4,8 @@ import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import Toast from 'react-native-toast-message';
 
-import { deleteToken, emitter, getToken, saveToken } from '~/utils';
+import { emitter } from './events';
+import { deleteToken, getToken, saveToken } from './secureStore';
 
 const api = axios.create({
   baseURL: `${API_BASE_URL}`, // Replace with API_BASE_URL for production
@@ -16,6 +17,7 @@ type DecodedToken = {
 };
 
 let isRefreshing = false;
+let isLoggingOut = false;
 let failedQueue: any[] = [];
 
 const processQueue = (error: any, token: string | null = null) => {
@@ -43,7 +45,7 @@ api.interceptors.request.use(async (config) => {
         isRefreshing = true;
 
         try {
-          const res = await axios.get<{ token: string }>(`${API_BASE_URL}/auth/refresh`, {
+          const res = await axios.post<{ token: string }>(`${API_BASE_URL}/auth/refresh`, {
             withCredentials: true,
           });
 
@@ -79,6 +81,7 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
     const isRefreshCall = originalRequest.url?.includes('/auth/refresh');
+    const isLogoutCall = originalRequest.url?.includes('/logout');
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshCall) {
@@ -102,34 +105,21 @@ api.interceptors.response.use(
           .catch((err) => Promise.reject(err));
       }
 
-      originalRequest._retry = true;
-      isRefreshing = true;
-
-      try {
-        const res = await axios.get<{ token: string }>(`${API_BASE_URL}/auth/refresh`, {
-          withCredentials: true,
-        });
-
-        const newToken = res.data.token;
-        await saveToken(newToken);
-        api.defaults.headers.common.Authorization = `Bearer ${newToken}`;
-        processQueue(null, newToken);
-
-        originalRequest.headers.Authorization = `Bearer ${newToken}`;
-        return api(originalRequest);
-      } catch (err) {
-        processQueue(err, null);
-        await deleteToken();
-        emitter.emit('logout');
-        Toast.show({
-          type: 'error',
-          text1: 'Session expired',
-          text2: 'Please log in again.',
-        });
-        return Promise.reject(err);
-      } finally {
-        isRefreshing = false;
+      // Prevent infinite logout loop
+      if (!isLogoutCall && !isLoggingOut) {
+        isLoggingOut = true;
+        try {
+          emitter.emit('logout');
+          Toast.show({
+            type: 'error',
+            text1: 'Session expired',
+            text2: 'Please log in again.',
+          });
+        } finally {
+          isLoggingOut = false;
+        }
       }
+      return Promise.reject(error);
     }
 
     return Promise.reject(error);

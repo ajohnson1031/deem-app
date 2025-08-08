@@ -1,11 +1,22 @@
 import { API_BASE_URL } from '@env';
-import axios from 'axios';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import Toast from 'react-native-toast-message';
 
-import { useWallet } from '~/hooks'; // make sure this hook is working and imported
+import { useWallet } from '~/hooks';
 import { AuthContextType, UserData } from '~/types';
-import { deleteToken, deleteUser, emitter, getToken, getUser, saveToken, saveUser } from '~/utils';
+import {
+  deleteRefreshToken,
+  deleteToken,
+  deleteUser, // <-- add these
+  emitter,
+  getRefreshToken,
+  getToken,
+  getUser,
+  saveRefreshToken,
+  saveToken,
+  saveUser,
+} from '~/utils';
+import { api } from '~/utils/api';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -14,22 +25,51 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const { loadWallet } = useWallet(); // ⬅️ brings in the wallet loader
+  const { loadWallet } = useWallet();
 
   const setAuthHeader = (token: string | null) => {
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    } else {
-      delete axios.defaults.headers.common['Authorization'];
-    }
+    if (token) api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    else delete api.defaults.headers.common['Authorization'];
   };
 
   const loadWalletOnInit = async (token: string) => {
     try {
       setAuthHeader(token);
-      await loadWallet(); // assumes passwordless wallet load (via SecureStore)
+      await loadWallet();
     } catch (err) {
       console.warn('⚠️ Wallet failed to load during auth restore:', err);
+    }
+  };
+
+  // Refresh access token using refresh token
+  const refreshSession = async () => {
+    try {
+      const refreshToken = await getRefreshToken();
+      if (!refreshToken) throw new Error('No refresh token found');
+      // Your backend should accept POST with { refreshToken }
+      const res = await api.post(`${API_BASE_URL}/auth/refresh`, { refreshToken });
+      const { token: newToken, refreshToken: newRefresh, user: refreshedUser } = res.data;
+      setToken(newToken);
+      setAuthHeader(newToken);
+      await saveToken(newToken);
+
+      // If you rotate refreshToken
+      if (newRefresh) await saveRefreshToken(newRefresh);
+
+      if (refreshedUser) {
+        setUser(refreshedUser);
+        await saveUser(refreshedUser);
+      }
+      return true;
+    } catch (err) {
+      await deleteToken();
+      await deleteRefreshToken();
+      await deleteUser();
+      setToken(null);
+      setUser(null);
+      setAuthHeader(null);
+      console.log('🔒 Session refresh failed:', err);
+      return false;
     }
   };
 
@@ -38,32 +78,34 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       try {
         const localToken = await getToken();
         const localUser = await getUser();
+        const localRefresh = await getRefreshToken();
 
         if (localToken && localUser) {
           setToken(localToken);
           setUser(localUser);
           setAuthHeader(localToken);
           await loadWalletOnInit(localToken);
-        } else {
-          // Try refreshing from server as fallback
-          const res = await axios.get(`${API_BASE_URL}/auth/refresh`, {
-            withCredentials: true,
+        } else if (localRefresh) {
+          // Try to refresh with refreshToken
+          const res = await api.post(`${API_BASE_URL}/auth/refresh`, {
+            refreshToken: localRefresh,
           });
-          const { token: newToken } = res.data;
-          setAuthHeader(newToken);
-
-          const me = await axios.get(`${API_BASE_URL}/me`);
+          const { token: newToken, refreshToken: newRefresh, user: refreshedUser } = res.data;
           setToken(newToken);
-          setUser(me.data.user);
-
+          setUser(refreshedUser);
+          setAuthHeader(newToken);
           await saveToken(newToken);
-          await saveUser(me.data.user);
+          if (newRefresh) await saveRefreshToken(newRefresh);
+          await saveUser(refreshedUser);
           await loadWalletOnInit(newToken);
         }
       } catch (err) {
         console.log('🔒 Session not restored:', err);
         await deleteToken();
+        await deleteRefreshToken();
         await deleteUser();
+        setToken(null);
+        setUser(null);
       } finally {
         setIsLoading(false);
       }
@@ -86,28 +128,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return () => emitter.off('logout', handleLogout);
   }, []);
 
+  // ======== LOGIN
   const login = async (identifier: string, password: string) => {
     try {
-      const res = await axios.post(
-        `${API_BASE_URL}/auth/login`,
-        { identifier, password },
-        { withCredentials: true }
-      );
-
-      const { token: accessToken, user, requires2FA, tempUserId } = res.data;
+      const res = await api.post(`${API_BASE_URL}/auth/login`, { identifier, password });
+      const { token: accessToken, refreshToken, user, requires2FA, tempUserId } = res.data;
 
       if (requires2FA) {
-        // 2FA required; stop here and let UI handle modal
         return { success: false, requires2FA: true, tempUserId };
       }
 
-      // Normal flow
       setToken(accessToken);
       setUser(user);
       setAuthHeader(accessToken);
-
       await saveToken(accessToken);
       await saveUser(user);
+      await saveRefreshToken(refreshToken);
       await loadWallet(password);
 
       return { success: true };
@@ -116,9 +152,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  // ======== LOGOUT
   const logout = async () => {
     try {
-      await axios.post(`${API_BASE_URL}/auth/logout`, {}, { withCredentials: true });
+      await api.post(`${API_BASE_URL}/auth/logout`);
     } catch (err) {
       console.warn('Logout request failed:', err);
     } finally {
@@ -127,6 +164,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setAuthHeader(null);
       await deleteToken();
       await deleteUser();
+      await deleteRefreshToken();
 
       setTimeout(() => {
         Toast.show({
@@ -138,21 +176,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  // ======== 2FA VERIFY
   const verify2FA = async (tempUserId: string, token: string, password: string) => {
     try {
-      const res = await axios.post(`${API_BASE_URL}/auth/2fa/verify`, {
+      const res = await api.post(`${API_BASE_URL}/auth/2fa/verify`, {
         userId: tempUserId,
         token,
       });
 
-      const { user, accessToken } = res.data;
+      const { user, accessToken, refreshToken } = res.data;
 
       setToken(accessToken);
       setUser(user);
       setAuthHeader(accessToken);
-
       await saveToken(accessToken);
       await saveUser(user);
+      if (refreshToken) await saveRefreshToken(refreshToken); // some flows rotate
       await loadWallet(password);
 
       return { success: true };
@@ -173,6 +212,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         verify2FA,
         setToken,
         setAuthHeader,
+        refreshSession,
       }}>
       {children}
     </AuthContext.Provider>

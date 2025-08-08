@@ -17,6 +17,7 @@ const HomeScreen = () => {
   const [loginError, setLoginError] = useState<string | null>(null);
   const [twoFAModalVisible, setTwoFAModalVisible] = useState<boolean>(false);
   const [tempUserId, setTempUserId] = useState<string | null>(null);
+  const [twoFACode, setTwoFACode] = useState<string>('');
 
   const { login, verify2FA } = useAuth();
   const { loadWallet } = useWallet();
@@ -67,13 +68,16 @@ const HomeScreen = () => {
     <View className="flex-1 items-center justify-center bg-white px-6">
       <TwoFAPromptModal
         visible={twoFAModalVisible}
-        onConfirm={async (token) => {
+        value={twoFACode}
+        onChangeValue={setTwoFACode}
+        error={loginError ?? ''}
+        onConfirm={async (token: string) => {
           try {
             if (!tempUserId) return;
-
             await verify2FA(tempUserId, token, password);
             setTwoFAModalVisible(false); // ✅ Hide modal
             setTempUserId(null); // ✅ Clear temp user ID
+            setTwoFACode(''); // Clear 2FA code
             await loadWallet(password); // 🔓 Load wallet after 2FA
           } catch (err) {
             console.error('2FA verification failed:', err);
@@ -83,6 +87,7 @@ const HomeScreen = () => {
         onCancel={() => {
           setTwoFAModalVisible(false);
           setTempUserId(null); // Also clear on cancel
+          setTwoFACode(''); // Clear 2FA code
         }}
       />
 
@@ -98,6 +103,7 @@ const HomeScreen = () => {
           placeholderTextColor="#777"
           autoCapitalize="none"
           autoCorrect={false}
+          editable
           onFocus={cancelIdleTimer}
           onChangeText={(val) => {
             setIdentifier(val);

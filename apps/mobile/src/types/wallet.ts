@@ -1,3 +1,5 @@
+import { EncryptionModalMode } from '~/types/modals';
+
 type WalletBalanceResult = {
   success: boolean;
   balance: number;
@@ -5,6 +7,7 @@ type WalletBalanceResult = {
 };
 
 interface ManualWalletEntryProps {
+  disabled: boolean;
   walletAddress?: string;
   seed?: string;
   isValidWalletAddress: boolean;
@@ -14,4 +17,21 @@ interface ManualWalletEntryProps {
   onConfirm: () => void;
 }
 
-export type { ManualWalletEntryProps, WalletBalanceResult };
+interface WalletDetailsProps {
+  disabled?: boolean;
+  address: string;
+  publicKey: string;
+  seed?: string;
+  mode?: EncryptionModalMode;
+  passphrase: string;
+  passphraseModalVisible: boolean;
+  isProcessing: boolean;
+  onImportPress: () => Promise<void>;
+  onExportPress: () => void;
+  onChangePassphrase: (text: string) => void;
+  onClosePassphraseModal: () => void;
+  onConfirm: () => Promise<void>;
+  error: string;
+}
+
+export type { ManualWalletEntryProps, WalletBalanceResult, WalletDetailsProps };

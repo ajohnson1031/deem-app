@@ -2,7 +2,7 @@ import LottieView from 'lottie-react-native';
 import { useEffect, useRef } from 'react';
 import { Animated, Easing, Modal, Text, TouchableOpacity, View } from 'react-native';
 
-import { CountdownInput } from '~/components';
+import CountdownInput from '~/components/CountdownInput';
 import { EncryptionModalMode, FieldVariant, ModalPromptProps, ModalPromptVariant } from '~/types';
 
 const getPlaceholder = (variant: ModalPromptVariant) => {

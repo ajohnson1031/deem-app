@@ -4,18 +4,13 @@ import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { isValidClassicAddress, Wallet } from 'xrpl';
 
-import {
-  ManualWalletEntry,
-  ModalPrompt,
-  // PasswordVerificationPromptModal,
-  WalletDetails,
-} from '~/components';
+import { ManualWalletEntry, ModalPrompt, TwoFAPromptModal, WalletDetails } from '~/components';
 import { REGEX } from '~/constants';
-import { useAuth } from '~/contexts/AuthContext';
 import { useFlashScrollIndicators, useWallet } from '~/hooks';
 import { CoreLayout } from '~/layouts';
 import { EncryptionModalMode, ModalPromptVariant } from '~/types';
 import {
+  checkTwoFactorStatus,
   deriveKeyFromPassword,
   encryptSeed,
   handleExport,
@@ -31,6 +26,8 @@ const ManageWalletScreen = () => {
   const handleImport = useHandleImport();
   const { wallet, walletAddress, setWallet } = useWallet();
   const { scrollViewRef, flashIndicators } = useFlashScrollIndicators();
+
+  // --- UI/State
   const [flashCount, setFlashCount] = useState<number>(0);
   const [newWalletAddress, setNewWalletAddress] = useState<string | undefined>();
   const [newSeed, setNewSeed] = useState<string | undefined>();
@@ -39,15 +36,20 @@ const ManageWalletScreen = () => {
   const [currentMode, setCurrentMode] = useState<EncryptionModalMode | undefined>(undefined);
   const [passphrase, setPassphrase] = useState('');
   const [importFile, setImportFile] = useState<string | null>(null);
-
   const [showPassphraseModal, setShowPassphraseModal] = useState(false);
-  const [twoFactorErrorIsVisible, setTwoFactorErrorIsVisible] = useState<boolean>(false);
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [verifyPasswordModalIsVisible, setVerifyPasswordModalIsVisible] = useState<boolean>(false);
+  const [show2FAModal, setShow2FAModal] = useState<boolean>(false);
+  const [pendingOperation, setPendingOperation] = useState<
+    'import' | 'export' | 'regenerate' | 'update' | null
+  >(null);
+  const [twoFAToken, setTwoFAToken] = useState('');
+  const [twoFAError, setTwoFAError] = useState('');
   const [currentViewIndex, setCurrentViewIndex] = useState<number>(0);
-  const { user } = useAuth();
-  const { twoFactorEnabled } = user || { twoFactorEnabled: false };
+  const functionsAreDisabled = !twoFactorEnabled || isProcessing;
 
+  // --- Validations
   const isValidNewWalletAddress = walletAddress
     ? isValidClassicAddress(walletAddress.trim())
     : false;
@@ -60,36 +62,54 @@ const ManageWalletScreen = () => {
     }
   })();
 
-  const handlePreCheck = () => {
-    let hasTwoFA;
-    if (!twoFactorEnabled) {
-      hasTwoFA = false;
-      setTwoFactorErrorIsVisible(true);
-    } else hasTwoFA = true;
-    return hasTwoFA;
-  };
-
-  const handleGenerate = async () => {
-    if (!REGEX.PASSWORD.test(password as string)) {
+  // ---- Password Modal Confirm ----
+  const handlePasswordConfirm = async () => {
+    if (!REGEX.PASSWORD.test(password)) {
       setError(passError);
       return;
     }
+    // (Optional: Verify password via backend here.)
+    setVerifyPasswordModalIsVisible(false);
+    setPassword('');
+    setShow2FAModal(true);
+  };
 
+  // ---- 2FA Modal Confirm ----
+  const handle2FAConfirm = async () => {
+    if (!twoFAToken || twoFAToken.length !== 6) {
+      setTwoFAError('2FA token must be 6 digits');
+      return;
+    }
+    setShow2FAModal(false);
+    setIsProcessing(true);
     try {
-      setIsProcessing(true);
-      await doGenerate(password);
+      if (pendingOperation === 'import') {
+        await handleImport(importFile!, passphrase);
+      } else if (pendingOperation === 'export') {
+        if (!wallet!.seed) {
+          Toast.show({
+            type: 'error',
+            text1: 'Problem Exporting Wallet',
+            text2: 'Wallet seed could not be found.',
+          });
+          return;
+        }
+        await handleExport(passphrase, wallet!.seed);
+      } else if (pendingOperation === 'regenerate') {
+        await doGenerate(password);
+      }
     } finally {
       setIsProcessing(false);
-      setVerifyPasswordModalIsVisible(false);
+      setPendingOperation(null);
+      setPassphrase('');
+      setTwoFAToken('');
+      setTwoFAError('');
+      setShowPassphraseModal(false);
     }
   };
 
-  // Import/Export Wallet Fns
+  // ---- Import/Export/Regenerate Handlers ----
   const onImportPress = async () => {
-    const has2FA = handlePreCheck();
-    if (!has2FA) return;
-    setVerifyPasswordModalIsVisible(true);
-    //TODO: Handle 2FA
     setCurrentMode(EncryptionModalMode.IMPORT);
     const fileContents = await handleFilePicker();
     if (fileContents) {
@@ -98,15 +118,16 @@ const ManageWalletScreen = () => {
     }
   };
 
-  const onExportPress = () => {
-    const has2FA = handlePreCheck();
-    if (!has2FA) return;
-    setVerifyPasswordModalIsVisible(true);
-    //TODO: Handle 2FA
+  const onExportPress = async () => {
     setCurrentMode(EncryptionModalMode.EXPORT);
     setShowPassphraseModal(true);
   };
 
+  const onRegeneratePress = async () => {
+    setPendingOperation('regenerate');
+  };
+
+  // ---- Other Flows ----
   const onChangePassphrase = (text: string) => {
     setPassphrase(text);
     setError('');
@@ -118,39 +139,10 @@ const ManageWalletScreen = () => {
     setIsProcessing(false);
   };
 
-  const onImportOrExportConfirm = async () => {
-    if (!REGEX.PASSWORD.test(passphrase as string)) {
-      setError(passError);
-      return;
-    }
-
-    setIsProcessing(true);
-    setTimeout(async () => {
-      try {
-        if (currentMode === EncryptionModalMode.EXPORT) {
-          if (!wallet!.seed) {
-            Toast.show({
-              type: 'error',
-              text1: 'Problem Exporting Wallet',
-              text2: 'Wallet seed could not be found.',
-            });
-            return;
-          }
-          await handleExport(passphrase, wallet!.seed);
-        } else if (currentMode === EncryptionModalMode.IMPORT) {
-          await handleImport(importFile!, passphrase);
-        }
-      } finally {
-        onClosePassphraseModal();
-      }
-    }, 50);
-  };
-
-  // Regenerate Wallet Fn
+  // ---- Regenerate Wallet ----
   const doGenerate = async (password: string) => {
     const newWallet = Wallet.generate();
     const key = await deriveKeyFromPassword(password);
-
     try {
       const encryptedSeed = encryptSeed(newWallet.seed!, key);
       await api.patch('/wallet', {
@@ -173,17 +165,19 @@ const ManageWalletScreen = () => {
     }
   };
 
-  // Manual Wallet Entry Fn
-  const handleUpdate = () => {
-    const has2FA = handlePreCheck();
-    if (!has2FA) return;
-    setVerifyPasswordModalIsVisible(true);
-    //TODO: Handle 2FA
-    return null;
+  // ---- Manual Wallet Entry ----
+  const handleUpdate = async () => {
+    setPendingOperation('update');
   };
 
-  const handle2FA = async () => {};
+  // ---- View Change ----
+  const handleViewChange = (dir: 'plus' | 'minus') => {
+    const viewIndex = dir === 'plus' ? currentViewIndex + 1 : currentViewIndex - 1;
+    setError('');
+    setCurrentViewIndex(viewIndex);
+  };
 
+  // ---- Views ----
   const VIEWS: Record<string, string | ReactNode>[] = [
     {
       headerText: 'Current Wallet Details',
@@ -192,11 +186,12 @@ const ManageWalletScreen = () => {
           {!!walletAddress && (
             <View>
               <Text className="mb-6 text-lg leading-snug text-slate-600">
-                Import or export your wallet details using a secure, encrypted file. Confirming the
-                import overwrites the currently stored wallet. Please be sure to copy and store your
-                current wallet details before doing so.
+                Import or export your wallet using a secure, encrypted file. Importing overwrites
+                your currently stored wallet. Copy and store your wallet details in advance of doing
+                so.
               </Text>
               <WalletDetails
+                disabled={functionsAreDisabled}
                 address={walletAddress}
                 publicKey={wallet!.publicKey}
                 seed={wallet!.seed}
@@ -208,7 +203,7 @@ const ManageWalletScreen = () => {
                 onExportPress={onExportPress}
                 onChangePassphrase={onChangePassphrase}
                 onClosePassphraseModal={onClosePassphraseModal}
-                onConfirm={onImportOrExportConfirm}
+                onConfirm={async () => {}} // Confirm handled after password+2FA
                 error={error}
               />
             </View>
@@ -216,21 +211,23 @@ const ManageWalletScreen = () => {
         </View>
       ),
     },
-
     {
       headerText: 'Regenerate Wallet',
       component: (
         <View>
-          <Text className="mb-6 text-lg text-gray-600">
+          <Text className="mb-6 text-lg leading-snug text-gray-600">
             Regenerating your wallet will automatically overwrite your current wallet details. Be
             sure to capture and store them safely if you still need them as otherwise they will be
             unrecoverable.
           </Text>
-
           <TouchableOpacity
-            onPress={handlePreCheck} // Always verify password
-            className="rounded-lg bg-emerald-600 py-4">
-            <Text className="text-center text-xl font-medium text-white">Regenerate Wallet</Text>
+            onPress={onRegeneratePress}
+            className="rounded-lg bg-emerald-600 py-4 disabled:bg-gray-300"
+            disabled={functionsAreDisabled}>
+            <Text
+              className={`text-center text-xl font-medium ${functionsAreDisabled ? 'text-gray-400' : 'text-white'}`}>
+              Regenerate Wallet
+            </Text>
           </TouchableOpacity>
         </View>
       ),
@@ -239,6 +236,7 @@ const ManageWalletScreen = () => {
       headerText: 'Update Wallet Manually',
       component: (
         <ManualWalletEntry
+          disabled={functionsAreDisabled}
           walletAddress={newWalletAddress}
           seed={newSeed}
           isValidWalletAddress={isValidNewWalletAddress}
@@ -251,6 +249,7 @@ const ManageWalletScreen = () => {
     },
   ];
 
+  // ---- UI Effects ----
   useEffect(() => {
     const flashInterval = setInterval(() => {
       if (flashCount < 4) {
@@ -258,55 +257,64 @@ const ManageWalletScreen = () => {
         setFlashCount(flashCount + 1);
       }
     }, 500);
-
     return () => clearInterval(flashInterval);
   }, [flashCount]);
 
   useEffect(() => {
-    const errTimeout = setTimeout(() => setTwoFactorErrorIsVisible(false), 3000);
-    return () => clearTimeout(errTimeout);
-  }, [twoFactorErrorIsVisible]);
+    (async () => {
+      const is2faEnabled = await checkTwoFactorStatus();
+      if (!is2faEnabled) {
+        setTwoFactorEnabled(false);
+      } else {
+        setTwoFactorEnabled(true);
+      }
+    })();
+  }, []);
 
+  // ---- Render ----
   return (
     <CoreLayout showBack title="Manage Wallet">
+      {/* Password Prompt */}
       <ModalPrompt
         value={password}
-        onChangeValue={(text: string) => {
-          setPassword(text);
-          setError('');
-        }}
-        variant={ModalPromptVariant.PASSWORD}
+        onChangeValue={setPassword}
         visible={verifyPasswordModalIsVisible}
         isProcessing={isProcessing}
-        onConfirm={() => {
-          // TODO: Set up password verification and what happens after based on current view
-        }}
-        onCancel={() => {
-          setPassword('');
-          setVerifyPasswordModalIsVisible(false);
-        }}
+        onConfirm={handlePasswordConfirm}
+        onCancel={() => setVerifyPasswordModalIsVisible(false)}
         error={error}
+        variant={ModalPromptVariant.PASSWORD}
+      />
+
+      {/* 2FA Prompt */}
+      <TwoFAPromptModal
+        visible={show2FAModal}
+        value={twoFAToken}
+        onChangeValue={setTwoFAToken}
+        onConfirm={handle2FAConfirm}
+        onCancel={() => setShow2FAModal(false)}
+        error={twoFAError}
       />
 
       <View className="mx-6">
         <View className="flex">
-          <Text className="text-2xl font-semibold text-red-600">Important Note</Text>
-          <Text className="text-2xl font-semibold text-slate-600">About Crypto Wallets</Text>
+          <View className="flex-row gap-1.5">
+            <Text className="text-2xl font-semibold text-red-600">Important Note</Text>
+            <Text className="text-2xl font-semibold text-slate-600">About Crypto Wallets</Text>
+          </View>
         </View>
-
         <ScrollView
           ref={scrollViewRef}
-          className="my-3 flex max-h-36 pr-4"
+          className="my-2 flex max-h-32 pr-4"
           showsVerticalScrollIndicator
           persistentScrollbar>
-          <Text className="text-lg text-slate-600">
+          <Text className="text-lg leading-snug text-slate-600">
             Your
             <Text className="font-medium italic text-slate-600"> Wallet Address</Text>,
             <Text className="font-medium italic text-slate-600"> Public Key &</Text>
-            <Text className="font-medium italic text-red-600"> Seed</Text> are the core elements
-            making up your crypto wallet. Sharing the wallet address is encouraged, as it is the
-            primary vector for sending & receiving funds to or from your wallet. Your public key may
-            also be shared without deleterious effect.
+            <Text className="font-medium italic text-red-600"> Seed</Text> are what makes up your
+            crypto wallet. Sharing your wallet address is encouraged so you can send & receive
+            funds. Your public key may also be shared without danger to you.
           </Text>
           <Text className="my-3 text-lg text-slate-600">
             Your seed, however, should <Text className="font-bold text-red-600">never</Text> be
@@ -324,12 +332,10 @@ const ManageWalletScreen = () => {
           </Text>
         </ScrollView>
       </View>
-
       <View className="mx-6 mb-4 flex-row justify-between border-y border-gray-200 py-3">
         <Text className="text-lg font-medium text-slate-600">
           {VIEWS[currentViewIndex].headerText}
         </Text>
-
         <View className="flex-row items-center gap-2">
           <Text className="font-bold text-slate-600">
             {`${currentViewIndex + 1}`}
@@ -338,19 +344,13 @@ const ManageWalletScreen = () => {
           <View className="w-16 flex-row items-center justify-between gap-2">
             <TouchableOpacity
               className="rounded-lg bg-gray-100 p-1.5"
-              onPress={() => {
-                setError('');
-                setCurrentViewIndex(currentViewIndex - 1);
-              }}
+              onPress={() => handleViewChange('minus')}
               disabled={currentViewIndex < 1}>
               <Feather name="chevron-left" size={16} color="#475569" />
             </TouchableOpacity>
             <TouchableOpacity
               className="rounded-lg bg-gray-100 p-1.5"
-              onPress={() => {
-                setError('');
-                setCurrentViewIndex(currentViewIndex + 1);
-              }}
+              onPress={() => handleViewChange('plus')}
               disabled={currentViewIndex >= VIEWS.length - 1}>
               <Feather name="chevron-right" size={16} color="#475569" />
             </TouchableOpacity>
@@ -359,14 +359,11 @@ const ManageWalletScreen = () => {
       </View>
       <View className="mx-6">
         <View>{VIEWS[currentViewIndex].component}</View>
-        {!!twoFactorErrorIsVisible && (
-          <Text className="mt-2 text-center text-sm text-red-600">
-            2FA Must be enabled to update wallet details.
+        {!twoFactorEnabled && (
+          <Text className="mt-2 rounded-md bg-red-100 p-1 text-center text-sm text-red-700">
+            2FA Must be enabled to edit wallet details.
           </Text>
         )}
-        {/* {currentViewIndex === 2 && (
-          
-        )} */}
       </View>
     </CoreLayout>
   );

@@ -12,6 +12,7 @@ type AuthContextType = {
   login: (identifier: string, password: string) => Promise<LoginResponse>;
   logout: () => Promise<void>;
   verify2FA: (tempUserId: string, token: string, password: string) => Promise<{ success: boolean }>;
+  refreshSession: () => Promise<boolean>;
   isLoading: boolean;
   token: string | null;
   setToken: React.Dispatch<React.SetStateAction<string | null>>;

@@ -18,6 +18,7 @@ export const useGlobalKeyboardIdleDismiss = (delay: number = 3000) => {
     }
   };
 
+  // Optional: clear on unmount
   useEffect(() => cancelIdleTimer, []);
 
   return { resetIdleTimer, cancelIdleTimer };
