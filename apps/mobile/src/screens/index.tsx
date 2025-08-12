@@ -11,6 +11,7 @@ export { default as PendingTransactionsScreen } from './PendingTransactions';
 export { default as PinEntryScreen } from './PinEntry';
 export { default as PinSetupScreen } from './PinSetup';
 export { default as RegisterScreen } from './Register';
+export { default as SecurityScreen } from './Security';
 export { default as SendScreen } from './Send';
 export { default as SettingsScreen } from './Settings';
 export { default as TxConfirmationScreen } from './TxConfirmation';

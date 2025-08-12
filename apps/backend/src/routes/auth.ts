@@ -3,6 +3,7 @@ import {
   changePassword,
   checkUsernameAvailable,
   getMy2FAStatus,
+  getSessions,
   login,
   logout,
   refreshToken,
@@ -23,6 +24,7 @@ router.post("/refresh", requireAuth, refreshToken);
 router.post("/verify-2fa", requireAuth, verify2FA);
 router.get("/check-username", checkUsernameAvailable);
 router.post("/logout", requireAuth, logout);
+router.get("/sessions", requireAuth, getSessions);
 
 router.post("/login", login);
 router.post("/register", register);

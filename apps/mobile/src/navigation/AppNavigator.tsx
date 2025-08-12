@@ -20,6 +20,7 @@ import {
   ManageWalletScreen,
   PendingTransactionsScreen,
   RegisterScreen,
+  SecurityScreen,
   SendScreen,
   SettingsScreen,
   TxConfirmationScreen,
@@ -114,6 +115,7 @@ export default function AppNavigator() {
               <Stack.Screen name="Conversions" component={ConversionsScreen} />
               <Stack.Screen name="EditBasicInfo" component={EditBasicInfo} />
               <Stack.Screen name="ManageWallet" component={ManageWalletScreen} />
+              <Stack.Screen name="Security" component={SecurityScreen} />
             </>
           )}
         </Stack.Navigator>

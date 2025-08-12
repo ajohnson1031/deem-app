@@ -21,6 +21,7 @@ type RootStackParamList = {
   ResetPassword: { userId: string };
   EditBasicInfo: undefined;
   ManageWallet: undefined;
+  Security: undefined;
 };
 
 interface HeaderNavProps {

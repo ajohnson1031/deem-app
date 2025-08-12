@@ -33,6 +33,7 @@
     "qrcode": "^1.5.4",
     "react-native-dotenv": "^3.4.11",
     "speakeasy": "^2.0.0",
+    "uuid": "^11.1.0",
     "xrpl": "^4.3.0",
     "zod": "^4.0.5"
   },

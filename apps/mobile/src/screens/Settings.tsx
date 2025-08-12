@@ -169,7 +169,8 @@ const SettingsScreen = () => {
           <ScrollView persistentScrollbar className="pb-20">
             <MenuListItem
               iconType={MenuIconType.FEATHER}
-              iconName="edit-2"
+              iconName="edit-3"
+              iconSize={20}
               labelText="Edit Basic Info"
               helperText="You've changed. Help us stay current."
               hasBackground
@@ -199,9 +200,8 @@ const SettingsScreen = () => {
             />
 
             <MenuListItem
-              iconType={MenuIconType.MATERIAL_COMM}
+              iconType={MenuIconType.FONT_AWESOME}
               iconName="bank"
-              iconSize={22}
               labelText="Linked Bank(s)"
               helperText="Partner with the institutions you trust."
               hasBackground
@@ -210,12 +210,12 @@ const SettingsScreen = () => {
 
             <MenuListItem
               iconType={MenuIconType.MATERIAL_COMM}
-              iconName="security"
+              iconName="shield-lock"
               iconSize={24}
               labelText="Security"
               helperText="Safety first, always."
               hasBackground
-              onPress={() => {}}
+              onPress={() => navigation.navigate('Security')}
             />
 
             {/* Invite Friends Button */}

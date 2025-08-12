@@ -1,4 +1,11 @@
-import { Feather, FontAwesome, FontAwesome6, MaterialCommunityIcons } from '@expo/vector-icons';
+import {
+  Feather,
+  FontAwesome,
+  FontAwesome6,
+  MaterialCommunityIcons,
+  MaterialIcons,
+  Octicons,
+} from '@expo/vector-icons';
 import { Text, TouchableOpacity, View } from 'react-native';
 
 import { MenuIconType, MenuListItemProps } from '~/types';
@@ -9,6 +16,7 @@ const MenuListItem = ({
   iconSize = 18,
   labelText,
   helperText,
+  chevronText,
   hasBackground = true,
   onPress,
 }: MenuListItemProps) => {
@@ -24,8 +32,14 @@ const MenuListItem = ({
     case MenuIconType.FONT_AWESOME6:
       Icon = <FontAwesome6 name={iconName} size={iconSize} color="#4b5563" />;
       break;
+    case MenuIconType.MATERIAL:
+      Icon = <MaterialIcons name={iconName} size={iconSize} color="#4b5563" />;
+      break;
     case MenuIconType.MATERIAL_COMM:
       Icon = <MaterialCommunityIcons name={iconName} size={iconSize} color="#4b5563" />;
+      break;
+    case MenuIconType.OCTICONS:
+      Icon = <Octicons name={iconName} size={iconSize} color="#4b5563" />;
       break;
   }
 
@@ -41,7 +55,10 @@ const MenuListItem = ({
           <Text className="text-md text-gray-600">{helperText}</Text>
         </View>
       </View>
-      <Feather name="chevron-right" size={16} />
+      <View className="flex-row gap-2">
+        {chevronText && <Text>{chevronText}</Text>}
+        <Feather name="chevron-right" size={16} />
+      </View>
     </TouchableOpacity>
   );
 };

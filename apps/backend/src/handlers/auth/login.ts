@@ -5,6 +5,7 @@ import z from "zod";
 import { JWT_EXPIRES_IN, JWT_SECRET, REFRESH_EXPIRES_IN, REFRESH_SECRET } from "../../config/env";
 import { RedisFuncType, safeRedis } from "../../handlers/redis";
 import prisma from "../../prisma/client";
+import { createSession } from "../redis";
 
 const loginSchema = z.object({
   identifier: z.string().nonempty(),
@@ -43,7 +44,15 @@ export const login = async (req: Request, res: Response) => {
 
     await safeRedis(`refresh:${refreshToken}`, RedisFuncType.SETEX, { value: user.id, ttl: 60 * 60 * 24 * 7 }); // 7 days
 
-    const { password: _pw, twoFactorSecret: _2faSecret, ...userData } = user;
+    // --- Session creation ---
+    const deviceInfo = {
+      userAgent: req.headers["user-agent"] || "",
+      ip: req.ip || req.connection?.remoteAddress || "",
+      platform: req.headers["sec-ch-ua-platform"] || "",
+    };
+    const sessionId = await createSession(user.id, deviceInfo);
+
+    const { password: _pw, twoFactorSecret: _2faSecret, tempTwoFactorSecret, ...userData } = user;
 
     return res
       .cookie("refreshToken", refreshToken, {
@@ -52,7 +61,7 @@ export const login = async (req: Request, res: Response) => {
         sameSite: "strict",
         maxAge: 1000 * 60 * 60 * 24 * 7,
       })
-      .json({ user: userData, token: accessToken, refreshToken });
+      .json({ user: userData, token: accessToken, refreshToken, sessionId });
   } catch (err) {
     console.error("Login error:", err);
     return res.status(500).json({ error: "Internal server error." });

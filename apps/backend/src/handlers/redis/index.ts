@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { v4 as uuidv4 } from "uuid";
 import redis from "../../utils/redis";
 
 enum RedisFuncType {
@@ -124,4 +125,44 @@ const getRedisHealth = async (req: Request, res: Response) => {
   }
 };
 
-export { getRedisHealth, RedisFuncType, safeDeleteRefreshToken, safeGetRefreshToken, safeRedis, safeSetEx, safeSetRefreshToken };
+// --- Session Handling ---
+// Create a session
+async function createSession(userId: string, deviceInfo: Record<string, any>, ttlSeconds: number = 60 * 60 * 24 * 7) {
+  const sessionId = uuidv4();
+  const sessionKey = `session:${sessionId}`;
+  const userSessionsKey = `user_sessions:${userId}`;
+  const now = Date.now();
+
+  await redis.hmset(sessionKey, {
+    userId,
+    ...deviceInfo, // e.g., userAgent, platform, ip, etc.
+    createdAt: now,
+    lastActive: now,
+  });
+  await redis.expire(sessionKey, ttlSeconds);
+  await redis.sadd(userSessionsKey, sessionId);
+  return sessionId;
+}
+
+// Delete a session
+async function deleteSession(userId: string, sessionId: string) {
+  const sessionKey = `session:${sessionId}`;
+  const userSessionsKey = `user_sessions:${userId}`;
+  await redis.del(sessionKey);
+  await redis.srem(userSessionsKey, sessionId);
+}
+
+// Get all sessions for a user
+async function getUserSessions(userId: string) {
+  const userSessionsKey = `user_sessions:${userId}`;
+  const sessionIds = await redis.smembers(userSessionsKey);
+  const sessions = await Promise.all(
+    sessionIds.map(async (id) => {
+      const data = await redis.hgetall(`session:${id}`);
+      return { sessionId: id, ...data };
+    })
+  );
+  return sessions;
+}
+
+export { createSession, deleteSession, getRedisHealth, getUserSessions, RedisFuncType, safeDeleteRefreshToken, safeGetRefreshToken, safeRedis, safeSetEx, safeSetRefreshToken };

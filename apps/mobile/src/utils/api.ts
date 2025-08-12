@@ -45,9 +45,7 @@ api.interceptors.request.use(async (config) => {
         isRefreshing = true;
 
         try {
-          const res = await axios.post<{ token: string }>(`${API_BASE_URL}/auth/refresh`, {
-            withCredentials: true,
-          });
+          const res = await axios.post<{ token: string }>(`${API_BASE_URL}/auth/refresh`, {});
 
           const newToken = res.data.token;
           await saveToken(newToken);
